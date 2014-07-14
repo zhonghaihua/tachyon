@@ -1,9 +1,11 @@
 package tachyon.r;
 
-public abstract class StoreBase {
-  protected final String URI;
+import tachyon.TachyonURI;
 
-  public StoreBase(String uri) {
+public abstract class StoreBase {
+  protected final TachyonURI URI;
+
+  public StoreBase(TachyonURI uri) {
     URI = uri;
   }
 

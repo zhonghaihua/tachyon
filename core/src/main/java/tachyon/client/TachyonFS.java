@@ -1772,4 +1772,14 @@ public class TachyonFS {
       throw new IOException(e);
     }
   }
+
+  public int r_createStore(String path, String storeType) throws IOException {
+    connect();
+    try {
+      return mMasterClient.r_createStore(path, storeType);
+    } catch (TException e) {
+      mConnected = false;
+      throw new IOException(e);
+    }
+  }
 }

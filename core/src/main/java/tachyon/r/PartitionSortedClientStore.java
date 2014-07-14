@@ -1,20 +1,22 @@
 package tachyon.r;
 
+import java.io.IOException;
+
+import tachyon.TachyonURI;
+
 public class PartitionSortedClientStore extends ClientStoreBase {
 
-  protected PartitionSortedClientStore(String uri, ShardBase shard) {
-    super(uri, shard);
-    // TODO Auto-generated constructor stub
+  protected PartitionSortedClientStore(TachyonURI uri, ShardBase shard, boolean create)
+      throws IOException {
+    super(uri, shard, "tachyon.r.PartitionSortedClientStore", create);
   }
 
-  public static PartitionSortedClientStore getStore(String uri) {
-    // TODO Auto-generated method stub
-    return null;
+  public static PartitionSortedClientStore getStore(TachyonURI uri) throws IOException {
+    return new PartitionSortedClientStore(uri, new PartitionSortedShard(false), false);
   }
 
-  public static PartitionSortedClientStore createStore(String uri) {
-    // TODO Auto-generated method stub
-    return null;
+  public static PartitionSortedClientStore createStore(TachyonURI uri) throws IOException {
+    return new PartitionSortedClientStore(uri, new PartitionSortedShard(false), true);
   }
 
   @Override
@@ -29,8 +31,8 @@ public class PartitionSortedClientStore extends ClientStoreBase {
 
   }
 
-  public boolean createPartition(int partitionId) {
-    return false;
+  public void createPartition(int partitionId) {
+    mTachyonFS.r_createPartition(partitionId);
   }
 
   public void put(int partitionId, byte[] key, byte[] value) {

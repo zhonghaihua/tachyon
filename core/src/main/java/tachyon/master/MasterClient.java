@@ -881,4 +881,17 @@ public class MasterClient {
     }
     return -1;
   }
+
+  public synchronized int r_createStore(String path, String storeType) throws TException {
+    while (!mIsShutdown) {
+      connect();
+      try {
+        return mClient.r_createStore(path, storeType);
+      } catch (TTransportException e) {
+        LOG.error(e.getMessage());
+        mIsConnected = false;
+      }
+    }
+    return -1;
+  }
 }

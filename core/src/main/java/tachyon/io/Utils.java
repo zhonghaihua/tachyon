@@ -183,4 +183,26 @@ public class Utils {
       writeString(list.get(k), os);
     }
   }
+
+  public static int compare(byte[] a, byte[] b) {
+    int index = 0;
+
+    while (index < a.length && index < b.length) {
+      if (a[index] < b[index]) {
+        return -1;
+      } else if (a[index] > b[index]) {
+        return 1;
+      }
+      index ++;
+    }
+
+    if (index < a.length) {
+      return 1;
+    }
+    if (index < b.length) {
+      return -1;
+    }
+
+    return 0;
+  }
 }

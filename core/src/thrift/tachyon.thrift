@@ -118,6 +118,17 @@ exception DependencyDoesNotExistException {
   1: string message
 }
 
+struct PartitionSortedStorePartitionInfo {
+  1: string storeType
+  2: i32 storeId
+  3: i32 partitionIndex
+  4: i32 dataFileId
+  5: i32 indexFileId
+  6: binary startKey
+  7: binary endKey
+  8: NetAddress location // Assume only one location for now. Add multiple locations in the future.
+}
+
 service MasterService {
   bool addCheckpoint(1: i64 workerId, 2: i32 fileId, 3: i64 length, 4: string checkpointPath)
     throws (1: FileDoesNotExistException eP, 2: SuspectedFileSizeException eS,
@@ -277,6 +288,27 @@ service MasterService {
     throws (1: FileDoesNotExistException eR, 2: InvalidPathException eI)
 
   string user_getUnderfsAddress()
+
+
+  // Services for RStore; TODO Build a seperate service
+  i32 r_createStore(1: string path, 2: string storeType)
+    throws (1: InvalidPathException eI, 2: FileAlreadyExistException eA)
+
+  bool r_addPartition(1: PartitionSortedStorePartitionInfo partitionInfo)
+    throws (1: TachyonException e)
+
+  PartitionSortedStorePartitionInfo r_getPartition(1: i32 storeId, 2: binary key)
+    throws (1: TachyonException e)
+
+  /**
+   * Report that the worker does not have the partition. Returns a new worker designed to have the
+   * partition; For now, this can happen only if the worker is missing/lost; Any worker gets a
+   * partition search request will get the data.
+   */
+  PartitionSortedStorePartitionInfo r_noPartition(1: NetAddress workerAddress, 2: i32 storeId, 3: i32 partitionIndex)
+    throws (1: TachyonException e)
+
+   // PartitionSortedStorePartitionInfo
 }
 
 service WorkerService {
@@ -308,4 +340,9 @@ service WorkerService {
   void unlockBlock(1: i64 blockId, 2: i64 userId) // unlock the file
 
   void userHeartbeat(1: i64 userId)   // Local user send heartbeat to local worker to keep its temp folder.
+
+
+  // Services for RStore; TODO Build a seperate service
+  binary r_get(1: PartitionSortedStorePartitionInfo partitionInfo, 2: binary key)
+    throws (1: TachyonException e)
 }

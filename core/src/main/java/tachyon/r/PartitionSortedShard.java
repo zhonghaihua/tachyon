@@ -4,8 +4,8 @@ import java.util.List;
 
 public class PartitionSortedShard extends ShardBase {
 
-  public PartitionSortedShard() {
-    // TODO Auto-generated constructor stub
+  public PartitionSortedShard(boolean isMaster) {
+    super(isMaster);
   }
 
   @Override
