@@ -182,8 +182,9 @@ public class TFS extends FileSystem {
       FileSystem fs = hdfsPath.getFileSystem(getConf());
       if (fs.exists(hdfsPath)) {
         String ufsAddrPath = CommonUtils.concat(UNDERFS_ADDRESS, path);
-        UnderfsUtils
-            .loadUnderFs(mTFS, Constants.PATH_SEPARATOR, ufsAddrPath, new PrefixList(null));
+
+        // Set the path as the TFS root path.
+        UnderfsUtils.loadUnderFs(mTFS, path, ufsAddrPath, new PrefixList(null));
       }
     }
   }
@@ -228,10 +229,10 @@ public class TFS extends FileSystem {
     return ret;
   }
 
-  @Override
   /**
    * Return the status of a single file. If the file does not exist in Tachyon, query it from HDFS.
    */
+  @Override
   public FileStatus getFileStatus(Path path) throws IOException {
     String tPath = Utils.getPathWithoutScheme(path);
     Path hdfsPath = Utils.getHDFSPath(tPath);
@@ -255,7 +256,7 @@ public class TFS extends FileSystem {
 
   /**
    * Returns an object implementing the Tachyon-specific client API.
-   * 
+   *
    * @return null if initialize() hasn't been called.
    */
   public TachyonFS getTachyonFS() {
@@ -290,9 +291,6 @@ public class TFS extends FileSystem {
   }
 
   @Override
-  /**
-   * List entries of a path
-   */
   public FileStatus[] listStatus(Path path) throws IOException {
     String tPath = Utils.getPathWithoutScheme(path);
     Path hdfsPath = Utils.getHDFSPath(tPath);
@@ -323,9 +321,6 @@ public class TFS extends FileSystem {
   }
 
   @Override
-  /**
-   * Return the FSDataInputStream of a file.
-   */
   public FSDataInputStream open(Path cPath, int bufferSize) throws IOException {
     LOG.info("open(" + cPath + ", " + bufferSize + ")");
 
