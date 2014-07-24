@@ -29,6 +29,8 @@ import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
 
+import com.google.common.base.Throwables;
+
 import tachyon.Constants;
 import tachyon.HeartbeatThread;
 import tachyon.LeaderInquireClient;
@@ -227,9 +229,8 @@ public class MasterClient {
       return CommonUtils.parseInetSocketAddress(temp);
     } catch (IOException e) {
       LOG.error(e.getMessage(), e);
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
-    return null;
   }
 
   public synchronized long getUserId() throws TException {

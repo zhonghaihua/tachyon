@@ -34,6 +34,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+
 import tachyon.Constants;
 import tachyon.UnderFileSystem;
 import tachyon.client.table.RawTable;
@@ -86,9 +89,9 @@ public class TachyonFS {
     if (tempAddress.contains(Constants.PATH_SEPARATOR)) {
       masterAddress = tempAddress.substring(0, tempAddress.indexOf(Constants.PATH_SEPARATOR));
     }
-    if (masterAddress.split(":").length != 2) {
-      CommonUtils.illegalArgumentException("Illegal Tachyon Master Address: " + tachyonPath);
-    }
+    Preconditions.checkArgument(masterAddress.split(":").length == 2,
+        "Illegal Tachyon Master Address: " + tachyonPath);
+
     String masterHost = masterAddress.split(":")[0];
     int masterPort = Integer.parseInt(masterAddress.split(":")[1]);
     return new TachyonFS(new InetSocketAddress(masterHost, masterPort), zookeeperMode);
@@ -1726,7 +1729,7 @@ public class TachyonFS {
       mMasterClient.user_setPinned(fid, pinned);
     } catch (TException e) {
       LOG.error(e.getMessage());
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
   }
 

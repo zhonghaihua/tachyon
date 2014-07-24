@@ -28,6 +28,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+
 import tachyon.Constants;
 import tachyon.Version;
 import tachyon.client.OutStream;
@@ -58,7 +61,7 @@ public class Performance {
   private static String RESULT_PREFIX = null;
   private static long[] Results = new long[RESULT_ARRAY_SIZE];
   private static int BASE_FILE_NUMBER = 0;
-
+ 
   private static boolean TACHYON_STREAMING_READ = false;
 
   public static void createFiles() throws IOException {
@@ -168,7 +171,7 @@ public class Performance {
       try {
         memoryCopyParition();
       } catch (IOException e) {
-        CommonUtils.runtimeException(e);
+        throw Throwables.propagate(e);
       }
       LOG.info(mMsg + mWorkerId + " just finished.");
     }
@@ -207,7 +210,7 @@ public class Performance {
       try {
         writeParition();
       } catch (Exception e) {
-        CommonUtils.runtimeException(e);
+        throw Throwables.propagate(e);
       }
       LOG.info("WriteWorker " + mWorkerId + " just finished.");
     }
@@ -237,7 +240,7 @@ public class Performance {
               tmp = intBuf.get();
               if ((k == 0 && tmp == (i + mWorkerId)) || (k != 0 && tmp == k)) {
               } else {
-                CommonUtils.runtimeException("WHAT? " + tmp + " " + k);
+                throw new IllegalStateException("WHAT? " + tmp + " " + k);
               }
             }
           }
@@ -256,9 +259,7 @@ public class Performance {
           while (len > 0) {
             int r = is.read(mBuf.array());
             len -= r;
-            if (r == -1) {
-              CommonUtils.runtimeException("R == -1");
-            }
+            Preconditions.checkState(r != -1, "R == -1");
           }
           is.close();
           logPerIteration(startTimeMs, pId, "th ReadTachyonFile @ Worker ", pId);
@@ -290,7 +291,7 @@ public class Performance {
       try {
         readPartition();
       } catch (Exception e) {
-        CommonUtils.runtimeException(e);
+        throw Throwables.propagate(e);
       }
       LOG.info("ReadWorker " + mWorkerId + " just finished.");
     }
@@ -355,9 +356,7 @@ public class Performance {
           while (len > 0) {
             int r = is.read(mBuf.array());
             len -= r;
-            if (r == -1) {
-              CommonUtils.runtimeException("R == -1");
-            }
+            Preconditions.checkState(r != -1, "R == -1");
           }
           is.close();
           logPerIteration(startTimeMs, times, str, mWorkerId);
@@ -371,7 +370,7 @@ public class Performance {
       try {
         io();
       } catch (IOException e) {
-        CommonUtils.runtimeException(e);
+        throw Throwables.propagate(e);
       }
       LOG.info(mMsg + mWorkerId + " just finished.");
     }
@@ -407,7 +406,7 @@ public class Performance {
       try {
         WWs[thread].join();
       } catch (InterruptedException e) {
-        CommonUtils.runtimeException(e);
+        throw Throwables.propagate(e);
       }
     }
     long takenTimeMs = System.currentTimeMillis() - startTimeMs;
@@ -447,7 +446,7 @@ public class Performance {
       try {
         WWs[thread].join();
       } catch (InterruptedException e) {
-        CommonUtils.runtimeException(e);
+        throw Throwables.propagate(e);
       }
     }
     long takenTimeMs = System.currentTimeMillis() - startTimeMs;
@@ -483,7 +482,7 @@ public class Performance {
       try {
         WWs[thread].join();
       } catch (InterruptedException e) {
-        CommonUtils.runtimeException(e);
+        throw Throwables.propagate(e);
       }
     }
     long takenTimeMs = System.currentTimeMillis() - startTimeMs;
@@ -565,7 +564,7 @@ public class Performance {
       LOG.info(RESULT_PREFIX);
       HdfsTest(false);
     } else {
-      CommonUtils.runtimeException("No Test Case " + testCase);
+      throw new RuntimeException("No Test Case " + testCase);
     }
 
     for (int k = 0; k < RESULT_ARRAY_SIZE; k ++) {

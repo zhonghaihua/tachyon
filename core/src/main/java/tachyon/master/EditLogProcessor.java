@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Throwables;
+
 import tachyon.Constants;
 import tachyon.UnderFileSystem;
 import tachyon.util.CommonUtils;
@@ -29,7 +31,7 @@ public class EditLogProcessor implements Runnable {
     try {
       mLoadedImageModTime = mJournal.getImageModTimeMs();
     } catch (IOException e) {
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
     LOG.info("Created edit log processor with path " + mPath);
   }
@@ -72,7 +74,7 @@ public class EditLogProcessor implements Runnable {
         }
         CommonUtils.sleepMs(LOG, Constants.SECOND_MS);
       } catch (IOException e) {
-        CommonUtils.runtimeException(e);
+        throw Throwables.propagate(e);
       }
     }
     LOG.info("Standy log processor with path " + mPath + " stopped.");

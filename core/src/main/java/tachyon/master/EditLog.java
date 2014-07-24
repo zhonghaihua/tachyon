@@ -20,10 +20,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
+
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.log4j.Logger;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.apache.log4j.Logger;
-import org.apache.hadoop.fs.FSDataOutputStream;
+import com.google.common.base.Throwables;
 
 import tachyon.Constants;
 import tachyon.Pair;
@@ -120,11 +123,13 @@ public class EditLog {
       try {
         switch (op.type) {
         case ADD_BLOCK: {
-          info.opAddBlock(op.getInt("fileId"), op.getInt("blockIndex"), op.getLong("blockLength"));
+          info.opAddBlock(op.getInt("fileId"), op.getInt("blockIndex"), op.getLong("blockLength"),
+              op.getLong("opTimeMs"));
           break;
         }
         case ADD_CHECKPOINT: {
-          info.addCheckpoint(-1, op.getInt("fileId"), op.getLong("length"), op.getString("path"));
+          info._addCheckpoint(-1, op.getInt("fileId"), op.getLong("length"), op.getString("path"),
+              op.getLong("opTimeMs"));
           break;
         }
         case CREATE_FILE: {
@@ -134,19 +139,19 @@ public class EditLog {
           break;
         }
         case COMPLETE_FILE: {
-          info.completeFile(op.<Integer> get("fileId"));
+          info._completeFile(op.<Integer> get("fileId"), op.getLong("opTimeMs"));
           break;
         }
         case SET_PINNED: {
-          info.setPinned(op.getInt("fileId"), op.getBoolean("pinned"));
+          info._setPinned(op.getInt("fileId"), op.getBoolean("pinned"), op.getLong("opTimeMs"));
           break;
         }
         case RENAME: {
-          info._rename(op.getInt("fileId"), op.getString("dstPath"));
+          info._rename(op.getInt("fileId"), op.getString("dstPath"), op.getLong("opTimeMs"));
           break;
         }
         case DELETE: {
-          info._delete(op.getInt("fileId"), op.getBoolean("recursive"));
+          info._delete(op.getInt("fileId"), op.getBoolean("recursive"), op.getLong("opTimeMs"));
           break;
         }
         case CREATE_RAW_TABLE: {
@@ -204,7 +209,7 @@ public class EditLog {
         toDelete = CommonUtils.concat(folder, mBackUpLogStartNum + ".editLog");
       }
     } catch (IOException e) {
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
     mBackUpLogStartNum = -1;
   }
@@ -298,11 +303,11 @@ public class EditLog {
         mOs.close();
       }
     } catch (IOException e) {
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
   }
 
-  public synchronized void addBlock(int fileId, int blockIndex, long blockLength) {
+  public synchronized void addBlock(int fileId, int blockIndex, long blockLength, long opTimeMs) {
     if (INACTIVE) {
       return;
     }
@@ -310,11 +315,12 @@ public class EditLog {
     EditLogOperation operation =
         new EditLogOperation(EditLogOperationType.ADD_BLOCK, ++ mTransactionId)
             .withParameter("fileId", fileId).withParameter("blockIndex", blockIndex)
-            .withParameter("blockLength", blockLength);
+            .withParameter("blockLength", blockLength).withParameter("opTimeMs", opTimeMs);
     writeOperation(operation);
   }
 
-  public synchronized void addCheckpoint(int fileId, long length, String checkpointPath) {
+  public synchronized void addCheckpoint(int fileId, long length, String checkpointPath,
+      long opTimeMs) {
     if (INACTIVE) {
       return;
     }
@@ -322,7 +328,7 @@ public class EditLog {
     EditLogOperation operation =
         new EditLogOperation(EditLogOperationType.ADD_CHECKPOINT, ++ mTransactionId)
             .withParameter("fileId", fileId).withParameter("length", length)
-            .withParameter("path", checkpointPath);
+            .withParameter("path", checkpointPath).withParameter("opTimeMs", opTimeMs);
     writeOperation(operation);
   }
 
@@ -338,18 +344,18 @@ public class EditLog {
       _closeActiveStream();
       mUfs.close();
     } catch (IOException e) {
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
   }
 
-  public synchronized void completeFile(int fileId) {
+  public synchronized void completeFile(int fileId, long opTimeMs) {
     if (INACTIVE) {
       return;
     }
 
     EditLogOperation operation =
         new EditLogOperation(EditLogOperationType.COMPLETE_FILE, ++ mTransactionId).withParameter(
-            "fileId", fileId);
+            "fileId", fileId).withParameter("opTimeMs", opTimeMs);
     writeOperation(operation);
   }
 
@@ -398,14 +404,15 @@ public class EditLog {
     writeOperation(operation);
   }
 
-  public synchronized void delete(int fileId, boolean recursive) {
+  public synchronized void delete(int fileId, boolean recursive, long opTimeMs) {
     if (INACTIVE) {
       return;
     }
 
     EditLogOperation operation =
-        new EditLogOperation(EditLogOperationType.DELETE, ++ mTransactionId).withParameter(
-            "fileId", fileId).withParameter("recursive", recursive);
+        new EditLogOperation(EditLogOperationType.DELETE, ++ mTransactionId)
+            .withParameter("fileId", fileId).withParameter("recursive", recursive)
+            .withParameter("opTimeMs", opTimeMs);
     writeOperation(operation);
   }
 
@@ -420,7 +427,7 @@ public class EditLog {
         ufs.delete(toDelete, true);
       }
     } catch (IOException e) {
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
   }
 
@@ -441,7 +448,7 @@ public class EditLog {
         rotateEditLog(PATH);
       }
     } catch (IOException e) {
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
 
     mFlushedTransactionId = mTransactionId;
@@ -456,14 +463,15 @@ public class EditLog {
     return new Pair<Long, Long>(mTransactionId, mFlushedTransactionId);
   }
 
-  public synchronized void rename(int fileId, String dstPath) {
+  public synchronized void rename(int fileId, String dstPath, long opTimeMs) {
     if (INACTIVE) {
       return;
     }
 
     EditLogOperation operation =
-        new EditLogOperation(EditLogOperationType.RENAME, ++ mTransactionId).withParameter(
-            "fileId", fileId).withParameter("dstPath", dstPath);
+        new EditLogOperation(EditLogOperationType.RENAME, ++ mTransactionId)
+            .withParameter("fileId", fileId).withParameter("dstPath", dstPath)
+            .withParameter("opTimeMs", opTimeMs);
     writeOperation(operation);
   }
 
@@ -488,7 +496,7 @@ public class EditLog {
       mDos = new DataOutputStream(mOs);
       LOG.info("Created new log file " + path);
     } catch (IOException e) {
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
   }
 
@@ -501,14 +509,15 @@ public class EditLog {
     mMaxLogSize = size;
   }
 
-  public synchronized void setPinned(int fileId, boolean pinned) {
+  public synchronized void setPinned(int fileId, boolean pinned, long opTimeMs) {
     if (INACTIVE) {
       return;
     }
 
     EditLogOperation operation =
-        new EditLogOperation(EditLogOperationType.SET_PINNED, ++ mTransactionId).withParameter(
-            "fileId", fileId).withParameter("pinned", pinned);
+        new EditLogOperation(EditLogOperationType.SET_PINNED, ++ mTransactionId)
+            .withParameter("fileId", fileId).withParameter("pinned", pinned)
+            .withParameter("opTimeMs", opTimeMs);
     writeOperation(operation);
   }
 
@@ -529,7 +538,7 @@ public class EditLog {
       WRITER.writeValue(mDos, operation);
       mDos.writeByte('\n');
     } catch (IOException e) {
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
   }
 }

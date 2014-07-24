@@ -16,7 +16,7 @@ package tachyon.conf;
 
 import org.apache.log4j.Logger;
 
-import tachyon.util.CommonUtils;
+import com.google.common.base.Preconditions;
 
 /**
  * Utils for tachyon.conf package.
@@ -50,11 +50,8 @@ class Utils {
 
   public static String getProperty(String property) {
     String ret = System.getProperty(property);
-    if (ret == null) {
-      CommonUtils.illegalArgumentException(property + " is not configured.");
-    } else {
-      LOG.debug(property + " : " + ret);
-    }
+    Preconditions.checkArgument(ret != null, property + " is not configured.");
+    LOG.debug(property + " : " + ret);
     return ret;
   }
 

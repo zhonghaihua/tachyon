@@ -9,6 +9,8 @@ import java.util.Enumeration;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Throwables;
+
 import tachyon.Constants;
 
 /**
@@ -25,9 +27,8 @@ public class NetworkUtils {
       return InetAddress.getByName(getLocalIpAddress()).getCanonicalHostName();
     } catch (UnknownHostException e) {
       LOG.error(e);
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
-    return null;
   }
 
   /**
@@ -61,9 +62,8 @@ public class NetworkUtils {
       return address.getHostAddress();
     } catch (IOException e) {
       LOG.error(e);
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
-    return null;
   }
 
   /**

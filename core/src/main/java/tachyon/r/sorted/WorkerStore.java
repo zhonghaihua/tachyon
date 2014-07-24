@@ -13,7 +13,6 @@ import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.r.WorkerStoreBase;
 import tachyon.thrift.PartitionSortedStorePartitionInfo;
-import tachyon.util.CommonUtils;
 
 public class WorkerStore extends WorkerStoreBase {
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
@@ -35,30 +34,28 @@ public class WorkerStore extends WorkerStoreBase {
 
   @Override
   public byte[] get(byte[] key) {
-    CommonUtils.runtimeException("PartitionSortedWorkerStore get");
-    return null;
+    throw new RuntimeException("PartitionSortedWorkerStore get");
   }
 
   @Override
   public void put(byte[] key, byte[] value) {
-    CommonUtils.runtimeException("PartitionSortedWorkerStore put");
+    throw new RuntimeException("PartitionSortedWorkerStore put");
   }
 
-//  public byte[] get(PartitionSortedStorePartitionInfo info, byte[] key) throws IOException {
-//    if (!mData.containsKey(info.getStoreId())) {
-//      mData.put(info.getStoreId(), new HashMap<Integer, WorkerPartition>());
-//    }
-//
-//    HashMap<Integer, WorkerPartition> store = mData.get(info.getStoreId());
-//    if (!store.containsKey(info.getPartitionIndex())) {
-//      store.put(info.getPartitionIndex(), new WorkerPartition(mTFS, info));
-//    }
-//
-//    return store.get(info.getPartitionIndex()).get(key);
-//  }
+  // public byte[] get(PartitionSortedStorePartitionInfo info, byte[] key) throws IOException {
+  // if (!mData.containsKey(info.getStoreId())) {
+  // mData.put(info.getStoreId(), new HashMap<Integer, WorkerPartition>());
+  // }
+  //
+  // HashMap<Integer, WorkerPartition> store = mData.get(info.getStoreId());
+  // if (!store.containsKey(info.getPartitionIndex())) {
+  // store.put(info.getPartitionIndex(), new WorkerPartition(mTFS, info));
+  // }
+  //
+  // return store.get(info.getPartitionIndex()).get(key);
+  // }
 
-  public ByteBuffer get(PartitionSortedStorePartitionInfo info, ByteBuffer key)
-      throws IOException {
+  public ByteBuffer get(PartitionSortedStorePartitionInfo info, ByteBuffer key) throws IOException {
     validate(info.getDataFileId());
     validate(info.getIndexFileId());
 

@@ -31,9 +31,10 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Throwables;
+
 import tachyon.conf.CommonConf;
 import tachyon.hadoop.Utils;
-import tachyon.util.CommonUtils;
 
 /**
  * HDFS UnderFilesystem implementation.
@@ -90,7 +91,7 @@ public class UnderFileSystemHdfs extends UnderFileSystem {
       // FileSystem.get(tConf);
       // mFs = FileSystem.get(new URI(fsDefaultName), tConf);
     } catch (IOException e) {
-      CommonUtils.runtimeException(e);
+      throw Throwables.propagate(e);
     }
   }
 
@@ -177,8 +178,7 @@ public class UnderFileSystemHdfs extends UnderFileSystem {
         te = e;
       }
     }
-    CommonUtils.runtimeException(te);
-    return false;
+    throw Throwables.propagate(te);
   }
 
   @Override
@@ -297,8 +297,7 @@ public class UnderFileSystemHdfs extends UnderFileSystem {
         te = e;
       }
     }
-    CommonUtils.runtimeException(te);
-    return false;
+    throw Throwables.propagate(te);
   }
 
   @Override
@@ -314,8 +313,7 @@ public class UnderFileSystemHdfs extends UnderFileSystem {
         te = e;
       }
     }
-    CommonUtils.runtimeException(te);
-    return null;
+    throw Throwables.propagate(te);
   }
 
   @Override
@@ -340,8 +338,7 @@ public class UnderFileSystemHdfs extends UnderFileSystem {
         te = e;
       }
     }
-    CommonUtils.runtimeException(te);
-    return false;
+    throw Throwables.propagate(te);
   }
 
   @Override
