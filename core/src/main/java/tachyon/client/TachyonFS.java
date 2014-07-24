@@ -50,6 +50,7 @@ import tachyon.thrift.FileDoesNotExistException;
 import tachyon.thrift.InvalidPathException;
 import tachyon.thrift.NetAddress;
 import tachyon.thrift.NoWorkerException;
+import tachyon.thrift.PartitionSortedStorePartitionInfo;
 import tachyon.thrift.TachyonException;
 import tachyon.util.CommonUtils;
 import tachyon.util.NetworkUtils;
@@ -1778,5 +1779,20 @@ public class TachyonFS {
       mConnected = false;
       throw new IOException(e);
     }
+  }
+
+  public void r_addPartition(PartitionSortedStorePartitionInfo pInfo) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public PartitionSortedStorePartitionInfo r_getPartition(int storeId, byte[] key) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public byte[] r_get(PartitionSortedStorePartitionInfo info, byte[] key) {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

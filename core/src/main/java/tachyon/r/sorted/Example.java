@@ -1,14 +1,14 @@
-package tachyon.r;
+package tachyon.r.sorted;
 
 import java.io.IOException;
 
 import tachyon.TachyonURI;
 
-public class PartitionSortedStoreExample {
+public class Example {
   private static int KEYS = 5;
 
   public static void createAndFillTheStore(TachyonURI uri) throws IOException {
-    PartitionSortedClientStore store = PartitionSortedClientStore.createStore(uri);
+    ClientStore store = ClientStore.createStore(uri);
 
     store.createPartition(0);
     for (int k = 0; k < KEYS; k ++) {
@@ -18,7 +18,7 @@ public class PartitionSortedStoreExample {
   }
 
   public static void getResults(TachyonURI uri) throws IOException {
-    PartitionSortedClientStore store = PartitionSortedClientStore.getStore(uri);
+    ClientStore store = ClientStore.getStore(uri);
 
     for (int k = 0; k < KEYS * 2; k += 2) {
       byte[] result = store.get(String.valueOf(k).getBytes());

@@ -15,12 +15,14 @@
 package tachyon.worker;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.apache.thrift.TException;
 
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.FailedToCheckpointException;
 import tachyon.thrift.FileDoesNotExistException;
+import tachyon.thrift.PartitionSortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TachyonException;
 import tachyon.thrift.WorkerService;
@@ -99,5 +101,12 @@ public class WorkerServiceHandler implements WorkerService.Iface {
   @Override
   public void userHeartbeat(long userId) throws TException {
     mWorkerStorage.userHeartbeat(userId);
+  }
+
+  @Override
+  public ByteBuffer r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key)
+      throws TachyonException, TException {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

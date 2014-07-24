@@ -1,5 +1,7 @@
 package tachyon.r;
 
+import java.io.IOException;
+
 import tachyon.TachyonURI;
 
 public abstract class StoreBase {
@@ -9,7 +11,7 @@ public abstract class StoreBase {
     URI = uri;
   }
 
-  public abstract byte[] get(byte[] key);
+  public abstract byte[] get(byte[] key) throws IOException;
 
-  public abstract void put(byte[] key, byte[] value);
+  public abstract void put(byte[] key, byte[] value) throws IOException;
 }

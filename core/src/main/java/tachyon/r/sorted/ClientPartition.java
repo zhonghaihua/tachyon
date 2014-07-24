@@ -1,4 +1,4 @@
-package tachyon.r;
+package tachyon.r.sorted;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -10,6 +10,7 @@ import tachyon.client.OutStream;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.client.WriteType;
+import tachyon.thrift.PartitionSortedStorePartitionInfo;
 import tachyon.util.CommonUtils;
 
 /**
@@ -18,16 +19,10 @@ import tachyon.util.CommonUtils;
  * This class should be abstract, and have different kinds of implementations. But for the first
  * step, it has only one implementation.
  */
-public class PartitionSortedStorePartition {
-
-  public static PartitionSortedStorePartition createPartitionSortedStorePartition(TachyonFS tfs, int storeId, String storePath,
-      int index) throws IOException {
-    return new PartitionSortedStorePartition(tfs, storeId, storePath, index, true);
-  }
-
-  public static PartitionSortedStorePartition
-      getPartitionSortedStorePartition(TachyonFS tfs, int storeId, String storePath, int index) throws IOException {
-    return new PartitionSortedStorePartition(tfs, storeId, storePath, index, false);
+public class ClientPartition {
+  public static ClientPartition createPartitionSortedStorePartition(TachyonFS tfs, int storeId,
+      String storePath, int index) throws IOException {
+    return new ClientPartition(tfs, storeId, storePath, index, true);
   }
 
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
@@ -57,7 +52,7 @@ public class PartitionSortedStorePartition {
 
   private int mDataFileLocation;
 
-  PartitionSortedStorePartition(TachyonFS tfs, int storeId, String storePath, int index, boolean create)
+  ClientPartition(TachyonFS tfs, int storeId, String storePath, int index, boolean create)
       throws IOException {
     TFS = tfs;
     STORE_ID = storeId;
@@ -91,14 +86,13 @@ public class PartitionSortedStorePartition {
     mDataFileLocation = 0;
     mStartKey = null;
     mEndKey = null;
-
   }
 
   public void close() throws IOException {
     if (CREATE) {
       mDataFileOutStream.close();
       mIndexFileOutStream.close();
-      PartitionSortedStorePartition info = new PartitionSortedStorePartition();
+      PartitionSortedStorePartitionInfo info = new PartitionSortedStorePartitionInfo();
       info.setStoreId(STORE_ID);
       info.setPartitionIndex(INDEX);
       info.setDataFileId(mDataFileId);
@@ -110,16 +104,12 @@ public class PartitionSortedStorePartition {
       info.setStartKey(mStartKey.array());
       info.setEndKey(mEndKey.array());
       try {
-        TFS.kv_addPartition(info);
+        TFS.r_addPartition(info);
       } catch (Exception e) {
         LOG.error(e);
       }
       LOG.info("closing: " + info);
     }
-  }
-
-  public ByteBuffer get(ByteBuffer key) {
-    return null;
   }
 
   public void put(byte[] key, byte[] value) throws IOException {
@@ -143,15 +133,15 @@ public class PartitionSortedStorePartition {
     mDataFileOutStream.write(ByteBuffer.allocate(4).putInt(value.length).array());
     mDataFileOutStream.write(value);
     mDataFileLocation += 4 + key.length + 4 + value.length;
-    LOG.info("PUT " + CommonUtils.byteArrayToString(key) + " "
-        + CommonUtils.byteArrayToString(value));
+    // LOG.info("PUT " + CommonUtils.byteArrayToString(key) + " "
+    // + CommonUtils.byteArrayToString(value));
   }
 
   // public void put(ByteBuffer key, ByteBuffer value) {
   // }
 
-  public void put(String key, int value) throws IOException {
-    put(key.getBytes(), ByteBuffer.allocate(4).putInt(value).array());
+  public void put(String key, String value) throws IOException {
+    put(key.getBytes(), value.getBytes());
   }
 
   @Override

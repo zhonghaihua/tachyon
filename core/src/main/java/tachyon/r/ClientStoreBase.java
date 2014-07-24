@@ -5,21 +5,17 @@ import java.io.IOException;
 import tachyon.TachyonURI;
 import tachyon.client.TachyonFS;
 
-public abstract class ClientStoreBase extends StoreBase {
-  protected ShardBase mShard;
-
+public abstract class ClientStoreBase extends StoreBase implements ShardBase {
   // TODO Use TachyonFS for now, create a new handler in the future.
   protected TachyonFS mTachyonFS;
 
   protected final int ID;
 
-  protected ClientStoreBase(TachyonURI uri, ShardBase shard, String storeType, boolean create)
+  protected ClientStoreBase(TachyonURI uri, String storeType, boolean create)
       throws IOException {
     super(uri);
 
     mTachyonFS = TachyonFS.get(uri.toString());
-
-    mShard = shard;
 
     if (create) {
       ID = mTachyonFS.r_createStore(uri.getPath(), storeType);

@@ -21,8 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.thrift.TException;
 import org.apache.log4j.Logger;
+import org.apache.thrift.TException;
 
 import tachyon.Constants;
 import tachyon.UnderFileSystem;
@@ -41,6 +41,7 @@ import tachyon.thrift.InvalidPathException;
 import tachyon.thrift.MasterService;
 import tachyon.thrift.NetAddress;
 import tachyon.thrift.NoWorkerException;
+import tachyon.thrift.PartitionSortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TableColumnException;
 import tachyon.thrift.TableDoesNotExistException;
@@ -350,5 +351,33 @@ public class MasterServiceHandler implements MasterService.Iface {
   public long worker_register(NetAddress workerNetAddress, long totalBytes, long usedBytes,
       List<Long> currentBlockIds) throws BlockInfoException, TException {
     return mMasterInfo.registerWorker(workerNetAddress, totalBytes, usedBytes, currentBlockIds);
+  }
+
+  @Override
+  public int r_createStore(String path, String storeType) throws InvalidPathException,
+      FileAlreadyExistException, TException {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public boolean r_addPartition(PartitionSortedStorePartitionInfo partitionInfo)
+      throws TachyonException, TException {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public PartitionSortedStorePartitionInfo r_getPartition(int storeId, ByteBuffer key)
+      throws TachyonException, TException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public PartitionSortedStorePartitionInfo r_noPartition(NetAddress workerAddress, int storeId,
+      int partitionIndex) throws TachyonException, TException {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

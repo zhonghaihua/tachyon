@@ -1,4 +1,4 @@
-package tachyon.r;
+package tachyon.r.sorted;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -9,15 +9,14 @@ import tachyon.client.TachyonFile;
 import tachyon.io.Utils;
 import tachyon.thrift.PartitionSortedStorePartitionInfo;
 
-public class PartitionSortedWorkerPartition {
+public class WorkerPartition {
   private TachyonFS mTFS;
   private PartitionSortedStorePartitionInfo mInfo;
   private TachyonByteBuffer mData = null;
   private TachyonByteBuffer mIndex = null;
   private long mLastAccessTimeMs = System.currentTimeMillis();
 
-  public PartitionSortedWorkerPartition(TachyonFS tfs,
-      PartitionSortedStorePartitionInfo partitionInfo) {
+  public WorkerPartition(TachyonFS tfs, PartitionSortedStorePartitionInfo partitionInfo) {
     mTFS = tfs;
     mInfo = new PartitionSortedStorePartitionInfo(partitionInfo);
   }
