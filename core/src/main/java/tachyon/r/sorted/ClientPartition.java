@@ -116,7 +116,7 @@ public class ClientPartition {
     if (!CREATE) {
       throw new IOException("Can not put key value pair in non-create mode");
     }
-    // put(ByteBuffer.wrap(key), ByteBuffer.wrap(value));
+
     if (mStartKey == null) {
       mStartKey = ByteBuffer.allocate(key.length);
       mStartKey.put(key);
@@ -125,7 +125,6 @@ public class ClientPartition {
     mEndKey = ByteBuffer.allocate(key.length);
     mEndKey.put(key);
     mEndKey.flip();
-    // mEndKey = ByteBuffer.wrap(value);
 
     mIndexFileOutStream.write(ByteBuffer.allocate(4).putInt(mDataFileLocation).array());
     mDataFileOutStream.write(ByteBuffer.allocate(4).putInt(key.length).array());
@@ -133,16 +132,12 @@ public class ClientPartition {
     mDataFileOutStream.write(ByteBuffer.allocate(4).putInt(value.length).array());
     mDataFileOutStream.write(value);
     mDataFileLocation += 4 + key.length + 4 + value.length;
-    // LOG.info("PUT " + CommonUtils.byteArrayToString(key) + " "
-    // + CommonUtils.byteArrayToString(value));
+    LOG.info("PUT " + Utils.byteArrayToString(key) + " " + Utils.byteArrayToString(value));
   }
 
-  // public void put(ByteBuffer key, ByteBuffer value) {
-  // }
-
-  public void put(String key, String value) throws IOException {
-    put(key.getBytes(), value.getBytes());
-  }
+//  public void put(String key, String value) throws IOException {
+//    put(key.getBytes(), value.getBytes());
+//  }
 
   @Override
   public String toString() {

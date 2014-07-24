@@ -5,6 +5,9 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import tachyon.Constants;
 import tachyon.thrift.FileAlreadyExistException;
 import tachyon.thrift.PartitionSortedStorePartitionInfo;
 import tachyon.thrift.TachyonException;
@@ -13,39 +16,46 @@ import tachyon.thrift.TachyonException;
  * All key/value stores information in the master;
  */
 public class StoresInfo {
-  public Map<Integer, StoreInfo> KVS = new HashMap<Integer, StoreInfo>();
+  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+
+  private Map<Integer, StoreInfo> mStores = new HashMap<Integer, StoreInfo>();
 
   public synchronized void addStoresInfo(StoreInfo info) throws FileAlreadyExistException {
-    if (KVS.containsKey(info.INODE_ID)) {
+    if (mStores.containsKey(info.INODE_ID)) {
       throw new FileAlreadyExistException("The store already exists: " + info);
     }
 
-    KVS.put(info.INODE_ID, info);
+    mStores.put(info.INODE_ID, info);
   }
 
   public synchronized boolean addPartition(PartitionSortedStorePartitionInfo info)
-      throws TachyonException, IOException {
+      throws TachyonException {
     int storeId = info.storeId;
-    if (!KVS.containsKey(storeId)) {
+    if (!mStores.containsKey(storeId)) {
       throw new TachyonException("Store does not exist for partition: " + info);
     }
-    KVS.get(storeId).addPartition(
-        new MasterPartition(info.storeId, info.partitionIndex, info.dataFileId, info.indexFileId,
-            info.startKey, info.endKey));
+    try {
+      mStores.get(storeId).addPartition(
+          new MasterPartition(info.storeId, info.partitionIndex, info.dataFileId, info.indexFileId,
+              info.startKey, info.endKey));
+    } catch (IOException e) {
+      LOG.error(e.getMessage());
+      throw new TachyonException(e.getMessage());
+    }
     return true;
   }
 
   public synchronized MasterPartition get(int storeId, ByteBuffer key) throws TachyonException {
-    if (!KVS.containsKey(storeId)) {
+    if (!mStores.containsKey(storeId)) {
       throw new TachyonException("Store does not exist: " + storeId);
     }
-    return KVS.get(storeId).getPartition(key);
+    return mStores.get(storeId).getPartition(key);
   }
 
   public synchronized MasterPartition get(int storeId, int partitionIndex) throws TachyonException {
-    if (!KVS.containsKey(storeId)) {
+    if (!mStores.containsKey(storeId)) {
       throw new TachyonException("Store does not exist: " + storeId);
     }
-    return KVS.get(storeId).getPartition(partitionIndex);
+    return mStores.get(storeId).getPartition(partitionIndex);
   }
 }

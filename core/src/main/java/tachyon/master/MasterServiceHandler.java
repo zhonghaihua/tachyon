@@ -27,6 +27,9 @@ import org.apache.thrift.TException;
 import tachyon.Constants;
 import tachyon.UnderFileSystem;
 import tachyon.conf.CommonConf;
+import tachyon.r.sorted.master.MasterPartition;
+import tachyon.r.sorted.master.StoreInfo;
+import tachyon.r.sorted.master.StoresInfo;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.ClientBlockInfo;
 import tachyon.thrift.ClientDependencyInfo;
@@ -58,8 +61,12 @@ public class MasterServiceHandler implements MasterService.Iface {
 
   private final MasterInfo mMasterInfo;
 
+  private final StoresInfo mStoresInfo;
+
   public MasterServiceHandler(MasterInfo masterInfo) {
     mMasterInfo = masterInfo;
+
+    mStoresInfo = new StoresInfo();
   }
 
   @Override
@@ -312,8 +319,8 @@ public class MasterServiceHandler implements MasterService.Iface {
   }
 
   @Override
-  public void user_setPinned(int fileId, boolean pinned)
-      throws FileDoesNotExistException, TException {
+  public void user_setPinned(int fileId, boolean pinned) throws FileDoesNotExistException,
+      TException {
     mMasterInfo.setPinned(fileId, pinned);
   }
 
@@ -356,28 +363,70 @@ public class MasterServiceHandler implements MasterService.Iface {
   @Override
   public int r_createStore(String path, String storeType) throws InvalidPathException,
       FileAlreadyExistException, TException {
-    // TODO Auto-generated method stub
-    return 0;
+    if (!mMasterInfo.mkdir(path)) {
+      return -1;
+    }
+    int storeId = mMasterInfo.getFileId(path);
+    mStoresInfo.addStoresInfo(new StoreInfo(storeId));
+    return storeId;
   }
 
   @Override
   public boolean r_addPartition(PartitionSortedStorePartitionInfo partitionInfo)
       throws TachyonException, TException {
-    // TODO Auto-generated method stub
-    return false;
+    return mStoresInfo.addPartition(partitionInfo);
   }
 
   @Override
   public PartitionSortedStorePartitionInfo r_getPartition(int storeId, ByteBuffer key)
       throws TachyonException, TException {
-    // TODO Auto-generated method stub
-    return null;
+    MasterPartition partition = mStoresInfo.get(storeId, CommonUtils.cloneByteBuffer(key));
+    if (partition == null) {
+      PartitionSortedStorePartitionInfo res = new PartitionSortedStorePartitionInfo();
+      res.partitionIndex = -1;
+      return res;
+    }
+    PartitionSortedStorePartitionInfo res = partition.generatePartitionSortedStorePartitionInfo();
+    if (!partition.hasLocation()) {
+      int indexFileId = partition.INDEX_FILE_ID;
+      List<ClientBlockInfo> blockInfo;
+      try {
+        blockInfo = mMasterInfo.getFileLocations(indexFileId);
+      } catch (IOException e) {
+        throw new TachyonException(e.getMessage());
+      }
+      LOG.info("MasterPartition empty location blockinfo: " + blockInfo.get(0));
+      res.setLocation(blockInfo.get(0).locations.get(0));
+      LOG.info("MasterPartition empty location: " + res);
+    } else {
+      LOG.info("MasterPartition with locations: " + res);
+    }
+    return res;
   }
 
   @Override
   public PartitionSortedStorePartitionInfo r_noPartition(NetAddress workerAddress, int storeId,
       int partitionIndex) throws TachyonException, TException {
-    // TODO Auto-generated method stub
-    return null;
+    // TODO the logic is wrong. Improve this.
+    MasterPartition partition = mStoresInfo.get(storeId, partitionIndex);
+    partition.removeLocation(workerAddress);
+
+    PartitionSortedStorePartitionInfo res = partition.generatePartitionSortedStorePartitionInfo();
+    if (!partition.hasLocation()) {
+      int indexFileId = partition.INDEX_FILE_ID;
+      List<ClientBlockInfo> blockInfo;
+      try {
+        blockInfo = mMasterInfo.getFileLocations(indexFileId);
+      } catch (FileDoesNotExistException e) {
+        throw new TachyonException(e.getMessage());
+      } catch (IOException e) {
+        throw new TachyonException(e.getMessage());
+      }
+      res.setLocation(blockInfo.get(0).locations.get(0));
+      LOG.info("kv_getPartition empty location: " + res);
+    } else {
+      LOG.info("kv_getPartition with locations: " + res);
+    }
+    return res;
   }
 }

@@ -13,6 +13,30 @@ public class Utils {
     return sb.toString();
   }
 
+  public static int compare(byte[] a, byte[] b) {
+    int pa = 0;
+    int pb = 0;
+
+    while (pa < a.length && pb < b.length) {
+      if (a[pa] < b[pb]) {
+        return -1;
+      } else if (a[pa] > b[pb]) {
+        return 1;
+      }
+      pa ++;
+      pb ++;
+    }
+
+    if (pa < a.length) {
+      return 1;
+    }
+    if (pb < b.length) {
+      return -1;
+    }
+
+    return 0;
+  }
+
   public static int compare(ByteBuffer a, ByteBuffer b) {
     int pa = a.position();
     int pb = b.position();

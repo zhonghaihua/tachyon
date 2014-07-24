@@ -17,8 +17,12 @@ package tachyon.worker;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
+import tachyon.Constants;
+import tachyon.TachyonURI;
+import tachyon.r.sorted.WorkerStore;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.FailedToCheckpointException;
 import tachyon.thrift.FileDoesNotExistException;
@@ -26,15 +30,30 @@ import tachyon.thrift.PartitionSortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TachyonException;
 import tachyon.thrift.WorkerService;
+import tachyon.util.CommonUtils;
 
 /**
  * <code>WorkerServiceHandler</code> handles all the RPC calls to the worker.
  */
 public class WorkerServiceHandler implements WorkerService.Iface {
+  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
   private WorkerStorage mWorkerStorage;
+
+  private WorkerStore mWorkerStore;
 
   public WorkerServiceHandler(WorkerStorage workerStorage) {
     mWorkerStorage = workerStorage;
+    LOG.info("A");
+    try {
+      mWorkerStore =
+          new WorkerStore(new TachyonURI("tachyon://"
+              + mWorkerStorage.mMasterAddress.getHostName() + ":"
+              + mWorkerStorage.mMasterAddress.getPort()));
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      LOG.error(e.getMessage());
+    }
+    LOG.info("B");
   }
 
   @Override
@@ -106,7 +125,10 @@ public class WorkerServiceHandler implements WorkerService.Iface {
   @Override
   public ByteBuffer r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key)
       throws TachyonException, TException {
-    // TODO Auto-generated method stub
-    return null;
+    try {
+      return mWorkerStore.get(partitionInfo, CommonUtils.cloneByteBuffer(key));
+    } catch (IOException e) {
+      throw new TachyonException(e.getMessage());
+    }
   }
 }

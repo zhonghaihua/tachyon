@@ -21,13 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
-import org.apache.log4j.Logger;
 
 import tachyon.Constants;
 import tachyon.HeartbeatThread;
@@ -48,6 +48,7 @@ import tachyon.thrift.InvalidPathException;
 import tachyon.thrift.MasterService;
 import tachyon.thrift.NetAddress;
 import tachyon.thrift.NoWorkerException;
+import tachyon.thrift.PartitionSortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TableColumnException;
 import tachyon.thrift.TableDoesNotExistException;
@@ -760,8 +761,7 @@ public class MasterClient {
     }
   }
 
-  public synchronized void user_setPinned(int id, boolean pinned)
-      throws IOException, TException {
+  public synchronized void user_setPinned(int id, boolean pinned) throws IOException, TException {
     while (!mIsShutdown) {
       connect();
       try {
@@ -893,5 +893,37 @@ public class MasterClient {
       }
     }
     return -1;
+  }
+
+  public boolean r_addPartition(PartitionSortedStorePartitionInfo pInfo) throws IOException,
+      TException {
+    while (!mIsShutdown) {
+      connect();
+      try {
+        return mClient.r_addPartition(pInfo);
+      } catch (TachyonException e) {
+        throw new IOException(e);
+      } catch (TException e) {
+        LOG.error(e.getMessage());
+        mIsConnected = false;
+      }
+    }
+    return false;
+  }
+
+  public PartitionSortedStorePartitionInfo r_getPartition(int storeId, byte[] key)
+      throws IOException, TException {
+    while (!mIsShutdown) {
+      connect();
+      try {
+        return mClient.r_getPartition(storeId, ByteBuffer.wrap(key));
+      } catch (TachyonException e) {
+        throw new IOException(e);
+      } catch (TException e) {
+        LOG.error(e.getMessage());
+        mIsConnected = false;
+      }
+    }
+    return null;
   }
 }

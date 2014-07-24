@@ -66,7 +66,7 @@ public class MasterPartition {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("KVPartitionInfo(");
+    StringBuilder sb = new StringBuilder("MasterPartition(");
     sb.append("STORE_ID ").append(STORE_ID);
     sb.append(", PARTITION_INDEX ").append(PARTITION_INDEX);
     sb.append(", DATA_FILE_ID ").append(DATA_FILE_ID);

@@ -12,6 +12,9 @@ public class Example {
 
     store.createPartition(0);
     for (int k = 0; k < KEYS; k ++) {
+      System.out.println("Puting " + k + " "
+          + Utils.byteArrayToString(String.valueOf(k).getBytes()) + " "
+          + Utils.byteArrayToString(String.valueOf(k * k).getBytes()));
       store.put(0, String.valueOf(k).getBytes(), String.valueOf(k * k).getBytes());
     }
     store.closePartition(0);
@@ -25,13 +28,13 @@ public class Example {
       if (null == result) {
         System.out.println("Key " + k + " does not exist in the store " + uri);
       } else {
-        System.out.println("Key " + k + " has value " + new String(result));
+        System.out.println("Key " + k + " has value " + new String(result, "UTF-8"));
       }
     }
   }
 
   public static void main(String[] args) throws IOException {
-    TachyonURI uri = new TachyonURI("");
+    TachyonURI uri = new TachyonURI("tachyon://localhost:19998/kv3");
     createAndFillTheStore(uri);
     getResults(uri);
   }

@@ -1,5 +1,6 @@
 package tachyon.r;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ShardBase {
@@ -9,5 +10,5 @@ public interface ShardBase {
    * @param key
    * @return all partitions (ids) containing the key;
    */
-  public abstract List<Integer> lookup(byte[] key);
+  public abstract List<Integer> lookup(byte[] key) throws IOException;
 }

@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -248,7 +248,7 @@ public class WorkerStorage {
 
   private final CommonConf COMMON_CONF;
   private volatile MasterClient mMasterClient;
-  private InetSocketAddress mMasterAddress;
+  public InetSocketAddress mMasterAddress;
   private InetSocketAddress mWorkerAddress;
   private WorkerSpaceCounter mWorkerSpaceCounter;
 

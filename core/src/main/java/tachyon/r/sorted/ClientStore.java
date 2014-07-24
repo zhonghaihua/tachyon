@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.thrift.TException;
+
 import tachyon.TachyonURI;
 import tachyon.r.ClientStoreBase;
 import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.TachyonException;
 
 public class ClientStore extends ClientStoreBase {
   /** the map from partition id to the ClientPartition */
@@ -46,7 +49,13 @@ public class ClientStore extends ClientStoreBase {
 
     PartitionSortedStorePartitionInfo info = mReadPartitions.get(pIds.get(0));
 
-    return mTachyonFS.r_get(info, key);
+    try {
+      return mTachyonFS.r_get(info, key);
+    } catch (TachyonException e) {
+      throw new IOException(e);
+    } catch (TException e) {
+      throw new IOException(e);
+    }
   }
 
   @Override
@@ -75,13 +84,12 @@ public class ClientStore extends ClientStoreBase {
     if (!mWritePartitions.containsKey(partitionId)) {
       throw new IOException("Partition " + partitionId + " has not been created yet.");
     }
-
     mWritePartitions.get(partitionId).close();
     mWritePartitions.remove(partitionId);
   }
 
   @Override
-  public List<Integer> lookup(byte[] key) {
+  public List<Integer> lookup(byte[] key) throws IOException {
     ByteBuffer tKey = ByteBuffer.wrap(key);
     List<Integer> res = new ArrayList<Integer>();
     for (Entry<Integer, PartitionSortedStorePartitionInfo> entry : mReadPartitions.entrySet()) {

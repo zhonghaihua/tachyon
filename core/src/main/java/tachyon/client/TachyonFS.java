@@ -1781,18 +1781,46 @@ public class TachyonFS {
     }
   }
 
-  public void r_addPartition(PartitionSortedStorePartitionInfo pInfo) {
-    // TODO Auto-generated method stub
-    
+  public void r_addPartition(PartitionSortedStorePartitionInfo pInfo) throws IOException {
+    connect();
+    try {
+      mMasterClient.r_addPartition(pInfo);
+    } catch (TException e) {
+      mConnected = false;
+      throw new IOException(e);
+    }
   }
 
-  public PartitionSortedStorePartitionInfo r_getPartition(int storeId, byte[] key) {
-    // TODO Auto-generated method stub
-    return null;
+  public PartitionSortedStorePartitionInfo r_getPartition(int storeId, byte[] key)
+      throws IOException {
+    connect();
+    try {
+      return mMasterClient.r_getPartition(storeId, key);
+    } catch (TException e) {
+      mConnected = false;
+      throw new IOException(e);
+    }
   }
 
-  public byte[] r_get(PartitionSortedStorePartitionInfo info, byte[] key) {
-    // TODO Auto-generated method stub
-    return null;
+  // TODO Use a real store worker client.
+  private Map<InetSocketAddress, WorkerClient> mStoreWorkerClients =
+      new HashMap<InetSocketAddress, WorkerClient>();
+
+  public byte[] r_get(PartitionSortedStorePartitionInfo partition, byte[] key)
+      throws TachyonException, TException {
+    InetSocketAddress workerAddress =
+        new InetSocketAddress(partition.location.mHost, partition.location.mPort);
+
+    WorkerClient tWorkerClient = mStoreWorkerClients.get(workerAddress);
+    if (tWorkerClient == null) {
+      LOG.debug("Connecting to the worker: " + workerAddress);
+      tWorkerClient = new WorkerClient(workerAddress, 1000);
+      tWorkerClient.open();
+      mStoreWorkerClients.put(workerAddress, tWorkerClient);
+    } else {
+      LOG.debug("Using cached worker: " + workerAddress);
+    }
+    ByteBuffer result = tWorkerClient.r_get(partition, key);
+    return CommonUtils.cloneByteBuffer(result).array();
   }
 }
