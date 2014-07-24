@@ -32,7 +32,7 @@ public class PartitionSortedClientStore extends ClientStoreBase {
   }
 
   public void createPartition(int partitionId) {
-    mTachyonFS.r_createPartition(partitionId);
+    mTachyonFS.r_createPartition(ID, partitionId);
   }
 
   public void put(int partitionId, byte[] key, byte[] value) {
