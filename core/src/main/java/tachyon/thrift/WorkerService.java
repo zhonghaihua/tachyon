@@ -90,7 +90,7 @@ public class WorkerService {
 
     public void userHeartbeat(long userId, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
-    public void r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.r_get_call> resultHandler) throws org.apache.thrift.TException;
+    public void r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -842,7 +842,7 @@ public class WorkerService {
       }
     }
 
-    public void r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback<r_get_call> resultHandler) throws org.apache.thrift.TException {
+    public void r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
       checkReady();
       r_get_call method_call = new r_get_call(partitionInfo, key, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -852,7 +852,7 @@ public class WorkerService {
     public static class r_get_call extends org.apache.thrift.async.TAsyncMethodCall {
       private PartitionSortedStorePartitionInfo partitionInfo;
       private ByteBuffer key;
-      public r_get_call(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback<r_get_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public r_get_call(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.partitionInfo = partitionInfo;
         this.key = key;
@@ -1219,6 +1219,7 @@ public class WorkerService {
       processMap.put("requestSpace", new requestSpace());
       processMap.put("unlockBlock", new unlockBlock());
       processMap.put("userHeartbeat", new userHeartbeat());
+      processMap.put("r_get", new r_get());
       return processMap;
     }
 
@@ -1869,6 +1870,63 @@ public class WorkerService {
 
       public void start(I iface, userHeartbeat_args args, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws TException {
         iface.userHeartbeat(args.userId,resultHandler);
+      }
+    }
+
+    public static class r_get<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, r_get_args, ByteBuffer> {
+      public r_get() {
+        super("r_get");
+      }
+
+      public r_get_args getEmptyArgsInstance() {
+        return new r_get_args();
+      }
+
+      public AsyncMethodCallback<ByteBuffer> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new AsyncMethodCallback<ByteBuffer>() { 
+          public void onComplete(ByteBuffer o) {
+            r_get_result result = new r_get_result();
+            result.success = o;
+            try {
+              fcall.sendResponse(fb,result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+              return;
+            } catch (Exception e) {
+              LOGGER.error("Exception writing to internal frame buffer", e);
+            }
+            fb.close();
+          }
+          public void onError(Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TBase msg;
+            r_get_result result = new r_get_result();
+            if (e instanceof TachyonException) {
+                        result.e = (TachyonException) e;
+                        result.setEIsSet(true);
+                        msg = result;
+            }
+             else 
+            {
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TBase)new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+              return;
+            } catch (Exception ex) {
+              LOGGER.error("Exception writing to internal frame buffer", ex);
+            }
+            fb.close();
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, r_get_args args, org.apache.thrift.async.AsyncMethodCallback<ByteBuffer> resultHandler) throws TException {
+        iface.r_get(args.partitionInfo, args.key,resultHandler);
       }
     }
 
@@ -10880,7 +10938,7 @@ public class WorkerService {
 
   }
 
-  public static class r_get_args implements org.apache.thrift.TBase<r_get_args, r_get_args._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_get_args implements org.apache.thrift.TBase<r_get_args, r_get_args._Fields>, java.io.Serializable, Cloneable, Comparable<r_get_args>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_get_args");
 
     private static final org.apache.thrift.protocol.TField PARTITION_INFO_FIELD_DESC = new org.apache.thrift.protocol.TField("partitionInfo", org.apache.thrift.protocol.TType.STRUCT, (short)1);
@@ -11148,30 +11206,30 @@ public class WorkerService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_get_args other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_get_args typedOther = (r_get_args)other;
 
-      lastComparison = Boolean.valueOf(isSetPartitionInfo()).compareTo(typedOther.isSetPartitionInfo());
+      lastComparison = Boolean.valueOf(isSetPartitionInfo()).compareTo(other.isSetPartitionInfo());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetPartitionInfo()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.partitionInfo, typedOther.partitionInfo);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.partitionInfo, other.partitionInfo);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetKey()).compareTo(typedOther.isSetKey());
+      lastComparison = Boolean.valueOf(isSetKey()).compareTo(other.isSetKey());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetKey()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.key, typedOther.key);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.key, other.key);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -11350,7 +11408,7 @@ public class WorkerService {
 
   }
 
-  public static class r_get_result implements org.apache.thrift.TBase<r_get_result, r_get_result._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_get_result implements org.apache.thrift.TBase<r_get_result, r_get_result._Fields>, java.io.Serializable, Cloneable, Comparable<r_get_result>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_get_result");
 
     private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.STRING, (short)0);
@@ -11618,30 +11676,30 @@ public class WorkerService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_get_result other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_get_result typedOther = (r_get_result)other;
 
-      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
+      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(other.isSetSuccess());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetSuccess()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, other.success);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetE()).compareTo(typedOther.isSetE());
+      lastComparison = Boolean.valueOf(isSetE()).compareTo(other.isSetE());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetE()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.e, typedOther.e);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.e, other.e);
         if (lastComparison != 0) {
           return lastComparison;
         }

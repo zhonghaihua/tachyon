@@ -271,13 +271,13 @@ public class MasterService {
 
     public void user_getUnderfsAddress(org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
-    public void r_createStore(String path, String storeType, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.r_createStore_call> resultHandler) throws org.apache.thrift.TException;
+    public void r_createStore(String path, String storeType, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
-    public void r_addPartition(PartitionSortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.r_addPartition_call> resultHandler) throws org.apache.thrift.TException;
+    public void r_addPartition(PartitionSortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
-    public void r_getPartition(int storeId, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.r_getPartition_call> resultHandler) throws org.apache.thrift.TException;
+    public void r_getPartition(int storeId, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
-    public void r_noPartition(NetAddress workerAddress, int storeId, int partitionIndex, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.r_noPartition_call> resultHandler) throws org.apache.thrift.TException;
+    public void r_noPartition(NetAddress workerAddress, int storeId, int partitionIndex, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -2977,7 +2977,7 @@ public class MasterService {
       }
     }
 
-    public void r_createStore(String path, String storeType, org.apache.thrift.async.AsyncMethodCallback<r_createStore_call> resultHandler) throws org.apache.thrift.TException {
+    public void r_createStore(String path, String storeType, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
       checkReady();
       r_createStore_call method_call = new r_createStore_call(path, storeType, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -2987,7 +2987,7 @@ public class MasterService {
     public static class r_createStore_call extends org.apache.thrift.async.TAsyncMethodCall {
       private String path;
       private String storeType;
-      public r_createStore_call(String path, String storeType, org.apache.thrift.async.AsyncMethodCallback<r_createStore_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public r_createStore_call(String path, String storeType, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.path = path;
         this.storeType = storeType;
@@ -3012,7 +3012,7 @@ public class MasterService {
       }
     }
 
-    public void r_addPartition(PartitionSortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback<r_addPartition_call> resultHandler) throws org.apache.thrift.TException {
+    public void r_addPartition(PartitionSortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
       checkReady();
       r_addPartition_call method_call = new r_addPartition_call(partitionInfo, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -3021,7 +3021,7 @@ public class MasterService {
 
     public static class r_addPartition_call extends org.apache.thrift.async.TAsyncMethodCall {
       private PartitionSortedStorePartitionInfo partitionInfo;
-      public r_addPartition_call(PartitionSortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback<r_addPartition_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public r_addPartition_call(PartitionSortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.partitionInfo = partitionInfo;
       }
@@ -3044,7 +3044,7 @@ public class MasterService {
       }
     }
 
-    public void r_getPartition(int storeId, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback<r_getPartition_call> resultHandler) throws org.apache.thrift.TException {
+    public void r_getPartition(int storeId, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
       checkReady();
       r_getPartition_call method_call = new r_getPartition_call(storeId, key, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -3054,7 +3054,7 @@ public class MasterService {
     public static class r_getPartition_call extends org.apache.thrift.async.TAsyncMethodCall {
       private int storeId;
       private ByteBuffer key;
-      public r_getPartition_call(int storeId, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback<r_getPartition_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public r_getPartition_call(int storeId, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.storeId = storeId;
         this.key = key;
@@ -3079,7 +3079,7 @@ public class MasterService {
       }
     }
 
-    public void r_noPartition(NetAddress workerAddress, int storeId, int partitionIndex, org.apache.thrift.async.AsyncMethodCallback<r_noPartition_call> resultHandler) throws org.apache.thrift.TException {
+    public void r_noPartition(NetAddress workerAddress, int storeId, int partitionIndex, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
       checkReady();
       r_noPartition_call method_call = new r_noPartition_call(workerAddress, storeId, partitionIndex, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -3090,7 +3090,7 @@ public class MasterService {
       private NetAddress workerAddress;
       private int storeId;
       private int partitionIndex;
-      public r_noPartition_call(NetAddress workerAddress, int storeId, int partitionIndex, org.apache.thrift.async.AsyncMethodCallback<r_noPartition_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public r_noPartition_call(NetAddress workerAddress, int storeId, int partitionIndex, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.workerAddress = workerAddress;
         this.storeId = storeId;
@@ -4374,6 +4374,10 @@ public class MasterService {
       processMap.put("user_updateRawTableMetadata", new user_updateRawTableMetadata());
       processMap.put("user_getNumberOfFiles", new user_getNumberOfFiles());
       processMap.put("user_getUnderfsAddress", new user_getUnderfsAddress());
+      processMap.put("r_createStore", new r_createStore());
+      processMap.put("r_addPartition", new r_addPartition());
+      processMap.put("r_getPartition", new r_getPartition());
+      processMap.put("r_noPartition", new r_noPartition());
       return processMap;
     }
 
@@ -6848,6 +6852,241 @@ public class MasterService {
 
       public void start(I iface, user_getUnderfsAddress_args args, org.apache.thrift.async.AsyncMethodCallback<String> resultHandler) throws TException {
         iface.user_getUnderfsAddress(resultHandler);
+      }
+    }
+
+    public static class r_createStore<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, r_createStore_args, Integer> {
+      public r_createStore() {
+        super("r_createStore");
+      }
+
+      public r_createStore_args getEmptyArgsInstance() {
+        return new r_createStore_args();
+      }
+
+      public AsyncMethodCallback<Integer> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new AsyncMethodCallback<Integer>() { 
+          public void onComplete(Integer o) {
+            r_createStore_result result = new r_createStore_result();
+            result.success = o;
+            result.setSuccessIsSet(true);
+            try {
+              fcall.sendResponse(fb,result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+              return;
+            } catch (Exception e) {
+              LOGGER.error("Exception writing to internal frame buffer", e);
+            }
+            fb.close();
+          }
+          public void onError(Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TBase msg;
+            r_createStore_result result = new r_createStore_result();
+            if (e instanceof InvalidPathException) {
+                        result.eI = (InvalidPathException) e;
+                        result.setEIIsSet(true);
+                        msg = result;
+            }
+            else             if (e instanceof FileAlreadyExistException) {
+                        result.eA = (FileAlreadyExistException) e;
+                        result.setEAIsSet(true);
+                        msg = result;
+            }
+             else 
+            {
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TBase)new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+              return;
+            } catch (Exception ex) {
+              LOGGER.error("Exception writing to internal frame buffer", ex);
+            }
+            fb.close();
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, r_createStore_args args, org.apache.thrift.async.AsyncMethodCallback<Integer> resultHandler) throws TException {
+        iface.r_createStore(args.path, args.storeType,resultHandler);
+      }
+    }
+
+    public static class r_addPartition<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, r_addPartition_args, Boolean> {
+      public r_addPartition() {
+        super("r_addPartition");
+      }
+
+      public r_addPartition_args getEmptyArgsInstance() {
+        return new r_addPartition_args();
+      }
+
+      public AsyncMethodCallback<Boolean> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new AsyncMethodCallback<Boolean>() { 
+          public void onComplete(Boolean o) {
+            r_addPartition_result result = new r_addPartition_result();
+            result.success = o;
+            result.setSuccessIsSet(true);
+            try {
+              fcall.sendResponse(fb,result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+              return;
+            } catch (Exception e) {
+              LOGGER.error("Exception writing to internal frame buffer", e);
+            }
+            fb.close();
+          }
+          public void onError(Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TBase msg;
+            r_addPartition_result result = new r_addPartition_result();
+            if (e instanceof TachyonException) {
+                        result.e = (TachyonException) e;
+                        result.setEIsSet(true);
+                        msg = result;
+            }
+             else 
+            {
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TBase)new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+              return;
+            } catch (Exception ex) {
+              LOGGER.error("Exception writing to internal frame buffer", ex);
+            }
+            fb.close();
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, r_addPartition_args args, org.apache.thrift.async.AsyncMethodCallback<Boolean> resultHandler) throws TException {
+        iface.r_addPartition(args.partitionInfo,resultHandler);
+      }
+    }
+
+    public static class r_getPartition<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, r_getPartition_args, PartitionSortedStorePartitionInfo> {
+      public r_getPartition() {
+        super("r_getPartition");
+      }
+
+      public r_getPartition_args getEmptyArgsInstance() {
+        return new r_getPartition_args();
+      }
+
+      public AsyncMethodCallback<PartitionSortedStorePartitionInfo> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new AsyncMethodCallback<PartitionSortedStorePartitionInfo>() { 
+          public void onComplete(PartitionSortedStorePartitionInfo o) {
+            r_getPartition_result result = new r_getPartition_result();
+            result.success = o;
+            try {
+              fcall.sendResponse(fb,result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+              return;
+            } catch (Exception e) {
+              LOGGER.error("Exception writing to internal frame buffer", e);
+            }
+            fb.close();
+          }
+          public void onError(Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TBase msg;
+            r_getPartition_result result = new r_getPartition_result();
+            if (e instanceof TachyonException) {
+                        result.e = (TachyonException) e;
+                        result.setEIsSet(true);
+                        msg = result;
+            }
+             else 
+            {
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TBase)new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+              return;
+            } catch (Exception ex) {
+              LOGGER.error("Exception writing to internal frame buffer", ex);
+            }
+            fb.close();
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, r_getPartition_args args, org.apache.thrift.async.AsyncMethodCallback<PartitionSortedStorePartitionInfo> resultHandler) throws TException {
+        iface.r_getPartition(args.storeId, args.key,resultHandler);
+      }
+    }
+
+    public static class r_noPartition<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, r_noPartition_args, PartitionSortedStorePartitionInfo> {
+      public r_noPartition() {
+        super("r_noPartition");
+      }
+
+      public r_noPartition_args getEmptyArgsInstance() {
+        return new r_noPartition_args();
+      }
+
+      public AsyncMethodCallback<PartitionSortedStorePartitionInfo> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new AsyncMethodCallback<PartitionSortedStorePartitionInfo>() { 
+          public void onComplete(PartitionSortedStorePartitionInfo o) {
+            r_noPartition_result result = new r_noPartition_result();
+            result.success = o;
+            try {
+              fcall.sendResponse(fb,result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+              return;
+            } catch (Exception e) {
+              LOGGER.error("Exception writing to internal frame buffer", e);
+            }
+            fb.close();
+          }
+          public void onError(Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TBase msg;
+            r_noPartition_result result = new r_noPartition_result();
+            if (e instanceof TachyonException) {
+                        result.e = (TachyonException) e;
+                        result.setEIsSet(true);
+                        msg = result;
+            }
+             else 
+            {
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TBase)new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+              return;
+            } catch (Exception ex) {
+              LOGGER.error("Exception writing to internal frame buffer", ex);
+            }
+            fb.close();
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, r_noPartition_args args, org.apache.thrift.async.AsyncMethodCallback<PartitionSortedStorePartitionInfo> resultHandler) throws TException {
+        iface.r_noPartition(args.workerAddress, args.storeId, args.partitionIndex,resultHandler);
       }
     }
 
@@ -45375,7 +45614,7 @@ public class MasterService {
 
   }
 
-  public static class r_createStore_args implements org.apache.thrift.TBase<r_createStore_args, r_createStore_args._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_createStore_args implements org.apache.thrift.TBase<r_createStore_args, r_createStore_args._Fields>, java.io.Serializable, Cloneable, Comparable<r_createStore_args>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_createStore_args");
 
     private static final org.apache.thrift.protocol.TField PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("path", org.apache.thrift.protocol.TType.STRING, (short)1);
@@ -45632,30 +45871,30 @@ public class MasterService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_createStore_args other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_createStore_args typedOther = (r_createStore_args)other;
 
-      lastComparison = Boolean.valueOf(isSetPath()).compareTo(typedOther.isSetPath());
+      lastComparison = Boolean.valueOf(isSetPath()).compareTo(other.isSetPath());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetPath()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.path, typedOther.path);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.path, other.path);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetStoreType()).compareTo(typedOther.isSetStoreType());
+      lastComparison = Boolean.valueOf(isSetStoreType()).compareTo(other.isSetStoreType());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetStoreType()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.storeType, typedOther.storeType);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.storeType, other.storeType);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -45829,7 +46068,7 @@ public class MasterService {
 
   }
 
-  public static class r_createStore_result implements org.apache.thrift.TBase<r_createStore_result, r_createStore_result._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_createStore_result implements org.apache.thrift.TBase<r_createStore_result, r_createStore_result._Fields>, java.io.Serializable, Cloneable, Comparable<r_createStore_result>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_createStore_result");
 
     private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.I32, (short)0);
@@ -46147,40 +46386,40 @@ public class MasterService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_createStore_result other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_createStore_result typedOther = (r_createStore_result)other;
 
-      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
+      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(other.isSetSuccess());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetSuccess()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, other.success);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetEI()).compareTo(typedOther.isSetEI());
+      lastComparison = Boolean.valueOf(isSetEI()).compareTo(other.isSetEI());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetEI()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.eI, typedOther.eI);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.eI, other.eI);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetEA()).compareTo(typedOther.isSetEA());
+      lastComparison = Boolean.valueOf(isSetEA()).compareTo(other.isSetEA());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetEA()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.eA, typedOther.eA);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.eA, other.eA);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -46387,7 +46626,7 @@ public class MasterService {
 
   }
 
-  public static class r_addPartition_args implements org.apache.thrift.TBase<r_addPartition_args, r_addPartition_args._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_addPartition_args implements org.apache.thrift.TBase<r_addPartition_args, r_addPartition_args._Fields>, java.io.Serializable, Cloneable, Comparable<r_addPartition_args>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_addPartition_args");
 
     private static final org.apache.thrift.protocol.TField PARTITION_INFO_FIELD_DESC = new org.apache.thrift.protocol.TField("partitionInfo", org.apache.thrift.protocol.TType.STRUCT, (short)1);
@@ -46585,20 +46824,20 @@ public class MasterService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_addPartition_args other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_addPartition_args typedOther = (r_addPartition_args)other;
 
-      lastComparison = Boolean.valueOf(isSetPartitionInfo()).compareTo(typedOther.isSetPartitionInfo());
+      lastComparison = Boolean.valueOf(isSetPartitionInfo()).compareTo(other.isSetPartitionInfo());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetPartitionInfo()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.partitionInfo, typedOther.partitionInfo);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.partitionInfo, other.partitionInfo);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -46746,7 +46985,7 @@ public class MasterService {
 
   }
 
-  public static class r_addPartition_result implements org.apache.thrift.TBase<r_addPartition_result, r_addPartition_result._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_addPartition_result implements org.apache.thrift.TBase<r_addPartition_result, r_addPartition_result._Fields>, java.io.Serializable, Cloneable, Comparable<r_addPartition_result>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_addPartition_result");
 
     private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.BOOL, (short)0);
@@ -47005,30 +47244,30 @@ public class MasterService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_addPartition_result other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_addPartition_result typedOther = (r_addPartition_result)other;
 
-      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
+      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(other.isSetSuccess());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetSuccess()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, other.success);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetE()).compareTo(typedOther.isSetE());
+      lastComparison = Boolean.valueOf(isSetE()).compareTo(other.isSetE());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetE()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.e, typedOther.e);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.e, other.e);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -47202,7 +47441,7 @@ public class MasterService {
 
   }
 
-  public static class r_getPartition_args implements org.apache.thrift.TBase<r_getPartition_args, r_getPartition_args._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_getPartition_args implements org.apache.thrift.TBase<r_getPartition_args, r_getPartition_args._Fields>, java.io.Serializable, Cloneable, Comparable<r_getPartition_args>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_getPartition_args");
 
     private static final org.apache.thrift.protocol.TField STORE_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("storeId", org.apache.thrift.protocol.TType.I32, (short)1);
@@ -47472,30 +47711,30 @@ public class MasterService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_getPartition_args other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_getPartition_args typedOther = (r_getPartition_args)other;
 
-      lastComparison = Boolean.valueOf(isSetStoreId()).compareTo(typedOther.isSetStoreId());
+      lastComparison = Boolean.valueOf(isSetStoreId()).compareTo(other.isSetStoreId());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetStoreId()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.storeId, typedOther.storeId);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.storeId, other.storeId);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetKey()).compareTo(typedOther.isSetKey());
+      lastComparison = Boolean.valueOf(isSetKey()).compareTo(other.isSetKey());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetKey()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.key, typedOther.key);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.key, other.key);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -47665,7 +47904,7 @@ public class MasterService {
 
   }
 
-  public static class r_getPartition_result implements org.apache.thrift.TBase<r_getPartition_result, r_getPartition_result._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_getPartition_result implements org.apache.thrift.TBase<r_getPartition_result, r_getPartition_result._Fields>, java.io.Serializable, Cloneable, Comparable<r_getPartition_result>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_getPartition_result");
 
     private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.STRUCT, (short)0);
@@ -47922,30 +48161,30 @@ public class MasterService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_getPartition_result other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_getPartition_result typedOther = (r_getPartition_result)other;
 
-      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
+      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(other.isSetSuccess());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetSuccess()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, other.success);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetE()).compareTo(typedOther.isSetE());
+      lastComparison = Boolean.valueOf(isSetE()).compareTo(other.isSetE());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetE()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.e, typedOther.e);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.e, other.e);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -48126,7 +48365,7 @@ public class MasterService {
 
   }
 
-  public static class r_noPartition_args implements org.apache.thrift.TBase<r_noPartition_args, r_noPartition_args._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_noPartition_args implements org.apache.thrift.TBase<r_noPartition_args, r_noPartition_args._Fields>, java.io.Serializable, Cloneable, Comparable<r_noPartition_args>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_noPartition_args");
 
     private static final org.apache.thrift.protocol.TField WORKER_ADDRESS_FIELD_DESC = new org.apache.thrift.protocol.TField("workerAddress", org.apache.thrift.protocol.TType.STRUCT, (short)1);
@@ -48444,40 +48683,40 @@ public class MasterService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_noPartition_args other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_noPartition_args typedOther = (r_noPartition_args)other;
 
-      lastComparison = Boolean.valueOf(isSetWorkerAddress()).compareTo(typedOther.isSetWorkerAddress());
+      lastComparison = Boolean.valueOf(isSetWorkerAddress()).compareTo(other.isSetWorkerAddress());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetWorkerAddress()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.workerAddress, typedOther.workerAddress);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.workerAddress, other.workerAddress);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetStoreId()).compareTo(typedOther.isSetStoreId());
+      lastComparison = Boolean.valueOf(isSetStoreId()).compareTo(other.isSetStoreId());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetStoreId()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.storeId, typedOther.storeId);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.storeId, other.storeId);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetPartitionIndex()).compareTo(typedOther.isSetPartitionIndex());
+      lastComparison = Boolean.valueOf(isSetPartitionIndex()).compareTo(other.isSetPartitionIndex());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetPartitionIndex()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.partitionIndex, typedOther.partitionIndex);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.partitionIndex, other.partitionIndex);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -48677,7 +48916,7 @@ public class MasterService {
 
   }
 
-  public static class r_noPartition_result implements org.apache.thrift.TBase<r_noPartition_result, r_noPartition_result._Fields>, java.io.Serializable, Cloneable   {
+  public static class r_noPartition_result implements org.apache.thrift.TBase<r_noPartition_result, r_noPartition_result._Fields>, java.io.Serializable, Cloneable, Comparable<r_noPartition_result>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("r_noPartition_result");
 
     private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.STRUCT, (short)0);
@@ -48934,30 +49173,30 @@ public class MasterService {
       return 0;
     }
 
+    @Override
     public int compareTo(r_noPartition_result other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      r_noPartition_result typedOther = (r_noPartition_result)other;
 
-      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
+      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(other.isSetSuccess());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetSuccess()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, other.success);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetE()).compareTo(typedOther.isSetE());
+      lastComparison = Boolean.valueOf(isSetE()).compareTo(other.isSetE());
       if (lastComparison != 0) {
         return lastComparison;
       }
       if (isSetE()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.e, typedOther.e);
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.e, other.e);
         if (lastComparison != 0) {
           return lastComparison;
         }
