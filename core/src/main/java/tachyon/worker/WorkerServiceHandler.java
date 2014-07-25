@@ -126,7 +126,8 @@ public class WorkerServiceHandler implements WorkerService.Iface {
   public ByteBuffer r_get(SortedStorePartitionInfo partitionInfo, ByteBuffer key)
       throws TachyonException, TException {
     try {
-      return mWorkerStore.get(partitionInfo, CommonUtils.cloneByteBuffer(key));
+      return ByteBuffer.wrap(mWorkerStore.get(partitionInfo, CommonUtils.cloneByteBuffer(key)
+          .array()));
     } catch (IOException e) {
       throw new TachyonException(e.getMessage());
     }
