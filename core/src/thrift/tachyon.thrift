@@ -119,7 +119,7 @@ exception DependencyDoesNotExistException {
   1: string message
 }
 
-struct PartitionSortedStorePartitionInfo {
+struct SortedStorePartitionInfo {
   1: string storeType
   2: i32 storeId
   3: i32 partitionIndex
@@ -295,10 +295,10 @@ service MasterService {
   i32 r_createStore(1: string path, 2: string storeType)
     throws (1: InvalidPathException eI, 2: FileAlreadyExistException eA)
 
-  bool r_addPartition(1: PartitionSortedStorePartitionInfo partitionInfo)
+  bool r_addPartition(1: SortedStorePartitionInfo partitionInfo)
     throws (1: TachyonException e)
 
-  PartitionSortedStorePartitionInfo r_getPartition(1: i32 storeId, 2: binary key)
+  SortedStorePartitionInfo r_getPartition(1: i32 storeId, 2: binary key)
     throws (1: TachyonException e)
 
   /**
@@ -306,10 +306,10 @@ service MasterService {
    * partition; For now, this can happen only if the worker is missing/lost; Any worker gets a
    * partition search request will get the data.
    */
-  PartitionSortedStorePartitionInfo r_noPartition(1: NetAddress workerAddress, 2: i32 storeId, 3: i32 partitionIndex)
+  SortedStorePartitionInfo r_noPartition(1: NetAddress workerAddress, 2: i32 storeId, 3: i32 partitionIndex)
     throws (1: TachyonException e)
 
-   // PartitionSortedStorePartitionInfo
+   // SortedStorePartitionInfo
 }
 
 service WorkerService {
@@ -344,6 +344,6 @@ service WorkerService {
 
 
   // Services for RStore; TODO Build a seperate service
-  binary r_get(1: PartitionSortedStorePartitionInfo partitionInfo, 2: binary key)
+  binary r_get(1: SortedStorePartitionInfo partitionInfo, 2: binary key)
     throws (1: TachyonException e)
 }

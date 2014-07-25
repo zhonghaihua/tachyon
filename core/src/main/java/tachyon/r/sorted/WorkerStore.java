@@ -12,7 +12,7 @@ import tachyon.client.TachyonByteBuffer;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.r.WorkerStoreBase;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 
 public class WorkerStore extends WorkerStoreBase {
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
@@ -42,7 +42,7 @@ public class WorkerStore extends WorkerStoreBase {
     throw new RuntimeException("PartitionSortedWorkerStore put");
   }
 
-  // public byte[] get(PartitionSortedStorePartitionInfo info, byte[] key) throws IOException {
+  // public byte[] get(SortedStorePartitionInfo info, byte[] key) throws IOException {
   // if (!mData.containsKey(info.getStoreId())) {
   // mData.put(info.getStoreId(), new HashMap<Integer, WorkerPartition>());
   // }
@@ -55,7 +55,7 @@ public class WorkerStore extends WorkerStoreBase {
   // return store.get(info.getPartitionIndex()).get(key);
   // }
 
-  public ByteBuffer get(PartitionSortedStorePartitionInfo info, ByteBuffer key) throws IOException {
+  public ByteBuffer get(SortedStorePartitionInfo info, ByteBuffer key) throws IOException {
     validate(info.getDataFileId());
     validate(info.getIndexFileId());
 

@@ -53,12 +53,12 @@ import tachyon.thrift.FileDoesNotExistException;
 import tachyon.thrift.InvalidPathException;
 import tachyon.thrift.NetAddress;
 import tachyon.thrift.NoWorkerException;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.TachyonException;
 import tachyon.util.CommonUtils;
 import tachyon.util.NetworkUtils;
 import tachyon.worker.WorkerClient;
- 
+
 /**
  * Tachyon's user client API. It contains a MasterClient and several WorkerClients
  * depending on how many workers the client program is interacting with.
@@ -1802,7 +1802,7 @@ public class TachyonFS {
     }
   }
 
-  public void r_addPartition(PartitionSortedStorePartitionInfo pInfo) throws IOException {
+  public void r_addPartition(SortedStorePartitionInfo pInfo) throws IOException {
     connect();
     try {
       mMasterClient.r_addPartition(pInfo);
@@ -1812,8 +1812,7 @@ public class TachyonFS {
     }
   }
 
-  public PartitionSortedStorePartitionInfo r_getPartition(int storeId, byte[] key)
-      throws IOException {
+  public SortedStorePartitionInfo r_getPartition(int storeId, byte[] key) throws IOException {
     connect();
     try {
       return mMasterClient.r_getPartition(storeId, key);
@@ -1827,8 +1826,8 @@ public class TachyonFS {
   private Map<InetSocketAddress, WorkerClient> mStoreWorkerClients =
       new HashMap<InetSocketAddress, WorkerClient>();
 
-  public byte[] r_get(PartitionSortedStorePartitionInfo partition, byte[] key)
-      throws TachyonException, TException {
+  public byte[] r_get(SortedStorePartitionInfo partition, byte[] key) throws TachyonException,
+      TException {
     InetSocketAddress workerAddress =
         new InetSocketAddress(partition.location.mHost, partition.location.mPort);
 

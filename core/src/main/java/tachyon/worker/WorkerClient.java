@@ -32,7 +32,7 @@ import tachyon.conf.UserConf;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.FailedToCheckpointException;
 import tachyon.thrift.FileDoesNotExistException;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TachyonException;
 import tachyon.thrift.WorkerService;
@@ -282,7 +282,7 @@ public class WorkerClient {
     CLIENT.userHeartbeat(userId);
   }
 
-  public ByteBuffer r_get(PartitionSortedStorePartitionInfo partition, byte[] key)
+  public ByteBuffer r_get(SortedStorePartitionInfo partition, byte[] key)
       throws TachyonException, TException {
     return CLIENT.r_get(partition, ByteBuffer.wrap(key));
   }

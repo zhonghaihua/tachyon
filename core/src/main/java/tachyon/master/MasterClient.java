@@ -50,7 +50,7 @@ import tachyon.thrift.InvalidPathException;
 import tachyon.thrift.MasterService;
 import tachyon.thrift.NetAddress;
 import tachyon.thrift.NoWorkerException;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TableColumnException;
 import tachyon.thrift.TableDoesNotExistException;
@@ -896,8 +896,7 @@ public class MasterClient {
     return -1;
   }
 
-  public boolean r_addPartition(PartitionSortedStorePartitionInfo pInfo) throws IOException,
-      TException {
+  public boolean r_addPartition(SortedStorePartitionInfo pInfo) throws IOException, TException {
     while (!mIsShutdown) {
       connect();
       try {
@@ -912,8 +911,8 @@ public class MasterClient {
     return false;
   }
 
-  public PartitionSortedStorePartitionInfo r_getPartition(int storeId, byte[] key)
-      throws IOException, TException {
+  public SortedStorePartitionInfo r_getPartition(int storeId, byte[] key) throws IOException,
+      TException {
     while (!mIsShutdown) {
       connect();
       try {

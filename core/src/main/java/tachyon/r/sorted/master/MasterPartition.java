@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import tachyon.thrift.NetAddress;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.util.CommonUtils;
 
 /**
@@ -41,9 +41,8 @@ public class MasterPartition {
     return mLocations.contains(address);
   }
 
-  public synchronized PartitionSortedStorePartitionInfo
-      generatePartitionSortedStorePartitionInfo() {
-    PartitionSortedStorePartitionInfo res = new PartitionSortedStorePartitionInfo();
+  public synchronized SortedStorePartitionInfo generateSortedStorePartitionInfo() {
+    SortedStorePartitionInfo res = new SortedStorePartitionInfo();
     res.setStoreId(STORE_ID);
     res.setPartitionIndex(PARTITION_INDEX);
     res.setDataFileId(DATA_FILE_ID);

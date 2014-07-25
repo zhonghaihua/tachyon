@@ -10,7 +10,7 @@ import tachyon.client.OutStream;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.client.WriteType;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.util.CommonUtils;
 
 /**
@@ -92,7 +92,7 @@ public class ClientPartition {
     if (CREATE) {
       mDataFileOutStream.close();
       mIndexFileOutStream.close();
-      PartitionSortedStorePartitionInfo info = new PartitionSortedStorePartitionInfo();
+      SortedStorePartitionInfo info = new SortedStorePartitionInfo();
       info.setStoreId(STORE_ID);
       info.setPartitionIndex(INDEX);
       info.setDataFileId(mDataFileId);
@@ -135,9 +135,9 @@ public class ClientPartition {
     LOG.info("PUT " + Utils.byteArrayToString(key) + " " + Utils.byteArrayToString(value));
   }
 
-//  public void put(String key, String value) throws IOException {
-//    put(key.getBytes(), value.getBytes());
-//  }
+  // public void put(String key, String value) throws IOException {
+  // put(key.getBytes(), value.getBytes());
+  // }
 
   @Override
   public String toString() {

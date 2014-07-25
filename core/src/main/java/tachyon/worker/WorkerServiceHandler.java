@@ -26,7 +26,7 @@ import tachyon.r.sorted.WorkerStore;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.FailedToCheckpointException;
 import tachyon.thrift.FileDoesNotExistException;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TachyonException;
 import tachyon.thrift.WorkerService;
@@ -123,7 +123,7 @@ public class WorkerServiceHandler implements WorkerService.Iface {
   }
 
   @Override
-  public ByteBuffer r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key)
+  public ByteBuffer r_get(SortedStorePartitionInfo partitionInfo, ByteBuffer key)
       throws TachyonException, TException {
     try {
       return mWorkerStore.get(partitionInfo, CommonUtils.cloneByteBuffer(key));

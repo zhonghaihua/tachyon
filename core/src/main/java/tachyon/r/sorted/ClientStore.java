@@ -13,7 +13,7 @@ import org.apache.thrift.TException;
 
 import tachyon.TachyonURI;
 import tachyon.r.ClientStoreBase;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.TachyonException;
 
 public class ClientStore extends ClientStoreBase {
@@ -21,9 +21,9 @@ public class ClientStore extends ClientStoreBase {
   private Map<Integer, ClientPartition> mWritePartitions = Collections
       .synchronizedMap(new HashMap<Integer, ClientPartition>());
 
-  /** the map from partition id to the PartitionSortedStorePartitionInfo */
-  private Map<Integer, PartitionSortedStorePartitionInfo> mReadPartitions = Collections
-      .synchronizedMap(new HashMap<Integer, PartitionSortedStorePartitionInfo>());
+  /** the map from partition id to the SortedStorePartitionInfo */
+  private Map<Integer, SortedStorePartitionInfo> mReadPartitions = Collections
+      .synchronizedMap(new HashMap<Integer, SortedStorePartitionInfo>());
 
   protected ClientStore(TachyonURI uri, boolean create) throws IOException {
     super(uri, "tachyon.r.sorted.shard", create);
@@ -47,7 +47,7 @@ public class ClientStore extends ClientStoreBase {
       throw new IOException("More than one partition containing the key;");
     }
 
-    PartitionSortedStorePartitionInfo info = mReadPartitions.get(pIds.get(0));
+    SortedStorePartitionInfo info = mReadPartitions.get(pIds.get(0));
 
     try {
       return mTachyonFS.r_get(info, key);
@@ -92,14 +92,14 @@ public class ClientStore extends ClientStoreBase {
   public List<Integer> lookup(byte[] key) throws IOException {
     ByteBuffer tKey = ByteBuffer.wrap(key);
     List<Integer> res = new ArrayList<Integer>();
-    for (Entry<Integer, PartitionSortedStorePartitionInfo> entry : mReadPartitions.entrySet()) {
+    for (Entry<Integer, SortedStorePartitionInfo> entry : mReadPartitions.entrySet()) {
       if (Utils.compare(entry.getValue().startKey, tKey) <= 0
           && Utils.compare(entry.getValue().endKey, tKey) >= 0) {
         res.add(entry.getKey());
       }
     }
     if (res.size() == 0) {
-      PartitionSortedStorePartitionInfo info = mTachyonFS.r_getPartition(ID, key);
+      SortedStorePartitionInfo info = mTachyonFS.r_getPartition(ID, key);
       if (info.partitionIndex != -1) {
         mReadPartitions.put(info.partitionIndex, info);
         res.add(info.partitionIndex);

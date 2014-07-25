@@ -32,8 +32,8 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBase<PartitionSortedStorePartitionInfo, PartitionSortedStorePartitionInfo._Fields>, java.io.Serializable, Cloneable, Comparable<PartitionSortedStorePartitionInfo> {
-  private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("PartitionSortedStorePartitionInfo");
+public class SortedStorePartitionInfo implements org.apache.thrift.TBase<SortedStorePartitionInfo, SortedStorePartitionInfo._Fields>, java.io.Serializable, Cloneable, Comparable<SortedStorePartitionInfo> {
+  private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("SortedStorePartitionInfo");
 
   private static final org.apache.thrift.protocol.TField STORE_TYPE_FIELD_DESC = new org.apache.thrift.protocol.TField("storeType", org.apache.thrift.protocol.TType.STRING, (short)1);
   private static final org.apache.thrift.protocol.TField STORE_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("storeId", org.apache.thrift.protocol.TType.I32, (short)2);
@@ -46,8 +46,8 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
-    schemes.put(StandardScheme.class, new PartitionSortedStorePartitionInfoStandardSchemeFactory());
-    schemes.put(TupleScheme.class, new PartitionSortedStorePartitionInfoTupleSchemeFactory());
+    schemes.put(StandardScheme.class, new SortedStorePartitionInfoStandardSchemeFactory());
+    schemes.put(TupleScheme.class, new SortedStorePartitionInfoTupleSchemeFactory());
   }
 
   public String storeType; // required
@@ -164,13 +164,13 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     tmpMap.put(_Fields.LOCATION, new org.apache.thrift.meta_data.FieldMetaData("location", org.apache.thrift.TFieldRequirementType.DEFAULT, 
         new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, NetAddress.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
-    org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(PartitionSortedStorePartitionInfo.class, metaDataMap);
+    org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(SortedStorePartitionInfo.class, metaDataMap);
   }
 
-  public PartitionSortedStorePartitionInfo() {
+  public SortedStorePartitionInfo() {
   }
 
-  public PartitionSortedStorePartitionInfo(
+  public SortedStorePartitionInfo(
     String storeType,
     int storeId,
     int partitionIndex,
@@ -198,7 +198,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public PartitionSortedStorePartitionInfo(PartitionSortedStorePartitionInfo other) {
+  public SortedStorePartitionInfo(SortedStorePartitionInfo other) {
     __isset_bitfield = other.__isset_bitfield;
     if (other.isSetStoreType()) {
       this.storeType = other.storeType;
@@ -220,8 +220,8 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     }
   }
 
-  public PartitionSortedStorePartitionInfo deepCopy() {
-    return new PartitionSortedStorePartitionInfo(this);
+  public SortedStorePartitionInfo deepCopy() {
+    return new SortedStorePartitionInfo(this);
   }
 
   @Override
@@ -244,7 +244,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     return this.storeType;
   }
 
-  public PartitionSortedStorePartitionInfo setStoreType(String storeType) {
+  public SortedStorePartitionInfo setStoreType(String storeType) {
     this.storeType = storeType;
     return this;
   }
@@ -268,7 +268,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     return this.storeId;
   }
 
-  public PartitionSortedStorePartitionInfo setStoreId(int storeId) {
+  public SortedStorePartitionInfo setStoreId(int storeId) {
     this.storeId = storeId;
     setStoreIdIsSet(true);
     return this;
@@ -291,7 +291,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     return this.partitionIndex;
   }
 
-  public PartitionSortedStorePartitionInfo setPartitionIndex(int partitionIndex) {
+  public SortedStorePartitionInfo setPartitionIndex(int partitionIndex) {
     this.partitionIndex = partitionIndex;
     setPartitionIndexIsSet(true);
     return this;
@@ -314,7 +314,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     return this.dataFileId;
   }
 
-  public PartitionSortedStorePartitionInfo setDataFileId(int dataFileId) {
+  public SortedStorePartitionInfo setDataFileId(int dataFileId) {
     this.dataFileId = dataFileId;
     setDataFileIdIsSet(true);
     return this;
@@ -337,7 +337,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     return this.indexFileId;
   }
 
-  public PartitionSortedStorePartitionInfo setIndexFileId(int indexFileId) {
+  public SortedStorePartitionInfo setIndexFileId(int indexFileId) {
     this.indexFileId = indexFileId;
     setIndexFileIdIsSet(true);
     return this;
@@ -365,12 +365,12 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     return startKey;
   }
 
-  public PartitionSortedStorePartitionInfo setStartKey(byte[] startKey) {
+  public SortedStorePartitionInfo setStartKey(byte[] startKey) {
     setStartKey(startKey == null ? (ByteBuffer)null : ByteBuffer.wrap(startKey));
     return this;
   }
 
-  public PartitionSortedStorePartitionInfo setStartKey(ByteBuffer startKey) {
+  public SortedStorePartitionInfo setStartKey(ByteBuffer startKey) {
     this.startKey = startKey;
     return this;
   }
@@ -399,12 +399,12 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     return endKey;
   }
 
-  public PartitionSortedStorePartitionInfo setEndKey(byte[] endKey) {
+  public SortedStorePartitionInfo setEndKey(byte[] endKey) {
     setEndKey(endKey == null ? (ByteBuffer)null : ByteBuffer.wrap(endKey));
     return this;
   }
 
-  public PartitionSortedStorePartitionInfo setEndKey(ByteBuffer endKey) {
+  public SortedStorePartitionInfo setEndKey(ByteBuffer endKey) {
     this.endKey = endKey;
     return this;
   }
@@ -428,7 +428,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     return this.location;
   }
 
-  public PartitionSortedStorePartitionInfo setLocation(NetAddress location) {
+  public SortedStorePartitionInfo setLocation(NetAddress location) {
     this.location = location;
     return this;
   }
@@ -578,12 +578,12 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
   public boolean equals(Object that) {
     if (that == null)
       return false;
-    if (that instanceof PartitionSortedStorePartitionInfo)
-      return this.equals((PartitionSortedStorePartitionInfo)that);
+    if (that instanceof SortedStorePartitionInfo)
+      return this.equals((SortedStorePartitionInfo)that);
     return false;
   }
 
-  public boolean equals(PartitionSortedStorePartitionInfo that) {
+  public boolean equals(SortedStorePartitionInfo that) {
     if (that == null)
       return false;
 
@@ -668,7 +668,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
   }
 
   @Override
-  public int compareTo(PartitionSortedStorePartitionInfo other) {
+  public int compareTo(SortedStorePartitionInfo other) {
     if (!getClass().equals(other.getClass())) {
       return getClass().getName().compareTo(other.getClass().getName());
     }
@@ -772,7 +772,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("PartitionSortedStorePartitionInfo(");
+    StringBuilder sb = new StringBuilder("SortedStorePartitionInfo(");
     boolean first = true;
 
     sb.append("storeType:");
@@ -852,15 +852,15 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     }
   }
 
-  private static class PartitionSortedStorePartitionInfoStandardSchemeFactory implements SchemeFactory {
-    public PartitionSortedStorePartitionInfoStandardScheme getScheme() {
-      return new PartitionSortedStorePartitionInfoStandardScheme();
+  private static class SortedStorePartitionInfoStandardSchemeFactory implements SchemeFactory {
+    public SortedStorePartitionInfoStandardScheme getScheme() {
+      return new SortedStorePartitionInfoStandardScheme();
     }
   }
 
-  private static class PartitionSortedStorePartitionInfoStandardScheme extends StandardScheme<PartitionSortedStorePartitionInfo> {
+  private static class SortedStorePartitionInfoStandardScheme extends StandardScheme<SortedStorePartitionInfo> {
 
-    public void read(org.apache.thrift.protocol.TProtocol iprot, PartitionSortedStorePartitionInfo struct) throws org.apache.thrift.TException {
+    public void read(org.apache.thrift.protocol.TProtocol iprot, SortedStorePartitionInfo struct) throws org.apache.thrift.TException {
       org.apache.thrift.protocol.TField schemeField;
       iprot.readStructBegin();
       while (true)
@@ -946,7 +946,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
       struct.validate();
     }
 
-    public void write(org.apache.thrift.protocol.TProtocol oprot, PartitionSortedStorePartitionInfo struct) throws org.apache.thrift.TException {
+    public void write(org.apache.thrift.protocol.TProtocol oprot, SortedStorePartitionInfo struct) throws org.apache.thrift.TException {
       struct.validate();
 
       oprot.writeStructBegin(STRUCT_DESC);
@@ -988,16 +988,16 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
 
   }
 
-  private static class PartitionSortedStorePartitionInfoTupleSchemeFactory implements SchemeFactory {
-    public PartitionSortedStorePartitionInfoTupleScheme getScheme() {
-      return new PartitionSortedStorePartitionInfoTupleScheme();
+  private static class SortedStorePartitionInfoTupleSchemeFactory implements SchemeFactory {
+    public SortedStorePartitionInfoTupleScheme getScheme() {
+      return new SortedStorePartitionInfoTupleScheme();
     }
   }
 
-  private static class PartitionSortedStorePartitionInfoTupleScheme extends TupleScheme<PartitionSortedStorePartitionInfo> {
+  private static class SortedStorePartitionInfoTupleScheme extends TupleScheme<SortedStorePartitionInfo> {
 
     @Override
-    public void write(org.apache.thrift.protocol.TProtocol prot, PartitionSortedStorePartitionInfo struct) throws org.apache.thrift.TException {
+    public void write(org.apache.thrift.protocol.TProtocol prot, SortedStorePartitionInfo struct) throws org.apache.thrift.TException {
       TTupleProtocol oprot = (TTupleProtocol) prot;
       BitSet optionals = new BitSet();
       if (struct.isSetStoreType()) {
@@ -1052,7 +1052,7 @@ public class PartitionSortedStorePartitionInfo implements org.apache.thrift.TBas
     }
 
     @Override
-    public void read(org.apache.thrift.protocol.TProtocol prot, PartitionSortedStorePartitionInfo struct) throws org.apache.thrift.TException {
+    public void read(org.apache.thrift.protocol.TProtocol prot, SortedStorePartitionInfo struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
       BitSet incoming = iprot.readBitSet(8);
       if (incoming.get(0)) {

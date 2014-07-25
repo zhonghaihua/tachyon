@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 import tachyon.Constants;
 import tachyon.thrift.FileAlreadyExistException;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.TachyonException;
 
 /**
@@ -28,16 +28,15 @@ public class StoresInfo {
     mStores.put(info.INODE_ID, info);
   }
 
-  public synchronized boolean addPartition(PartitionSortedStorePartitionInfo info)
-      throws TachyonException {
+  public synchronized boolean addPartition(SortedStorePartitionInfo info) throws TachyonException {
     int storeId = info.storeId;
     if (!mStores.containsKey(storeId)) {
       throw new TachyonException("Store does not exist for partition: " + info);
     }
     try {
       mStores.get(storeId).addPartition(
-          new MasterPartition(info.storeId, info.partitionIndex, info.dataFileId, info.indexFileId,
-              info.startKey, info.endKey));
+          new MasterPartition(info.storeId, info.partitionIndex, info.dataFileId,
+              info.indexFileId, info.startKey, info.endKey));
     } catch (IOException e) {
       LOG.error(e.getMessage());
       throw new TachyonException(e.getMessage());

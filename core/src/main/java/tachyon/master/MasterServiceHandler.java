@@ -44,7 +44,7 @@ import tachyon.thrift.InvalidPathException;
 import tachyon.thrift.MasterService;
 import tachyon.thrift.NetAddress;
 import tachyon.thrift.NoWorkerException;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TableColumnException;
 import tachyon.thrift.TableDoesNotExistException;
@@ -372,21 +372,21 @@ public class MasterServiceHandler implements MasterService.Iface {
   }
 
   @Override
-  public boolean r_addPartition(PartitionSortedStorePartitionInfo partitionInfo)
-      throws TachyonException, TException {
+  public boolean r_addPartition(SortedStorePartitionInfo partitionInfo) throws TachyonException,
+      TException {
     return mStoresInfo.addPartition(partitionInfo);
   }
 
   @Override
-  public PartitionSortedStorePartitionInfo r_getPartition(int storeId, ByteBuffer key)
+  public SortedStorePartitionInfo r_getPartition(int storeId, ByteBuffer key)
       throws TachyonException, TException {
     MasterPartition partition = mStoresInfo.get(storeId, CommonUtils.cloneByteBuffer(key));
     if (partition == null) {
-      PartitionSortedStorePartitionInfo res = new PartitionSortedStorePartitionInfo();
+      SortedStorePartitionInfo res = new SortedStorePartitionInfo();
       res.partitionIndex = -1;
       return res;
     }
-    PartitionSortedStorePartitionInfo res = partition.generatePartitionSortedStorePartitionInfo();
+    SortedStorePartitionInfo res = partition.generateSortedStorePartitionInfo();
     if (!partition.hasLocation()) {
       int indexFileId = partition.INDEX_FILE_ID;
       List<ClientBlockInfo> blockInfo;
@@ -405,13 +405,13 @@ public class MasterServiceHandler implements MasterService.Iface {
   }
 
   @Override
-  public PartitionSortedStorePartitionInfo r_noPartition(NetAddress workerAddress, int storeId,
+  public SortedStorePartitionInfo r_noPartition(NetAddress workerAddress, int storeId,
       int partitionIndex) throws TachyonException, TException {
     // TODO the logic is wrong. Improve this.
     MasterPartition partition = mStoresInfo.get(storeId, partitionIndex);
     partition.removeLocation(workerAddress);
 
-    PartitionSortedStorePartitionInfo res = partition.generatePartitionSortedStorePartitionInfo();
+    SortedStorePartitionInfo res = partition.generateSortedStorePartitionInfo();
     if (!partition.hasLocation()) {
       int indexFileId = partition.INDEX_FILE_ID;
       List<ClientBlockInfo> blockInfo;

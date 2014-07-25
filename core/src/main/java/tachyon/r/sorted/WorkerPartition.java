@@ -7,18 +7,18 @@ import tachyon.client.TachyonByteBuffer;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.io.Utils;
-import tachyon.thrift.PartitionSortedStorePartitionInfo;
+import tachyon.thrift.SortedStorePartitionInfo;
 
 public class WorkerPartition {
   private TachyonFS mTFS;
-  private PartitionSortedStorePartitionInfo mInfo;
+  private SortedStorePartitionInfo mInfo;
   private TachyonByteBuffer mData = null;
   private TachyonByteBuffer mIndex = null;
   private long mLastAccessTimeMs = System.currentTimeMillis();
 
-  public WorkerPartition(TachyonFS tfs, PartitionSortedStorePartitionInfo partitionInfo) {
+  public WorkerPartition(TachyonFS tfs, SortedStorePartitionInfo partitionInfo) {
     mTFS = tfs;
-    mInfo = new PartitionSortedStorePartitionInfo(partitionInfo);
+    mInfo = new SortedStorePartitionInfo(partitionInfo);
   }
 
   public synchronized byte[] get(byte[] key) throws IOException {

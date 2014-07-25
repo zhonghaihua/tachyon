@@ -60,7 +60,7 @@ public class WorkerService {
 
     public void userHeartbeat(long userId) throws org.apache.thrift.TException;
 
-    public ByteBuffer r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key) throws TachyonException, org.apache.thrift.TException;
+    public ByteBuffer r_get(SortedStorePartitionInfo partitionInfo, ByteBuffer key) throws TachyonException, org.apache.thrift.TException;
 
   }
 
@@ -90,7 +90,7 @@ public class WorkerService {
 
     public void userHeartbeat(long userId, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
-    public void r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
+    public void r_get(SortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -398,13 +398,13 @@ public class WorkerService {
       return;
     }
 
-    public ByteBuffer r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key) throws TachyonException, org.apache.thrift.TException
+    public ByteBuffer r_get(SortedStorePartitionInfo partitionInfo, ByteBuffer key) throws TachyonException, org.apache.thrift.TException
     {
       send_r_get(partitionInfo, key);
       return recv_r_get();
     }
 
-    public void send_r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key) throws org.apache.thrift.TException
+    public void send_r_get(SortedStorePartitionInfo partitionInfo, ByteBuffer key) throws org.apache.thrift.TException
     {
       r_get_args args = new r_get_args();
       args.setPartitionInfo(partitionInfo);
@@ -842,7 +842,7 @@ public class WorkerService {
       }
     }
 
-    public void r_get(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
+    public void r_get(SortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
       checkReady();
       r_get_call method_call = new r_get_call(partitionInfo, key, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -850,9 +850,9 @@ public class WorkerService {
     }
 
     public static class r_get_call extends org.apache.thrift.async.TAsyncMethodCall {
-      private PartitionSortedStorePartitionInfo partitionInfo;
+      private SortedStorePartitionInfo partitionInfo;
       private ByteBuffer key;
-      public r_get_call(PartitionSortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public r_get_call(SortedStorePartitionInfo partitionInfo, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.partitionInfo = partitionInfo;
         this.key = key;
@@ -10950,7 +10950,7 @@ public class WorkerService {
       schemes.put(TupleScheme.class, new r_get_argsTupleSchemeFactory());
     }
 
-    public PartitionSortedStorePartitionInfo partitionInfo; // required
+    public SortedStorePartitionInfo partitionInfo; // required
     public ByteBuffer key; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
@@ -11019,7 +11019,7 @@ public class WorkerService {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.PARTITION_INFO, new org.apache.thrift.meta_data.FieldMetaData("partitionInfo", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, PartitionSortedStorePartitionInfo.class)));
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, SortedStorePartitionInfo.class)));
       tmpMap.put(_Fields.KEY, new org.apache.thrift.meta_data.FieldMetaData("key", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING          , true)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
@@ -11030,7 +11030,7 @@ public class WorkerService {
     }
 
     public r_get_args(
-      PartitionSortedStorePartitionInfo partitionInfo,
+      SortedStorePartitionInfo partitionInfo,
       ByteBuffer key)
     {
       this();
@@ -11043,7 +11043,7 @@ public class WorkerService {
      */
     public r_get_args(r_get_args other) {
       if (other.isSetPartitionInfo()) {
-        this.partitionInfo = new PartitionSortedStorePartitionInfo(other.partitionInfo);
+        this.partitionInfo = new SortedStorePartitionInfo(other.partitionInfo);
       }
       if (other.isSetKey()) {
         this.key = org.apache.thrift.TBaseHelper.copyBinary(other.key);
@@ -11061,11 +11061,11 @@ public class WorkerService {
       this.key = null;
     }
 
-    public PartitionSortedStorePartitionInfo getPartitionInfo() {
+    public SortedStorePartitionInfo getPartitionInfo() {
       return this.partitionInfo;
     }
 
-    public r_get_args setPartitionInfo(PartitionSortedStorePartitionInfo partitionInfo) {
+    public r_get_args setPartitionInfo(SortedStorePartitionInfo partitionInfo) {
       this.partitionInfo = partitionInfo;
       return this;
     }
@@ -11125,7 +11125,7 @@ public class WorkerService {
         if (value == null) {
           unsetPartitionInfo();
         } else {
-          setPartitionInfo((PartitionSortedStorePartitionInfo)value);
+          setPartitionInfo((SortedStorePartitionInfo)value);
         }
         break;
 
@@ -11317,7 +11317,7 @@ public class WorkerService {
           switch (schemeField.id) {
             case 1: // PARTITION_INFO
               if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
-                struct.partitionInfo = new PartitionSortedStorePartitionInfo();
+                struct.partitionInfo = new SortedStorePartitionInfo();
                 struct.partitionInfo.read(iprot);
                 struct.setPartitionInfoIsSet(true);
               } else { 
@@ -11395,7 +11395,7 @@ public class WorkerService {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
-          struct.partitionInfo = new PartitionSortedStorePartitionInfo();
+          struct.partitionInfo = new SortedStorePartitionInfo();
           struct.partitionInfo.read(iprot);
           struct.setPartitionInfoIsSet(true);
         }

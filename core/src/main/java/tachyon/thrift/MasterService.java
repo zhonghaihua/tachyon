@@ -170,9 +170,9 @@ public class MasterService {
 
     public int r_createStore(String path, String storeType) throws InvalidPathException, FileAlreadyExistException, org.apache.thrift.TException;
 
-    public boolean r_addPartition(PartitionSortedStorePartitionInfo partitionInfo) throws TachyonException, org.apache.thrift.TException;
+    public boolean r_addPartition(SortedStorePartitionInfo partitionInfo) throws TachyonException, org.apache.thrift.TException;
 
-    public PartitionSortedStorePartitionInfo r_getPartition(int storeId, ByteBuffer key) throws TachyonException, org.apache.thrift.TException;
+    public SortedStorePartitionInfo r_getPartition(int storeId, ByteBuffer key) throws TachyonException, org.apache.thrift.TException;
 
     /**
      * Report that the worker does not have the partition. Returns a new worker designed to have the
@@ -183,7 +183,7 @@ public class MasterService {
      * @param storeId
      * @param partitionIndex
      */
-    public PartitionSortedStorePartitionInfo r_noPartition(NetAddress workerAddress, int storeId, int partitionIndex) throws TachyonException, org.apache.thrift.TException;
+    public SortedStorePartitionInfo r_noPartition(NetAddress workerAddress, int storeId, int partitionIndex) throws TachyonException, org.apache.thrift.TException;
 
   }
 
@@ -273,7 +273,7 @@ public class MasterService {
 
     public void r_createStore(String path, String storeType, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
-    public void r_addPartition(PartitionSortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
+    public void r_addPartition(SortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
     public void r_getPartition(int storeId, ByteBuffer key, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException;
 
@@ -1482,13 +1482,13 @@ public class MasterService {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "r_createStore failed: unknown result");
     }
 
-    public boolean r_addPartition(PartitionSortedStorePartitionInfo partitionInfo) throws TachyonException, org.apache.thrift.TException
+    public boolean r_addPartition(SortedStorePartitionInfo partitionInfo) throws TachyonException, org.apache.thrift.TException
     {
       send_r_addPartition(partitionInfo);
       return recv_r_addPartition();
     }
 
-    public void send_r_addPartition(PartitionSortedStorePartitionInfo partitionInfo) throws org.apache.thrift.TException
+    public void send_r_addPartition(SortedStorePartitionInfo partitionInfo) throws org.apache.thrift.TException
     {
       r_addPartition_args args = new r_addPartition_args();
       args.setPartitionInfo(partitionInfo);
@@ -1508,7 +1508,7 @@ public class MasterService {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "r_addPartition failed: unknown result");
     }
 
-    public PartitionSortedStorePartitionInfo r_getPartition(int storeId, ByteBuffer key) throws TachyonException, org.apache.thrift.TException
+    public SortedStorePartitionInfo r_getPartition(int storeId, ByteBuffer key) throws TachyonException, org.apache.thrift.TException
     {
       send_r_getPartition(storeId, key);
       return recv_r_getPartition();
@@ -1522,7 +1522,7 @@ public class MasterService {
       sendBase("r_getPartition", args);
     }
 
-    public PartitionSortedStorePartitionInfo recv_r_getPartition() throws TachyonException, org.apache.thrift.TException
+    public SortedStorePartitionInfo recv_r_getPartition() throws TachyonException, org.apache.thrift.TException
     {
       r_getPartition_result result = new r_getPartition_result();
       receiveBase(result, "r_getPartition");
@@ -1535,7 +1535,7 @@ public class MasterService {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "r_getPartition failed: unknown result");
     }
 
-    public PartitionSortedStorePartitionInfo r_noPartition(NetAddress workerAddress, int storeId, int partitionIndex) throws TachyonException, org.apache.thrift.TException
+    public SortedStorePartitionInfo r_noPartition(NetAddress workerAddress, int storeId, int partitionIndex) throws TachyonException, org.apache.thrift.TException
     {
       send_r_noPartition(workerAddress, storeId, partitionIndex);
       return recv_r_noPartition();
@@ -1550,7 +1550,7 @@ public class MasterService {
       sendBase("r_noPartition", args);
     }
 
-    public PartitionSortedStorePartitionInfo recv_r_noPartition() throws TachyonException, org.apache.thrift.TException
+    public SortedStorePartitionInfo recv_r_noPartition() throws TachyonException, org.apache.thrift.TException
     {
       r_noPartition_result result = new r_noPartition_result();
       receiveBase(result, "r_noPartition");
@@ -3012,7 +3012,7 @@ public class MasterService {
       }
     }
 
-    public void r_addPartition(PartitionSortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
+    public void r_addPartition(SortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback resultHandler) throws org.apache.thrift.TException {
       checkReady();
       r_addPartition_call method_call = new r_addPartition_call(partitionInfo, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -3020,8 +3020,8 @@ public class MasterService {
     }
 
     public static class r_addPartition_call extends org.apache.thrift.async.TAsyncMethodCall {
-      private PartitionSortedStorePartitionInfo partitionInfo;
-      public r_addPartition_call(PartitionSortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private SortedStorePartitionInfo partitionInfo;
+      public r_addPartition_call(SortedStorePartitionInfo partitionInfo, org.apache.thrift.async.AsyncMethodCallback resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.partitionInfo = partitionInfo;
       }
@@ -3069,7 +3069,7 @@ public class MasterService {
         prot.writeMessageEnd();
       }
 
-      public PartitionSortedStorePartitionInfo getResult() throws TachyonException, org.apache.thrift.TException {
+      public SortedStorePartitionInfo getResult() throws TachyonException, org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new IllegalStateException("Method call not finished!");
         }
@@ -3107,7 +3107,7 @@ public class MasterService {
         prot.writeMessageEnd();
       }
 
-      public PartitionSortedStorePartitionInfo getResult() throws TachyonException, org.apache.thrift.TException {
+      public SortedStorePartitionInfo getResult() throws TachyonException, org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new IllegalStateException("Method call not finished!");
         }
@@ -6976,7 +6976,7 @@ public class MasterService {
       }
     }
 
-    public static class r_getPartition<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, r_getPartition_args, PartitionSortedStorePartitionInfo> {
+    public static class r_getPartition<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, r_getPartition_args, SortedStorePartitionInfo> {
       public r_getPartition() {
         super("r_getPartition");
       }
@@ -6985,10 +6985,10 @@ public class MasterService {
         return new r_getPartition_args();
       }
 
-      public AsyncMethodCallback<PartitionSortedStorePartitionInfo> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+      public AsyncMethodCallback<SortedStorePartitionInfo> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
         final org.apache.thrift.AsyncProcessFunction fcall = this;
-        return new AsyncMethodCallback<PartitionSortedStorePartitionInfo>() { 
-          public void onComplete(PartitionSortedStorePartitionInfo o) {
+        return new AsyncMethodCallback<SortedStorePartitionInfo>() { 
+          public void onComplete(SortedStorePartitionInfo o) {
             r_getPartition_result result = new r_getPartition_result();
             result.success = o;
             try {
@@ -7028,12 +7028,12 @@ public class MasterService {
         return false;
       }
 
-      public void start(I iface, r_getPartition_args args, org.apache.thrift.async.AsyncMethodCallback<PartitionSortedStorePartitionInfo> resultHandler) throws TException {
+      public void start(I iface, r_getPartition_args args, org.apache.thrift.async.AsyncMethodCallback<SortedStorePartitionInfo> resultHandler) throws TException {
         iface.r_getPartition(args.storeId, args.key,resultHandler);
       }
     }
 
-    public static class r_noPartition<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, r_noPartition_args, PartitionSortedStorePartitionInfo> {
+    public static class r_noPartition<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, r_noPartition_args, SortedStorePartitionInfo> {
       public r_noPartition() {
         super("r_noPartition");
       }
@@ -7042,10 +7042,10 @@ public class MasterService {
         return new r_noPartition_args();
       }
 
-      public AsyncMethodCallback<PartitionSortedStorePartitionInfo> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+      public AsyncMethodCallback<SortedStorePartitionInfo> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
         final org.apache.thrift.AsyncProcessFunction fcall = this;
-        return new AsyncMethodCallback<PartitionSortedStorePartitionInfo>() { 
-          public void onComplete(PartitionSortedStorePartitionInfo o) {
+        return new AsyncMethodCallback<SortedStorePartitionInfo>() { 
+          public void onComplete(SortedStorePartitionInfo o) {
             r_noPartition_result result = new r_noPartition_result();
             result.success = o;
             try {
@@ -7085,7 +7085,7 @@ public class MasterService {
         return false;
       }
 
-      public void start(I iface, r_noPartition_args args, org.apache.thrift.async.AsyncMethodCallback<PartitionSortedStorePartitionInfo> resultHandler) throws TException {
+      public void start(I iface, r_noPartition_args args, org.apache.thrift.async.AsyncMethodCallback<SortedStorePartitionInfo> resultHandler) throws TException {
         iface.r_noPartition(args.workerAddress, args.storeId, args.partitionIndex,resultHandler);
       }
     }
@@ -46637,7 +46637,7 @@ public class MasterService {
       schemes.put(TupleScheme.class, new r_addPartition_argsTupleSchemeFactory());
     }
 
-    public PartitionSortedStorePartitionInfo partitionInfo; // required
+    public SortedStorePartitionInfo partitionInfo; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -46702,7 +46702,7 @@ public class MasterService {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.PARTITION_INFO, new org.apache.thrift.meta_data.FieldMetaData("partitionInfo", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, PartitionSortedStorePartitionInfo.class)));
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, SortedStorePartitionInfo.class)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(r_addPartition_args.class, metaDataMap);
     }
@@ -46711,7 +46711,7 @@ public class MasterService {
     }
 
     public r_addPartition_args(
-      PartitionSortedStorePartitionInfo partitionInfo)
+      SortedStorePartitionInfo partitionInfo)
     {
       this();
       this.partitionInfo = partitionInfo;
@@ -46722,7 +46722,7 @@ public class MasterService {
      */
     public r_addPartition_args(r_addPartition_args other) {
       if (other.isSetPartitionInfo()) {
-        this.partitionInfo = new PartitionSortedStorePartitionInfo(other.partitionInfo);
+        this.partitionInfo = new SortedStorePartitionInfo(other.partitionInfo);
       }
     }
 
@@ -46735,11 +46735,11 @@ public class MasterService {
       this.partitionInfo = null;
     }
 
-    public PartitionSortedStorePartitionInfo getPartitionInfo() {
+    public SortedStorePartitionInfo getPartitionInfo() {
       return this.partitionInfo;
     }
 
-    public r_addPartition_args setPartitionInfo(PartitionSortedStorePartitionInfo partitionInfo) {
+    public r_addPartition_args setPartitionInfo(SortedStorePartitionInfo partitionInfo) {
       this.partitionInfo = partitionInfo;
       return this;
     }
@@ -46765,7 +46765,7 @@ public class MasterService {
         if (value == null) {
           unsetPartitionInfo();
         } else {
-          setPartitionInfo((PartitionSortedStorePartitionInfo)value);
+          setPartitionInfo((SortedStorePartitionInfo)value);
         }
         break;
 
@@ -46917,7 +46917,7 @@ public class MasterService {
           switch (schemeField.id) {
             case 1: // PARTITION_INFO
               if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
-                struct.partitionInfo = new PartitionSortedStorePartitionInfo();
+                struct.partitionInfo = new SortedStorePartitionInfo();
                 struct.partitionInfo.read(iprot);
                 struct.setPartitionInfoIsSet(true);
               } else { 
@@ -46976,7 +46976,7 @@ public class MasterService {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
-          struct.partitionInfo = new PartitionSortedStorePartitionInfo();
+          struct.partitionInfo = new SortedStorePartitionInfo();
           struct.partitionInfo.read(iprot);
           struct.setPartitionInfoIsSet(true);
         }
@@ -47916,7 +47916,7 @@ public class MasterService {
       schemes.put(TupleScheme.class, new r_getPartition_resultTupleSchemeFactory());
     }
 
-    public PartitionSortedStorePartitionInfo success; // required
+    public SortedStorePartitionInfo success; // required
     public TachyonException e; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
@@ -47985,7 +47985,7 @@ public class MasterService {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, PartitionSortedStorePartitionInfo.class)));
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, SortedStorePartitionInfo.class)));
       tmpMap.put(_Fields.E, new org.apache.thrift.meta_data.FieldMetaData("e", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRUCT)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
@@ -47996,7 +47996,7 @@ public class MasterService {
     }
 
     public r_getPartition_result(
-      PartitionSortedStorePartitionInfo success,
+      SortedStorePartitionInfo success,
       TachyonException e)
     {
       this();
@@ -48009,7 +48009,7 @@ public class MasterService {
      */
     public r_getPartition_result(r_getPartition_result other) {
       if (other.isSetSuccess()) {
-        this.success = new PartitionSortedStorePartitionInfo(other.success);
+        this.success = new SortedStorePartitionInfo(other.success);
       }
       if (other.isSetE()) {
         this.e = new TachyonException(other.e);
@@ -48026,11 +48026,11 @@ public class MasterService {
       this.e = null;
     }
 
-    public PartitionSortedStorePartitionInfo getSuccess() {
+    public SortedStorePartitionInfo getSuccess() {
       return this.success;
     }
 
-    public r_getPartition_result setSuccess(PartitionSortedStorePartitionInfo success) {
+    public r_getPartition_result setSuccess(SortedStorePartitionInfo success) {
       this.success = success;
       return this;
     }
@@ -48080,7 +48080,7 @@ public class MasterService {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((PartitionSortedStorePartitionInfo)value);
+          setSuccess((SortedStorePartitionInfo)value);
         }
         break;
 
@@ -48272,7 +48272,7 @@ public class MasterService {
           switch (schemeField.id) {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
-                struct.success = new PartitionSortedStorePartitionInfo();
+                struct.success = new SortedStorePartitionInfo();
                 struct.success.read(iprot);
                 struct.setSuccessIsSet(true);
               } else { 
@@ -48351,7 +48351,7 @@ public class MasterService {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
-          struct.success = new PartitionSortedStorePartitionInfo();
+          struct.success = new SortedStorePartitionInfo();
           struct.success.read(iprot);
           struct.setSuccessIsSet(true);
         }
@@ -48928,7 +48928,7 @@ public class MasterService {
       schemes.put(TupleScheme.class, new r_noPartition_resultTupleSchemeFactory());
     }
 
-    public PartitionSortedStorePartitionInfo success; // required
+    public SortedStorePartitionInfo success; // required
     public TachyonException e; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
@@ -48997,7 +48997,7 @@ public class MasterService {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, PartitionSortedStorePartitionInfo.class)));
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, SortedStorePartitionInfo.class)));
       tmpMap.put(_Fields.E, new org.apache.thrift.meta_data.FieldMetaData("e", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRUCT)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
@@ -49008,7 +49008,7 @@ public class MasterService {
     }
 
     public r_noPartition_result(
-      PartitionSortedStorePartitionInfo success,
+      SortedStorePartitionInfo success,
       TachyonException e)
     {
       this();
@@ -49021,7 +49021,7 @@ public class MasterService {
      */
     public r_noPartition_result(r_noPartition_result other) {
       if (other.isSetSuccess()) {
-        this.success = new PartitionSortedStorePartitionInfo(other.success);
+        this.success = new SortedStorePartitionInfo(other.success);
       }
       if (other.isSetE()) {
         this.e = new TachyonException(other.e);
@@ -49038,11 +49038,11 @@ public class MasterService {
       this.e = null;
     }
 
-    public PartitionSortedStorePartitionInfo getSuccess() {
+    public SortedStorePartitionInfo getSuccess() {
       return this.success;
     }
 
-    public r_noPartition_result setSuccess(PartitionSortedStorePartitionInfo success) {
+    public r_noPartition_result setSuccess(SortedStorePartitionInfo success) {
       this.success = success;
       return this;
     }
@@ -49092,7 +49092,7 @@ public class MasterService {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((PartitionSortedStorePartitionInfo)value);
+          setSuccess((SortedStorePartitionInfo)value);
         }
         break;
 
@@ -49284,7 +49284,7 @@ public class MasterService {
           switch (schemeField.id) {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
-                struct.success = new PartitionSortedStorePartitionInfo();
+                struct.success = new SortedStorePartitionInfo();
                 struct.success.read(iprot);
                 struct.setSuccessIsSet(true);
               } else { 
@@ -49363,7 +49363,7 @@ public class MasterService {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
-          struct.success = new PartitionSortedStorePartitionInfo();
+          struct.success = new SortedStorePartitionInfo();
           struct.success.read(iprot);
           struct.setSuccessIsSet(true);
         }
