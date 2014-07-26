@@ -896,7 +896,8 @@ public class MasterClient {
     return -1;
   }
 
-  public boolean r_addPartition(SortedStorePartitionInfo pInfo) throws IOException, TException {
+  public synchronized boolean r_addPartition(SortedStorePartitionInfo pInfo) throws IOException,
+      TException {
     while (!mIsShutdown) {
       connect();
       try {
@@ -911,8 +912,8 @@ public class MasterClient {
     return false;
   }
 
-  public SortedStorePartitionInfo r_getPartition(int storeId, byte[] key) throws IOException,
-      TException {
+  public synchronized SortedStorePartitionInfo r_getPartition(int storeId, byte[] key)
+      throws IOException, TException {
     while (!mIsShutdown) {
       connect();
       try {

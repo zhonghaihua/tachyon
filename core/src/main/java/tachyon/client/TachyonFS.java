@@ -1788,7 +1788,7 @@ public class TachyonFS {
     }
   }
 
-  public int r_createStore(String path, String storeType) throws IOException {
+  public synchronized int r_createStore(String path, String storeType) throws IOException {
     connect();
     try {
       return mMasterClient.r_createStore(path, storeType);
@@ -1798,7 +1798,7 @@ public class TachyonFS {
     }
   }
 
-  public void r_addPartition(SortedStorePartitionInfo pInfo) throws IOException {
+  public synchronized void r_addPartition(SortedStorePartitionInfo pInfo) throws IOException {
     connect();
     try {
       mMasterClient.r_addPartition(pInfo);
@@ -1808,7 +1808,8 @@ public class TachyonFS {
     }
   }
 
-  public SortedStorePartitionInfo r_getPartition(int storeId, byte[] key) throws IOException {
+  public synchronized SortedStorePartitionInfo r_getPartition(int storeId, byte[] key)
+      throws IOException {
     connect();
     try {
       return mMasterClient.r_getPartition(storeId, key);
@@ -1822,8 +1823,8 @@ public class TachyonFS {
   private Map<InetSocketAddress, WorkerClient> mStoreWorkerClients =
       new HashMap<InetSocketAddress, WorkerClient>();
 
-  public byte[] r_get(SortedStorePartitionInfo partition, byte[] key) throws TachyonException,
-      TException {
+  public synchronized byte[] r_get(SortedStorePartitionInfo partition, byte[] key)
+      throws TachyonException, TException {
     InetSocketAddress workerAddress =
         new InetSocketAddress(partition.location.mHost, partition.location.mPort);
 

@@ -282,7 +282,7 @@ public class WorkerClient {
     CLIENT.userHeartbeat(userId);
   }
 
-  public ByteBuffer r_get(SortedStorePartitionInfo partition, byte[] key)
+  public synchronized ByteBuffer r_get(SortedStorePartitionInfo partition, byte[] key)
       throws TachyonException, TException {
     return CLIENT.r_get(partition, ByteBuffer.wrap(key));
   }
