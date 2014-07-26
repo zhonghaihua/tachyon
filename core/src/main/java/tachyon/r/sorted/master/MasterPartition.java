@@ -65,14 +65,10 @@ public class MasterPartition {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("MasterPartition(");
-    sb.append("STORE_ID ").append(STORE_ID);
-    sb.append(", PARTITION_INDEX ").append(PARTITION_INDEX);
-    sb.append(", DATA_FILE_ID ").append(DATA_FILE_ID);
-    sb.append(", INDEX_FILE_ID ").append(INDEX_FILE_ID);
-    sb.append(", START_KEY ").append(START_KEY);
-    sb.append(", END_KEY ").append(END_KEY);
-    sb.append(")");
-    return sb.toString();
+    return new StringBuilder("MasterPartition(").append("STORE_ID ").append(STORE_ID)
+        .append(", PARTITION_INDEX ").append(PARTITION_INDEX).append(", DATA_FILE_ID ")
+        .append(DATA_FILE_ID).append(", INDEX_FILE_ID ").append(INDEX_FILE_ID)
+        .append(", START_KEY ").append(START_KEY).append(", END_KEY ").append(END_KEY).append(")")
+        .toString();
   }
 }

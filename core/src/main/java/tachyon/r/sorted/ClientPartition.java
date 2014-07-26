@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Strings;
+
 import tachyon.Constants;
 import tachyon.client.OutStream;
 import tachyon.client.TachyonFS;
@@ -61,7 +63,8 @@ public class ClientPartition {
     CREATE = create;
 
     mPartitionPath =
-        CommonUtils.concat(STORE_PATH, "partition-" + CommonUtils.addLeadingZero(index, 5));
+        CommonUtils.concat(STORE_PATH,
+            "partition-" + Strings.padStart(Integer.toString(index), 5, '0'));
     mDataFilePath = mPartitionPath + "-data";
     mIndexFilePath = mPartitionPath + "-index";
     LOG.info("Creating KV partition: " + toString());
@@ -122,6 +125,9 @@ public class ClientPartition {
       mStartKey.put(key);
       mStartKey.flip();
     }
+    if (mEndKey != null && Utils.compare(mEndKey.array(), key) > 0) {
+      throw new IOException("Keys must be in sorted order!");
+    }
     mEndKey = ByteBuffer.allocate(key.length);
     mEndKey.put(key);
     mEndKey.flip();
@@ -135,19 +141,11 @@ public class ClientPartition {
     LOG.info("PUT " + Utils.byteArrayToString(key) + " " + Utils.byteArrayToString(value));
   }
 
-  // public void put(String key, String value) throws IOException {
-  // put(key.getBytes(), value.getBytes());
-  // }
-
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("PartitionSortedStorePartition(");
-    sb.append("CREATE ").append(CREATE);
-    sb.append(" , STORE_PATH ").append(STORE_PATH);
-    sb.append(" , mPartitionPath ").append(mPartitionPath);
-    sb.append(" , mDataFilePath ").append(mDataFilePath);
-    sb.append(" , mIndexFilePath ").append(mIndexFilePath);
-    sb.append(")");
-    return sb.toString();
+    return new StringBuilder("PartitionSortedStorePartition(").append("CREATE ").append(CREATE)
+        .append(" , STORE_PATH ").append(STORE_PATH).append(" , mPartitionPath ")
+        .append(mPartitionPath).append(" , mDataFilePath ").append(mDataFilePath)
+        .append(" , mIndexFilePath ").append(mIndexFilePath).append(")").toString();
   }
 }

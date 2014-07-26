@@ -3,6 +3,9 @@ package tachyon.r.sorted;
 import java.nio.ByteBuffer;
 
 public class Utils {
+  /**
+   * @return print out all numbers in a byte array
+   */
   public static String byteArrayToString(byte[] bytes) {
     StringBuilder sb = new StringBuilder("(");
     for (int k = 0; k < bytes.length; k ++) {
@@ -13,6 +16,10 @@ public class Utils {
     return sb.toString();
   }
 
+  /**
+   * @return a negative integer, zero, or a positive integer as the first argument is less than,
+   *         equal to, or greater than the second.
+   */
   public static int compare(byte[] a, byte[] b) {
     int pa = 0;
     int pb = 0;
@@ -37,6 +44,10 @@ public class Utils {
     return 0;
   }
 
+  /**
+   * @return a negative integer, zero, or a positive integer as the first argument is less than,
+   *         equal to, or greater than the second.
+   */
   public static int compare(ByteBuffer a, ByteBuffer b) {
     int pa = a.position();
     int pb = b.position();

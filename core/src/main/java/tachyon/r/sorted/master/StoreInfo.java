@@ -25,8 +25,6 @@ public class StoreInfo {
   }
 
   void addPartition(MasterPartition partition) throws IOException {
-    // TODO this method is very inefficient currently.
-
     while (mPartitions.size() <= partition.PARTITION_INDEX) {
       mPartitions.add(null);
     }
@@ -37,18 +35,19 @@ public class StoreInfo {
 
     mPartitions.set(partition.PARTITION_INDEX, partition);
 
-    for (int i = 0; i < mPartitions.size(); i ++) {
-      if (mPartitions.get(i) == null) {
-        continue;
-      }
-      for (int j = i + 1; j < mPartitions.size(); j ++) {
-        if (mPartitions.get(j) == null) {
-          continue;
+    for (int k = partition.PARTITION_INDEX - 1; k >= 0; k --) {
+      if (mPartitions.get(k) != null) {
+        if (Utils.compare(mPartitions.get(k).END_KEY, partition.START_KEY) > 1) {
+          throw new IOException("Wrong partition order: " + mPartitions.get(k) + " > " + partition);
         }
-        int result = Utils.compare(mPartitions.get(i).END_KEY, mPartitions.get(j).START_KEY);
-        if (result > 0) {
-          throw new IOException("Wrong partition order: " + mPartitions.get(i) + " > "
-              + mPartitions.get(j));
+        break;
+      }
+    }
+
+    for (int k = partition.PARTITION_INDEX + 1; k < mPartitions.size(); k ++) {
+      if (mPartitions.get(k) != null) {
+        if (Utils.compare(partition.END_KEY, mPartitions.get(k).START_KEY) > 1) {
+          throw new IOException("Wrong partition order: " + mPartitions.get(k) + " < " + partition);
         }
         break;
       }

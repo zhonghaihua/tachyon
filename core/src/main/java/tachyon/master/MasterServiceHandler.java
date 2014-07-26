@@ -395,9 +395,9 @@ public class MasterServiceHandler implements MasterService.Iface {
       } catch (IOException e) {
         throw new TachyonException(e.getMessage());
       }
-      LOG.info("MasterPartition empty location blockinfo: " + blockInfo.get(0));
       res.setLocation(blockInfo.get(0).locations.get(0));
-      LOG.info("MasterPartition empty location: " + res);
+      LOG.info("MasterPartition empty location: blockinfo(" + blockInfo
+          + "); SortedStorePartitionInfo" + res);
     } else {
       LOG.info("MasterPartition with locations: " + res);
     }
