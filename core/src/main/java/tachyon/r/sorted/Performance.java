@@ -9,6 +9,7 @@ import org.apache.thrift.TException;
 
 import tachyon.Constants;
 import tachyon.TachyonURI;
+import tachyon.Version;
 import tachyon.thrift.TachyonException;
 
 public class Performance {
@@ -19,20 +20,20 @@ public class Performance {
   private static List<String> KEYS = new ArrayList<String>();
 
   public static void main(String[] args) throws IOException, TachyonException, TException {
-    // if (args.length != 1) {
-    // System.out.println("java -cp target/tachyon-" + Version.VERSION
-    // + "-jar-with-dependencies.jar tachyon.r.sorted.Performance <StoreAddress>");
-    // System.exit(-1);
-    // }
+    if (args.length != 1) {
+      System.out.println("java -cp core/target/tachyon-" + Version.VERSION
+          + "-jar-with-dependencies.jar tachyon.r.sorted.Performance <StoreAddress>");
+      System.exit(-1);
+    }
 
-    // STORE_ADDRESS = new TachyonURI(args[0]);
+    STORE_ADDRESS = new TachyonURI(args[0]);
     STORE_ADDRESS = new TachyonURI("tachyon://localhost:19998/store_11");
-    STORE = ClientStore.createStore(STORE_ADDRESS);
+    STORE = ClientStore.getStore(STORE_ADDRESS);
 
-    STORE.createPartition(0);
-    STORE.put(0, "spark".getBytes(), "5".getBytes());
-    STORE.put(0, "the".getBytes(), "3".getBytes());
-    STORE.closePartition(0);
+    // STORE.createPartition(0);
+    // STORE.put(0, "spark".getBytes(), "5".getBytes());
+    // STORE.put(0, "the".getBytes(), "3".getBytes());
+    // STORE.closePartition(0);
 
     KEYS.add("200400");
     KEYS.add("300410");
