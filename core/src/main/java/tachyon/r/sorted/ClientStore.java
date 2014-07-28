@@ -17,6 +17,14 @@ import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.TachyonException;
 
 public class ClientStore extends ClientStoreBase {
+  public static ClientStore createStore(TachyonURI uri) throws IOException {
+    return new ClientStore(uri, true);
+  }
+
+  public static ClientStore getStore(TachyonURI uri) throws IOException {
+    return new ClientStore(uri, false);
+  }
+
   /** the map from partition id to the ClientPartition */
   private Map<Integer, ClientPartition> mWritePartitions = Collections
       .synchronizedMap(new HashMap<Integer, ClientPartition>());
@@ -29,12 +37,21 @@ public class ClientStore extends ClientStoreBase {
     super(uri, "tachyon.r.sorted.shard", create);
   }
 
-  public static ClientStore getStore(TachyonURI uri) throws IOException {
-    return new ClientStore(uri, false);
+  public void closePartition(int partitionId) throws IOException {
+    if (!mWritePartitions.containsKey(partitionId)) {
+      throw new IOException("Partition " + partitionId + " has not been created yet.");
+    }
+    mWritePartitions.get(partitionId).close();
+    mWritePartitions.remove(partitionId);
   }
 
-  public static ClientStore createStore(TachyonURI uri) throws IOException {
-    return new ClientStore(uri, true);
+  public void createPartition(int partitionId) throws IOException {
+    if (mWritePartitions.containsKey(partitionId)) {
+      throw new IOException("Partition " + partitionId + " has been created before");
+    }
+
+    mWritePartitions.put(partitionId, ClientPartition.createPartitionSortedStorePartition(
+        mTachyonFS, ID, URI.getPath(), partitionId));
   }
 
   @Override
@@ -59,36 +76,6 @@ public class ClientStore extends ClientStoreBase {
   }
 
   @Override
-  public void put(byte[] key, byte[] value) throws IOException {
-    throw new RuntimeException("The method has not been implemented yet");
-  }
-
-  public void createPartition(int partitionId) throws IOException {
-    if (mWritePartitions.containsKey(partitionId)) {
-      throw new IOException("Partition " + partitionId + " has been created before");
-    }
-
-    mWritePartitions.put(partitionId, ClientPartition.createPartitionSortedStorePartition(
-        mTachyonFS, ID, URI.getPath(), partitionId));
-  }
-
-  public void put(int partitionId, byte[] key, byte[] value) throws IOException {
-    if (!mWritePartitions.containsKey(partitionId)) {
-      throw new IOException("Partition " + partitionId + " has not been created yet.");
-    }
-
-    mWritePartitions.get(partitionId).put(key, value);
-  }
-
-  public void closePartition(int partitionId) throws IOException {
-    if (!mWritePartitions.containsKey(partitionId)) {
-      throw new IOException("Partition " + partitionId + " has not been created yet.");
-    }
-    mWritePartitions.get(partitionId).close();
-    mWritePartitions.remove(partitionId);
-  }
-
-  @Override
   public List<Integer> lookup(byte[] key) throws IOException {
     ByteBuffer tKey = ByteBuffer.wrap(key);
     List<Integer> res = new ArrayList<Integer>();
@@ -106,5 +93,26 @@ public class ClientStore extends ClientStoreBase {
       }
     }
     return res;
+  }
+
+  @Override
+  public void put(byte[] key, byte[] value) throws IOException {
+    throw new RuntimeException("The method has not been implemented yet");
+  }
+
+  public void put(int partitionId, byte[] key, byte[] value) throws IOException {
+    if (!mWritePartitions.containsKey(partitionId)) {
+      throw new IOException("Partition " + partitionId + " has not been created yet.");
+    }
+
+    mWritePartitions.get(partitionId).put(key, value);
+  }
+
+  public void put(int partitionId, String key, int value) throws IOException {
+    if (!mWritePartitions.containsKey(partitionId)) {
+      throw new IOException("Partition " + partitionId + " has not been created yet.");
+    }
+
+    mWritePartitions.get(partitionId).put(key.getBytes(), String.valueOf(value).getBytes());
   }
 }
