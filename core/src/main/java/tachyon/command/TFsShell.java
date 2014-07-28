@@ -274,7 +274,7 @@ public class TFsShell {
     if (null == result) {
       System.out.println("Key " + key + " does not exist in the store.");
     } else {
-      System.out.println("The result is " + new String(result));
+      System.out.println("The result is " + new String(result, "UTF-8"));
     }
     return 0;
   }

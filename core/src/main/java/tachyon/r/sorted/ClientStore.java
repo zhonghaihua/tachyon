@@ -67,7 +67,8 @@ public class ClientStore extends ClientStoreBase {
     SortedStorePartitionInfo info = mReadPartitions.get(pIds.get(0));
 
     try {
-      return mTachyonFS.r_get(info, key);
+      byte[] result = mTachyonFS.r_get(info, key);
+      return result.length == 0 ? null : result;
     } catch (TachyonException e) {
       throw new IOException(e);
     } catch (TException e) {
