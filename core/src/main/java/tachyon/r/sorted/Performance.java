@@ -26,7 +26,7 @@ public class Performance {
     // }
 
     // STORE_ADDRESS = new TachyonURI(args[0]);
-    STORE_ADDRESS = new TachyonURI("tachyon://localhost:19998/perf/16");
+    STORE_ADDRESS = new TachyonURI("tachyon://localhost:19998/store_11");
     STORE = ClientStore.createStore(STORE_ADDRESS);
 
     STORE.createPartition(0);
@@ -34,11 +34,11 @@ public class Performance {
     STORE.put(0, "the".getBytes(), "3".getBytes());
     STORE.closePartition(0);
 
-    KEYS.add("the");
-    KEYS.add("Apache");
-    KEYS.add("any");
-    KEYS.add("spark");
-    KEYS.add("spark");
+    KEYS.add("200400");
+    KEYS.add("300410");
+    KEYS.add("500400");
+    KEYS.add("000400");
+    KEYS.add("700400");
 
     int tests = 10000;
     int have = 0;
