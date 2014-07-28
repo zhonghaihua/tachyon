@@ -109,6 +109,16 @@ public class ClientStore extends ClientStoreBase {
     mWritePartitions.get(partitionId).put(key, value);
   }
 
+  public void put(int partitionId, int key, int value) throws IOException {
+    if (!mWritePartitions.containsKey(partitionId)) {
+      throw new IOException("Partition " + partitionId + " has not been created yet.");
+    }
+
+    mWritePartitions.get(partitionId).put(String.valueOf(key).getBytes(),
+        String.valueOf(value).getBytes());
+
+  }
+
   public void put(int partitionId, String key, int value) throws IOException {
     if (!mWritePartitions.containsKey(partitionId)) {
       throw new IOException("Partition " + partitionId + " has not been created yet.");
