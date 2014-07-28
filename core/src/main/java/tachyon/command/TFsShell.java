@@ -28,14 +28,17 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.thrift.TException;
 
 import tachyon.Constants;
+import tachyon.TachyonURI;
 import tachyon.client.InStream;
 import tachyon.client.OutStream;
 import tachyon.client.ReadType;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.client.WriteType;
+import tachyon.r.sorted.ClientStore;
 import tachyon.thrift.ClientBlockInfo;
 import tachyon.thrift.ClientFileInfo;
+import tachyon.thrift.TachyonException;
 import tachyon.util.CommonUtils;
 
 /**
@@ -255,6 +258,23 @@ public class TFsShell {
     System.out.println(file + " with file id " + fileId + " have following blocks: ");
     for (ClientBlockInfo block : blocks) {
       System.out.println(block);
+    }
+    return 0;
+  }
+
+  public int get(String[] argv) throws IOException, TachyonException, TException {
+    if (argv.length != 3) {
+      System.out.println("Usage: tfs get <storeURI> <key>");
+      return -1;
+    }
+    TachyonURI uri = new TachyonURI(argv[1]);
+    String key = argv[2];
+    ClientStore store = ClientStore.getStore(uri);
+    byte[] result = store.get(key.getBytes());
+    if (null == result) {
+      System.out.println("Key " + key + " does not exist in the store.");
+    } else {
+      System.out.println("The result is " + new String(result));
     }
     return 0;
   }
@@ -571,6 +591,8 @@ public class TFsShell {
         exitCode = pin(argv);
       } else if (cmd.equals("unpin")) {
         exitCode = unpin(argv);
+      } else if (cmd.equals("get")) {
+        exitCode = get(argv);
       } else {
         printUsage();
         return -1;
