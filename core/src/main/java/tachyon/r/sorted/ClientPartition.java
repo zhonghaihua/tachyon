@@ -138,7 +138,7 @@ public class ClientPartition {
     mDataFileOutStream.write(ByteBuffer.allocate(4).putInt(value.length).array());
     mDataFileOutStream.write(value);
     mDataFileLocation += 4 + key.length + 4 + value.length;
-    LOG.info("PUT " + Utils.byteArrayToString(key) + " " + Utils.byteArrayToString(value));
+    LOG.debug("PUT " + Utils.byteArrayToString(key) + " " + Utils.byteArrayToString(value));
   }
 
   @Override
