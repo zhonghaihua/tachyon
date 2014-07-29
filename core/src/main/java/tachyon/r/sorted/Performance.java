@@ -34,7 +34,7 @@ public class Performance {
     System.out.println("There are " + (args.length - 1) + " keys.");
     for (int k = 1; k < args.length; k ++) {
       KEYS.add(args[k]);
-      System.out.println(args[k]);
+      System.out.println("Key " + k + ": " + args[k]);
     }
     // KEYS.add("200400");
     // KEYS.add("300410");
