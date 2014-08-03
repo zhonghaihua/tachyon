@@ -54,7 +54,7 @@ import tachyon.util.CommonUtils;
 
 /**
  * The Master server program.
- *
+ * 
  * It maintains the state of each worker. It never keeps the state of any user.
  */
 public class MasterServiceHandler implements MasterService.Iface {
@@ -368,10 +368,10 @@ public class MasterServiceHandler implements MasterService.Iface {
   @Override
   public int r_createStore(String path, String storeType) throws InvalidPathException,
       FileAlreadyExistException, TException {
-    if (!mMasterInfo.mkdir(path)) {
+    if (!MASTER_INFO.mkdir(path)) {
       return -1;
     }
-    int storeId = mMasterInfo.getFileId(path);
+    int storeId = MASTER_INFO.getFileId(path);
     mStoresInfo.addStoresInfo(new StoreInfo(storeId));
     return storeId;
   }
@@ -396,7 +396,7 @@ public class MasterServiceHandler implements MasterService.Iface {
       int indexFileId = partition.INDEX_FILE_ID;
       List<ClientBlockInfo> blockInfo;
       try {
-        blockInfo = mMasterInfo.getFileLocations(indexFileId);
+        blockInfo = MASTER_INFO.getFileLocations(indexFileId);
       } catch (IOException e) {
         throw new TachyonException(e.getMessage());
       }
@@ -421,7 +421,7 @@ public class MasterServiceHandler implements MasterService.Iface {
       int indexFileId = partition.INDEX_FILE_ID;
       List<ClientBlockInfo> blockInfo;
       try {
-        blockInfo = mMasterInfo.getFileLocations(indexFileId);
+        blockInfo = MASTER_INFO.getFileLocations(indexFileId);
       } catch (FileDoesNotExistException e) {
         throw new TachyonException(e.getMessage());
       } catch (IOException e) {

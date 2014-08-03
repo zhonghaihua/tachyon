@@ -46,9 +46,7 @@ public class WorkerServiceHandler implements WorkerService.Iface {
     LOG.info("A");
     try {
       mWorkerStore =
-          new WorkerStore(new TachyonURI("tachyon://"
-              + mWorkerStorage.mMasterAddress.getHostName() + ":"
-              + mWorkerStorage.mMasterAddress.getPort()));
+          new WorkerStore(new TachyonURI("tachyon://" + mWorkerStorage.getMasterAddress()));
     } catch (IOException e) {
       // TODO Auto-generated catch block
       LOG.error(e.getMessage());

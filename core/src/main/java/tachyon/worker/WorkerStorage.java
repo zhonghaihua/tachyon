@@ -289,10 +289,10 @@ public class WorkerStorage {
 
   /**
    * Main logic behind the worker process.
-   *
+   * 
    * This object is lazily initialized. Before an object of this call should be used,
    * {@link #initialize()} must be called.
-   *
+   * 
    * @param masterAddress
    *          The TachyonMaster's address
    * @param dataFolder
@@ -347,7 +347,7 @@ public class WorkerStorage {
 
   /**
    * Update the latest block access time on the worker.
-   *
+   * 
    * @param blockId
    *          The id of the block
    */
@@ -367,13 +367,13 @@ public class WorkerStorage {
 
   /**
    * Add the checkpoint information of a file. The information is from the user <code>userId</code>.
-   *
+   * 
    * This method is normally triggered from {@link tachyon.client.FileOutStream#close()} if and
    * only if {@link tachyon.client.WriteType#isThrough()} is true. The current implementation
    * of checkpointing is that through {@link tachyon.client.WriteType} operations write to
    * {@link tachyon.UnderFileSystem} on the client's write path, but under a user temp directory
    * (temp directory is defined in the worker as {@link #getUserUnderfsTempFolder(long)}).
-   *
+   * 
    * @param userId
    *          The user id of the client who send the notification
    * @param fileId
@@ -414,7 +414,7 @@ public class WorkerStorage {
 
   /**
    * Notify the worker to checkpoint the file asynchronously.
-   *
+   * 
    * @param fileId
    *          The id of the file
    * @return true if succeed, false otherwise
@@ -440,18 +440,18 @@ public class WorkerStorage {
 
   /**
    * Notify the worker the block is cached.
-   *
+   * 
    * This call is called remotely from {@link tachyon.client.TachyonFS#cacheBlock(long)} which is
    * only ever called from {@link tachyon.client.BlockOutStream#close()} (though its a public api
    * so anyone could call it). There are a few interesting preconditions for this to work.
-   *
+   * 
    * 1) Client process writes to files locally under a tachyon defined temp directory.
    * 2) Worker process is on the same node as the client
    * 3) Client is talking to the local worker directly
-   *
+   * 
    * If all conditions are true, then and only then can this method ever be called; all operations
    * work on local files.
-   *
+   * 
    * @param userId
    *          The user id of the client who send the notification
    * @param blockId
@@ -508,7 +508,7 @@ public class WorkerStorage {
 
   /**
    * Remove a block from the memory.
-   *
+   * 
    * @param blockId
    *          The block to be removed.
    * @return Removed file size in bytes.
@@ -535,10 +535,10 @@ public class WorkerStorage {
 
   /**
    * Remove blocks from the memory.
-   *
+   * 
    * This is triggered when the worker heartbeats to the master, which sends a
    * {@link tachyon.thrift.Command} with type {@link tachyon.thrift.CommandType#Free}
-   *
+   * 
    * @param blocks
    *          The list of blocks to be removed.
    */
@@ -557,6 +557,13 @@ public class WorkerStorage {
   }
 
   /**
+   * @return the master address. e.g. localhost:19998
+   */
+  public String getMasterAddress() {
+    return mMasterAddress.getHostName() + ":" + mMasterAddress.getPort();
+  }
+
+  /**
    * @return The orphans' folder in the under file system
    */
   public String getUnderfsOrphansFolder() {
@@ -565,18 +572,18 @@ public class WorkerStorage {
 
   /**
    * Get the local user temporary folder of the specified user.
-   *
+   * 
    * This method is a wrapper around {@link tachyon.Users#getUserTempFolder(long)}, and as
    * such should be referentially transparent with {@link tachyon.Users#getUserTempFolder(long)}.
    * In the context of {@code this}, this call will output the result of path concat of
    * {@link #mLocalUserFolder} with the provided {@literal userId}.
-   *
+   * 
    * This method differs from {@link #getUserUnderfsTempFolder(long)} in the context of where write
    * operations end up. This temp folder generated lives inside the tachyon file system, and as
    * such, will be stored in memory.
-   *
+   * 
    * @see tachyon.Users#getUserTempFolder(long)
-   *
+   * 
    * @param userId
    *          The id of the user
    * @return The local user temporary folder of the specified user
@@ -590,16 +597,16 @@ public class WorkerStorage {
 
   /**
    * Get the user temporary folder in the under file system of the specified user.
-   *
+   * 
    * This method is a wrapper around {@link tachyon.Users#getUserUnderfsTempFolder(long)}, and as
    * such should be referentially transparent with {@link Users#getUserUnderfsTempFolder(long)}. In
    * the context of {@code this}, this call will output the result of path concat of
    * {@link #mUnderfsWorkerFolder} with the provided {@literal userId}.
-   *
+   * 
    * This method differs from {@link #getUserTempFolder(long)} in the context of where write
    * operations end up. This temp folder generated lives inside the {@link tachyon.UnderFileSystem},
    * and as such, will be stored remotely, most likely on disk.
-   *
+   * 
    * @param userId
    *          The id of the user
    * @return The user temporary folder in the under file system
@@ -613,7 +620,7 @@ public class WorkerStorage {
 
   /**
    * Heartbeat with the TachyonMaster. Send the removed block list to the Master.
-   *
+   * 
    * @return The Command received from the Master
    * @throws BlockInfoException
    * @throws TException
@@ -689,13 +696,13 @@ public class WorkerStorage {
 
   /**
    * Lock the block
-   *
+   * 
    * Used internally to make sure blocks are unmodified, but also used in
    * {@link tachyon.client.TachyonFS} for cacheing blocks locally for users. When a user tries
    * to read a block ({@link tachyon.client.TachyonFile#readByteBuffer()}), the client will attempt
    * to cache the block on the local users's node, while the user is reading from the local block,
    * the given block is locked and unlocked once read.
-   *
+   * 
    * @param blockId
    *          The id of the block
    * @param userId
@@ -718,7 +725,7 @@ public class WorkerStorage {
 
   /**
    * Use local LRU to evict data, and get <code> requestBytes </code> available space.
-   *
+   * 
    * @param requestBytes
    *          The data requested.
    * @return <code> true </code> if the space is granted, <code> false </code> if not.
@@ -785,7 +792,7 @@ public class WorkerStorage {
 
   /**
    * Request space from the worker
-   *
+   * 
    * @param userId
    *          The id of the user who send the request
    * @param requestBytes
@@ -815,7 +822,7 @@ public class WorkerStorage {
 
   /**
    * Set a new MasterClient and connect to it.
-   *
+   * 
    * @throws TException
    */
   public void resetMasterClient() throws TException {
@@ -826,7 +833,7 @@ public class WorkerStorage {
 
   /**
    * Return the space which has been requested
-   *
+   * 
    * @param userId
    *          The id of the user who wants to return the space
    * @param returnedBytes
@@ -878,13 +885,13 @@ public class WorkerStorage {
 
   /**
    * Unlock the block
-   *
+   * 
    * Used internally to make sure blocks are unmodified, but also used in
    * {@link tachyon.client.TachyonFS} for cacheing blocks locally for users. When a user tries
    * to read a block ({@link tachyon.client.TachyonFile#readByteBuffer()}), the client will attempt
    * to cache the block on the local users's node, while the user is reading from the local block,
    * the given block is locked and unlocked once read.
-   *
+   * 
    * @param blockId
    *          The id of the block
    * @param userId
@@ -908,7 +915,7 @@ public class WorkerStorage {
 
   /**
    * Handle the user's heartbeat.
-   *
+   * 
    * @param userId
    *          The id of the user
    * @throws TException
