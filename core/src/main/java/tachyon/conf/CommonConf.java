@@ -15,10 +15,12 @@
 package tachyon.conf;
 
 import java.io.File;
-import java.util.List;
+import java.net.InetSocketAddress;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.log4j.Logger;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 import tachyon.Constants;
 
@@ -31,11 +33,7 @@ public class CommonConf extends Utils {
   private static CommonConf COMMON_CONF = null;
 
   public static final ImmutableList<String> DEFAULT_HADOOP_UFS_PREFIX = ImmutableList.of(
-      "hdfs://",
-      "s3://",
-      "s3n://",
-      "glusterfs:///"
-  );
+      "hdfs://", "s3://", "s3n://", "glusterfs:///");
 
   /**
    * This is for unit test only. DO NOT use it for other purpose.
@@ -78,6 +76,8 @@ public class CommonConf extends Utils {
 
   public final ImmutableList<String> HADOOP_UFS_PREFIXES;
 
+  public final boolean IN_TEST_MODE;
+
   private CommonConf() {
     if (System.getProperty("tachyon.home") == null) {
       LOG.warn("tachyon.home is not set. Using /mnt/tachyon_default_home as the default value.");
@@ -117,6 +117,19 @@ public class CommonConf extends Utils {
     MAX_COLUMNS = getIntProperty("tachyon.max.columns", 1000);
     MAX_TABLE_METADATA_BYTE = getIntProperty("tachyon.max.table.metadata.byte", Constants.MB * 5);
 
-    HADOOP_UFS_PREFIXES = getListProperty("tachyon.underfs.hadoop.prefixes", DEFAULT_HADOOP_UFS_PREFIX);
+    HADOOP_UFS_PREFIXES =
+        getListProperty("tachyon.underfs.hadoop.prefixes", DEFAULT_HADOOP_UFS_PREFIX);
+
+    IN_TEST_MODE = getBooleanProperty("tachyon.test.mode", false);
+  }
+
+  public static void assertValidPort(final int port) {
+    if (!get().IN_TEST_MODE) {
+      Preconditions.checkArgument(port > 0, "Port is only allowed to be zero in test mode.");
+    }
+  }
+
+  public static void assertValidPort(final InetSocketAddress address) {
+    assertValidPort(address.getPort());
   }
 }

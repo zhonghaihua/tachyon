@@ -32,6 +32,7 @@ import com.google.common.base.Throwables;
 
 import tachyon.Constants;
 import tachyon.Users;
+import tachyon.conf.CommonConf;
 
 /**
  * The Server to serve data file read request from remote machines. The current implementation
@@ -55,7 +56,7 @@ public class DataServer implements Runnable {
       .synchronizedMap(new HashMap<SocketChannel, DataServerMessage>());
 
   // The blocks locker manager.
-  private final BlocksLocker mBlocksLocker;
+  private final BlocksLocker BLOCKS_LOCKER;
 
   private volatile boolean mShutdown = false;
   private volatile boolean mShutdowned = false;
@@ -70,14 +71,22 @@ public class DataServer implements Runnable {
    */
   public DataServer(InetSocketAddress address, WorkerStorage workerStorage) {
     LOG.info("Starting DataServer @ " + address);
+    CommonConf.assertValidPort(address);
     mAddress = address;
-    mBlocksLocker = new BlocksLocker(workerStorage, Users.sDATASERVER_USER_ID);
+    BLOCKS_LOCKER = new BlocksLocker(workerStorage, Users.sDATASERVER_USER_ID);
     try {
       mSelector = initSelector();
     } catch (IOException e) {
       LOG.error(e.getMessage() + mAddress, e);
       throw Throwables.propagate(e);
     }
+  }
+
+  /**
+   * Gets the port listening on.
+   */
+  int getPort() {
+    return mServerChannel.socket().getLocalPort();
   }
 
   private void accept(SelectionKey key) throws IOException {
@@ -170,7 +179,7 @@ public class DataServer implements Runnable {
 
       key.interestOps(SelectionKey.OP_WRITE);
       LOG.info("Get request for " + tMessage.getBlockId());
-      int lockId = mBlocksLocker.lock(tMessage.getBlockId());
+      int lockId = BLOCKS_LOCKER.lock(tMessage.getBlockId());
       DataServerMessage tResponseMessage =
           DataServerMessage.createBlockResponseMessage(true, tMessage.getBlockId(),
               tMessage.getOffset(), tMessage.getLength());
@@ -243,7 +252,7 @@ public class DataServer implements Runnable {
       mReceivingData.remove(socketChannel);
       mSendingData.remove(socketChannel);
       sendMessage.close();
-      mBlocksLocker.unlock(Math.abs(sendMessage.getBlockId()), sendMessage.getLockId());
+      BLOCKS_LOCKER.unlock(Math.abs(sendMessage.getBlockId()), sendMessage.getLockId());
     }
   }
 }

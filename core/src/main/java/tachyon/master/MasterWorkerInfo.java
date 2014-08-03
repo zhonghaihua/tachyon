@@ -14,7 +14,6 @@
  */
 package tachyon.master;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -32,7 +31,7 @@ import tachyon.util.CommonUtils;
 public class MasterWorkerInfo {
 
   /** Worker's address **/
-  public final InetSocketAddress ADDRESS;
+  public final NetAddress ADDRESS;
   /** Capacity of worker in bytes **/
   private final long CAPACITY_BYTES;
   /** Start time of the worker in ms **/
@@ -48,7 +47,7 @@ public class MasterWorkerInfo {
   /** IDs of blocks the worker should remove **/
   private Set<Long> mToRemoveBlocks;
 
-  public MasterWorkerInfo(long id, InetSocketAddress address, long capacityBytes) {
+  public MasterWorkerInfo(long id, NetAddress address, long capacityBytes) {
     mId = id;
     ADDRESS = address;
     CAPACITY_BYTES = capacityBytes;
@@ -66,7 +65,7 @@ public class MasterWorkerInfo {
   public synchronized ClientWorkerInfo generateClientWorkerInfo() {
     ClientWorkerInfo ret = new ClientWorkerInfo();
     ret.id = mId;
-    ret.address = new NetAddress(ADDRESS.getAddress().getCanonicalHostName(), ADDRESS.getPort());
+    ret.address = ADDRESS;
     ret.lastContactSec =
         (int) ((CommonUtils.getCurrentMs() - mLastUpdatedTimeMs) / Constants.SECOND_MS);
     ret.state = "In Service";
@@ -79,7 +78,7 @@ public class MasterWorkerInfo {
   /**
    * @return the worker's address.
    */
-  public InetSocketAddress getAddress() {
+  public NetAddress getAddress() {
     return ADDRESS;
   }
 

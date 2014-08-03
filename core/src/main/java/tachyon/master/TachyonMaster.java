@@ -34,6 +34,7 @@ import tachyon.conf.CommonConf;
 import tachyon.conf.MasterConf;
 import tachyon.thrift.MasterService;
 import tachyon.util.CommonUtils;
+import tachyon.util.NetworkUtils;
 import tachyon.web.UIWebServer;
 
 /**
@@ -73,8 +74,14 @@ public class TachyonMaster {
 
   private LeaderSelectorClient mLeaderSelectorClient = null;
 
+  /** metadata port */
+  private final int PORT;
+
   public TachyonMaster(InetSocketAddress address, int webPort, int selectorThreads,
       int acceptQueueSizePerThreads, int workerThreads) {
+    CommonConf.assertValidPort(address);
+    CommonConf.assertValidPort(webPort);
+
     if (CommonConf.get().USE_ZOOKEEPER) {
       mZookeeperMode = true;
     }
@@ -86,7 +93,15 @@ public class TachyonMaster {
     mWorkerThreads = workerThreads;
 
     try {
-      mMasterAddress = address;
+      // Extract the port from the generated socket.
+      // When running tests, its great to use port '0' so the system will figure out what port to
+      // use (any random free port).
+      // In a production or any real deployment setup, port '0' should not be used as it will make
+      // deployment more complicated.
+      mServerTNonblockingServerSocket = new TNonblockingServerSocket(address);
+      PORT = NetworkUtils.getPort(mServerTNonblockingServerSocket);
+
+      mMasterAddress = new InetSocketAddress(address.getHostName(), PORT);
       String journalFolder = MasterConf.get().JOURNAL_FOLDER;
       Preconditions.checkState(isFormatted(journalFolder, MasterConf.get().FORMAT_FILE_PREFIX),
           "Tachyon was not formatted!");
@@ -95,9 +110,11 @@ public class TachyonMaster {
 
       if (mZookeeperMode) {
         CommonConf conf = CommonConf.get();
+        // InetSocketAddress.toString causes test issues, so build the string by hand
+        String name = mMasterAddress.getAddress().getHostName() + ":" + mMasterAddress.getPort();
         mLeaderSelectorClient =
             new LeaderSelectorClient(conf.ZOOKEEPER_ADDRESS, conf.ZOOKEEPER_ELECTION_PATH,
-                conf.ZOOKEEPER_LEADER_PATH, address.getHostName() + ":" + address.getPort());
+                conf.ZOOKEEPER_LEADER_PATH, name);
         mEditLogProcessor = new EditLogProcessor(mJournal, journalFolder, mMasterInfo);
         Thread logProcessor = new Thread(mEditLogProcessor);
         logProcessor.start();
@@ -106,6 +123,13 @@ public class TachyonMaster {
       LOG.error(e.getMessage(), e);
       throw Throwables.propagate(e);
     }
+  }
+
+  /**
+   * Get the port used by unit test only
+   */
+  int getMetaPort() {
+    return PORT;
   }
 
   /**
@@ -166,7 +190,6 @@ public class TachyonMaster {
     MasterService.Processor<MasterServiceHandler> masterServiceProcessor =
         new MasterService.Processor<MasterServiceHandler>(mMasterServiceHandler);
 
-    mServerTNonblockingServerSocket = new TNonblockingServerSocket(mMasterAddress);
     mMasterServiceServer =
         new TThreadedSelectorServer(new TThreadedSelectorServer.Args(
             mServerTNonblockingServerSocket).processor(masterServiceProcessor)
