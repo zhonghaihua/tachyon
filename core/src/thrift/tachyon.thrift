@@ -1,5 +1,6 @@
 namespace java tachyon.thrift
 
+// Version 3: 0.6.0
 // Version 2: 0.5.0
 // Version 1: before 0.5.0
 
@@ -291,26 +292,12 @@ service MasterService {
 
   string user_getUnderfsAddress()
 
-
-  // Services for RStore; TODO Build a seperate service
-  i32 r_createStore(1: string path, 2: string storeType)
-    throws (1: InvalidPathException eI, 2: FileAlreadyExistException eA)
-
-  bool r_addPartition(1: SortedStorePartitionInfo partitionInfo)
+  // Services for X Framework
+  list<binary> x_process(1: string clz, 2: list<binary> data)
     throws (1: TachyonException e)
-
-  SortedStorePartitionInfo r_getPartition(1: i32 storeId, 2: binary key)
+  
+  list<NetAddress> x_lookup(1: string clz, 2: list<binary> data)
     throws (1: TachyonException e)
-
-  /**
-   * Report that the worker does not have the partition. Returns a new worker designed to have the
-   * partition; For now, this can happen only if the worker is missing/lost; Any worker gets a
-   * partition search request will get the data.
-   */
-  SortedStorePartitionInfo r_noPartition(1: NetAddress workerAddress, 2: i32 storeId, 3: i32 partitionIndex)
-    throws (1: TachyonException e)
-
-   // SortedStorePartitionInfo
 }
 
 service WorkerService {
@@ -343,8 +330,7 @@ service WorkerService {
 
   void userHeartbeat(1: i64 userId)   // Local user send heartbeat to local worker to keep its temp folder.
 
-
-  // Services for RStore; TODO Build a seperate service
-  binary r_get(1: SortedStorePartitionInfo partitionInfo, 2: binary key)
+  // Services for X Framework
+  list<binary> x_process(1: string clz, 2: list<binary> data)
     throws (1: TachyonException e)
 }

@@ -18,8 +18,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -28,8 +31,8 @@ import org.apache.thrift.TException;
 import tachyon.Constants;
 import tachyon.UnderFileSystem;
 import tachyon.conf.CommonConf;
-import tachyon.r.sorted.master.MasterPartition;
-import tachyon.r.sorted.master.StoreInfo;
+import tachyon.extension.ComponentException;
+import tachyon.extension.MasterComponent;
 import tachyon.r.sorted.master.StoresInfo;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.ClientBlockInfo;
@@ -45,7 +48,6 @@ import tachyon.thrift.InvalidPathException;
 import tachyon.thrift.MasterService;
 import tachyon.thrift.NetAddress;
 import tachyon.thrift.NoWorkerException;
-import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TableColumnException;
 import tachyon.thrift.TableDoesNotExistException;
@@ -64,9 +66,12 @@ public class MasterServiceHandler implements MasterService.Iface {
 
   private final StoresInfo mStoresInfo;
 
+  private final Map<String, MasterComponent> COMPONENTS = Collections
+      .synchronizedMap(new HashMap<String, MasterComponent>());
+
   public MasterServiceHandler(MasterInfo masterInfo) {
     MASTER_INFO = masterInfo;
-    mStoresInfo = new StoresInfo();
+    mStoresInfo = new StoresInfo(MASTER_INFO);
   }
 
   @Override
@@ -365,73 +370,32 @@ public class MasterServiceHandler implements MasterService.Iface {
     return MASTER_INFO.registerWorker(workerNetAddress, totalBytes, usedBytes, currentBlockIds);
   }
 
-  @Override
-  public int r_createStore(String path, String storeType) throws InvalidPathException,
-      FileAlreadyExistException, TException {
-    if (!MASTER_INFO.mkdir(path)) {
-      return -1;
+  private MasterComponent x_checkAndGet(String clz) throws TachyonException {
+    MasterComponent res = COMPONENTS.get(clz);
+    if (res == null) {
+      // TODO use reflection to create the method
     }
-    int storeId = MASTER_INFO.getFileId(path);
-    mStoresInfo.addStoresInfo(new StoreInfo(storeId));
-    return storeId;
+
+    return mStoresInfo;
   }
 
   @Override
-  public boolean r_addPartition(SortedStorePartitionInfo partitionInfo) throws TachyonException,
+  public List<ByteBuffer> x_process(String clz, List<ByteBuffer> data) throws TachyonException,
       TException {
-    return mStoresInfo.addPartition(partitionInfo);
+    try {
+      return x_checkAndGet(clz).process(CommonUtils.cloneByteBufferList(data));
+    } catch (ComponentException e) {
+      throw new TachyonException(e.getMessage() + "\n" + e.getStackTrace());
+    }
   }
 
   @Override
-  public SortedStorePartitionInfo r_getPartition(int storeId, ByteBuffer key)
-      throws TachyonException, TException {
-    MasterPartition partition = mStoresInfo.get(storeId, CommonUtils.cloneByteBuffer(key));
-    if (partition == null) {
-      SortedStorePartitionInfo res = new SortedStorePartitionInfo();
-      res.partitionIndex = -1;
-      return res;
+  public List<NetAddress> x_lookup(String clz, List<ByteBuffer> data) throws TachyonException,
+      TException {
+    try {
+      return x_checkAndGet(clz).lookup(CommonUtils.cloneByteBufferList(data));
+    } catch (ComponentException e) {
+      throw new TachyonException(e.getMessage() + "\n" + e.getStackTrace());
     }
-    SortedStorePartitionInfo res = partition.generateSortedStorePartitionInfo();
-    if (!partition.hasLocation()) {
-      int indexFileId = partition.INDEX_FILE_ID;
-      List<ClientBlockInfo> blockInfo;
-      try {
-        blockInfo = MASTER_INFO.getFileLocations(indexFileId);
-      } catch (IOException e) {
-        throw new TachyonException(e.getMessage());
-      }
-      res.setLocation(blockInfo.get(0).locations.get(0));
-      LOG.info("MasterPartition empty location: blockinfo(" + blockInfo
-          + "); SortedStorePartitionInfo" + res);
-    } else {
-      LOG.info("MasterPartition with locations: " + res);
-    }
-    return res;
-  }
-
-  @Override
-  public SortedStorePartitionInfo r_noPartition(NetAddress workerAddress, int storeId,
-      int partitionIndex) throws TachyonException, TException {
-    // TODO the logic is wrong. Improve this.
-    MasterPartition partition = mStoresInfo.get(storeId, partitionIndex);
-    partition.removeLocation(workerAddress);
-
-    SortedStorePartitionInfo res = partition.generateSortedStorePartitionInfo();
-    if (!partition.hasLocation()) {
-      int indexFileId = partition.INDEX_FILE_ID;
-      List<ClientBlockInfo> blockInfo;
-      try {
-        blockInfo = MASTER_INFO.getFileLocations(indexFileId);
-      } catch (FileDoesNotExistException e) {
-        throw new TachyonException(e.getMessage());
-      } catch (IOException e) {
-        throw new TachyonException(e.getMessage());
-      }
-      res.setLocation(blockInfo.get(0).locations.get(0));
-      LOG.info("kv_getPartition empty location: " + res);
-    } else {
-      LOG.info("kv_getPartition with locations: " + res);
-    }
-    return res;
   }
 }

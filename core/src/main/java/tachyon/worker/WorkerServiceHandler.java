@@ -16,17 +16,18 @@ package tachyon.worker;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
 import tachyon.Constants;
 import tachyon.TachyonURI;
+import tachyon.extension.ComponentException;
 import tachyon.r.sorted.WorkerStore;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.FailedToCheckpointException;
 import tachyon.thrift.FileDoesNotExistException;
-import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TachyonException;
 import tachyon.thrift.WorkerService;
@@ -43,15 +44,12 @@ public class WorkerServiceHandler implements WorkerService.Iface {
 
   public WorkerServiceHandler(WorkerStorage workerStorage) {
     mWorkerStorage = workerStorage;
-    LOG.info("A");
     try {
       mWorkerStore =
           new WorkerStore(new TachyonURI("tachyon://" + mWorkerStorage.getMasterAddress()));
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       LOG.error(e.getMessage());
     }
-    LOG.info("B");
   }
 
   @Override
@@ -121,12 +119,12 @@ public class WorkerServiceHandler implements WorkerService.Iface {
   }
 
   @Override
-  public ByteBuffer r_get(SortedStorePartitionInfo partitionInfo, ByteBuffer key)
-      throws TachyonException, TException {
+  public List<ByteBuffer> x_process(String clz, List<ByteBuffer> data) throws TachyonException,
+      TException {
+    // TODO make it generic using clz;
     try {
-      return ByteBuffer.wrap(mWorkerStore.get(partitionInfo, CommonUtils.cloneByteBuffer(key)
-          .array()));
-    } catch (IOException e) {
+      return mWorkerStore.process(CommonUtils.cloneByteBufferList(data));
+    } catch (ComponentException e) {
       throw new TachyonException(e.getMessage());
     }
   }
