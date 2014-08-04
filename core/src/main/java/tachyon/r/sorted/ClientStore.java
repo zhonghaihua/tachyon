@@ -1,6 +1,7 @@
 package tachyon.r.sorted;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,12 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.thrift.TDeserializer;
 import org.apache.thrift.TException;
+import org.apache.thrift.TSerializer;
+import org.apache.thrift.protocol.TBinaryProtocol;
+
+import com.google.common.collect.ImmutableList;
 
 import tachyon.TachyonURI;
 import tachyon.r.ClientStoreBase;
+import tachyon.r.sorted.master.MasterOperationType;
 import tachyon.thrift.SortedStorePartitionInfo;
-import tachyon.thrift.TachyonException;
 
 public class ClientStore extends ClientStoreBase {
   public static ClientStore createStore(TachyonURI uri) throws IOException {
@@ -66,14 +72,22 @@ public class ClientStore extends ClientStoreBase {
 
     SortedStorePartitionInfo info = mReadPartitions.get(pIds.get(0));
 
+    TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
+    byte[] bytes = null;
     try {
-      byte[] result = mTachyonFS.r_get(info, key);
-      return result.length == 0 ? null : result;
-    } catch (TachyonException e) {
-      throw new IOException(e);
+      bytes = serializer.serialize(info);
     } catch (TException e) {
       throw new IOException(e);
     }
+
+    InetSocketAddress workerAddress =
+        new InetSocketAddress(info.location.mHost, info.location.mPort);
+    byte[] result =
+        mTachyonFS
+            .workerProcess(workerAddress,
+                ImmutableList.of(WorkerOperationType.GET.toByteBuffer(), ByteBuffer.wrap(bytes)))
+            .get(0).array();
+    return result.length == 0 ? null : result;
   }
 
   @Override
@@ -87,7 +101,22 @@ public class ClientStore extends ClientStoreBase {
       }
     }
     if (res.size() == 0) {
-      SortedStorePartitionInfo info = mTachyonFS.r_getPartition(ID, key);
+      ByteBuffer storeId = ByteBuffer.allocate(4);
+      storeId.putInt(ID);
+      storeId.flip();
+
+      List<ByteBuffer> tmp =
+          mTachyonFS.masterProcess(ImmutableList.of(
+              MasterOperationType.GET_PARTITION.toByteBuffer(), storeId, ByteBuffer.wrap(key)));
+
+      TDeserializer deserializer = new TDeserializer(new TBinaryProtocol.Factory());
+      SortedStorePartitionInfo info = new SortedStorePartitionInfo();
+      try {
+        deserializer.deserialize(info, tmp.get(0).array());
+      } catch (TException e) {
+        throw new IOException(e);
+      }
+
       if (info.partitionIndex != -1) {
         mReadPartitions.put(info.partitionIndex, info);
         res.add(info.partitionIndex);

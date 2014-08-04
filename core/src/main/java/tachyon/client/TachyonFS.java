@@ -53,7 +53,6 @@ import tachyon.thrift.FileDoesNotExistException;
 import tachyon.thrift.InvalidPathException;
 import tachyon.thrift.NetAddress;
 import tachyon.thrift.NoWorkerException;
-import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.TachyonException;
 import tachyon.util.CommonUtils;
 import tachyon.util.NetworkUtils;
@@ -1788,33 +1787,11 @@ public class TachyonFS {
     }
   }
 
-  public synchronized int r_createStore(String path, String storeType) throws IOException {
+  public List<ByteBuffer> masterProcess(List<ByteBuffer> data) throws IOException {
     connect();
     try {
-      return mMasterClient.r_createStore(path, storeType);
+      return mMasterClient.x_process(data);
     } catch (TException e) {
-      mConnected = false;
-      throw new IOException(e);
-    }
-  }
-
-  public synchronized void r_addPartition(SortedStorePartitionInfo pInfo) throws IOException {
-    connect();
-    try {
-      mMasterClient.r_addPartition(pInfo);
-    } catch (TException e) {
-      mConnected = false;
-      throw new IOException(e);
-    }
-  }
-
-  public synchronized SortedStorePartitionInfo r_getPartition(int storeId, byte[] key)
-      throws IOException {
-    connect();
-    try {
-      return mMasterClient.r_getPartition(storeId, key);
-    } catch (TException e) {
-      mConnected = false;
       throw new IOException(e);
     }
   }
@@ -1823,11 +1800,9 @@ public class TachyonFS {
   private Map<InetSocketAddress, WorkerClient> mStoreWorkerClients =
       new HashMap<InetSocketAddress, WorkerClient>();
 
-  public synchronized byte[] r_get(SortedStorePartitionInfo partition, byte[] key)
-      throws TachyonException, TException {
-    InetSocketAddress workerAddress =
-        new InetSocketAddress(partition.location.mHost, partition.location.mPort);
-
+  public List<ByteBuffer> workerProcess(InetSocketAddress workerAddress, List<ByteBuffer> data)
+      throws IOException {
+    connect();
     WorkerClient tWorkerClient = mStoreWorkerClients.get(workerAddress);
     if (tWorkerClient == null) {
       LOG.debug("Connecting to the worker: " + workerAddress);
@@ -1837,7 +1812,12 @@ public class TachyonFS {
     } else {
       LOG.debug("Using cached worker: " + workerAddress);
     }
-    ByteBuffer result = tWorkerClient.r_get(partition, key);
-    return CommonUtils.cloneByteBuffer(result).array();
+    try {
+      return tWorkerClient.x_process(data);
+    } catch (TachyonException e) {
+      throw new IOException(e);
+    } catch (TException e) {
+      throw new IOException(e);
+    }
   }
 }

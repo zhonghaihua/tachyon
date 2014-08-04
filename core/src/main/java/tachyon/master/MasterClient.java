@@ -50,7 +50,6 @@ import tachyon.thrift.InvalidPathException;
 import tachyon.thrift.MasterService;
 import tachyon.thrift.NetAddress;
 import tachyon.thrift.NoWorkerException;
-import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TableColumnException;
 import tachyon.thrift.TableDoesNotExistException;
@@ -883,41 +882,11 @@ public class MasterClient {
     return -1;
   }
 
-  public synchronized int r_createStore(String path, String storeType) throws TException {
+  public List<ByteBuffer> x_process(List<ByteBuffer> data) throws TException, IOException {
     while (!mIsShutdown) {
       connect();
       try {
-        return mClient.r_createStore(path, storeType);
-      } catch (TTransportException e) {
-        LOG.error(e.getMessage());
-        mIsConnected = false;
-      }
-    }
-    return -1;
-  }
-
-  public synchronized boolean r_addPartition(SortedStorePartitionInfo pInfo) throws IOException,
-      TException {
-    while (!mIsShutdown) {
-      connect();
-      try {
-        return mClient.r_addPartition(pInfo);
-      } catch (TachyonException e) {
-        throw new IOException(e);
-      } catch (TException e) {
-        LOG.error(e.getMessage());
-        mIsConnected = false;
-      }
-    }
-    return false;
-  }
-
-  public synchronized SortedStorePartitionInfo r_getPartition(int storeId, byte[] key)
-      throws IOException, TException {
-    while (!mIsShutdown) {
-      connect();
-      try {
-        return mClient.r_getPartition(storeId, ByteBuffer.wrap(key));
+        return CommonUtils.cloneByteBufferList(mClient.x_process("empty", data));
       } catch (TachyonException e) {
         throw new IOException(e);
       } catch (TException e) {

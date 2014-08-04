@@ -17,6 +17,7 @@ package tachyon.worker;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
@@ -32,10 +33,10 @@ import tachyon.conf.UserConf;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.FailedToCheckpointException;
 import tachyon.thrift.FileDoesNotExistException;
-import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.thrift.SuspectedFileSizeException;
 import tachyon.thrift.TachyonException;
 import tachyon.thrift.WorkerService;
+import tachyon.util.CommonUtils;
 
 /**
  * The client talks to a worker server. It keeps sending keep alive message to the worker server.
@@ -282,8 +283,8 @@ public class WorkerClient {
     CLIENT.userHeartbeat(userId);
   }
 
-  public synchronized ByteBuffer r_get(SortedStorePartitionInfo partition, byte[] key)
-      throws TachyonException, TException {
-    return CLIENT.r_get(partition, ByteBuffer.wrap(key));
+  public synchronized List<ByteBuffer> x_process(List<ByteBuffer> data) throws TachyonException,
+      TException {
+    return CommonUtils.cloneByteBufferList(CLIENT.x_process("empty", data));
   }
 }

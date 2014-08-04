@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.thrift.TBase;
+import org.apache.thrift.TException;
+import org.apache.thrift.TSerializer;
+import org.apache.thrift.protocol.TBinaryProtocol;
 
 import com.google.common.collect.Lists;
 
@@ -29,6 +33,15 @@ import com.google.common.collect.Lists;
  * Utilities to do ser/de String, and ByteBuffer
  */
 public class Utils {
+  public static byte[] thriftToByteArry(TBase data) throws IOException {
+    TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
+    try {
+      return serializer.serialize(data);
+    } catch (TException e) {
+      throw new IOException(e);
+    }
+  }
+
   /**
    * Converts a list of byte buffers to a list of base64-encoded Strings.
    */

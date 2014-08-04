@@ -2,16 +2,21 @@ package tachyon.r.sorted;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.thrift.TSerializer;
+import org.apache.thrift.protocol.TBinaryProtocol;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 
 import tachyon.Constants;
 import tachyon.client.OutStream;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.client.WriteType;
+import tachyon.r.sorted.master.MasterOperationType;
 import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.util.CommonUtils;
 
@@ -28,7 +33,7 @@ public class ClientPartition {
   }
 
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
-  private final TachyonFS TFS;
+  private final TachyonFS TachyonFS;
   private final int STORE_ID;
   private final String STORE_PATH;
   private final int INDEX;
@@ -56,7 +61,7 @@ public class ClientPartition {
 
   ClientPartition(TachyonFS tfs, int storeId, String storePath, int index, boolean create)
       throws IOException {
-    TFS = tfs;
+    TachyonFS = tfs;
     STORE_ID = storeId;
     STORE_PATH = storePath;
     INDEX = index;
@@ -70,20 +75,20 @@ public class ClientPartition {
     LOG.info("Creating KV partition: " + toString());
 
     if (create) {
-      mDataFileId = TFS.createFile(mDataFilePath, Constants.GB);
-      mDataFile = TFS.getFile(mDataFileId);
+      mDataFileId = TachyonFS.createFile(mDataFilePath, Constants.GB);
+      mDataFile = TachyonFS.getFile(mDataFileId);
       mDataFileOutStream = mDataFile.getOutStream(WriteType.CACHE_THROUGH);
 
-      mIndexFileId = TFS.createFile(mIndexFilePath, Constants.GB);
-      mIndexFile = TFS.getFile(mIndexFileId);
+      mIndexFileId = TachyonFS.createFile(mIndexFilePath, Constants.GB);
+      mIndexFile = TachyonFS.getFile(mIndexFileId);
       mIndexFileOutStream = mIndexFile.getOutStream(WriteType.CACHE_THROUGH);
 
       if (mDataFileId == -1 || mIndexFileId == -1) {
         throw new IOException("Failed to create data file or index file, or both.");
       }
     } else {
-      mDataFile = TFS.getFile(mDataFilePath);
-      mIndexFile = TFS.getFile(mIndexFilePath);
+      mDataFile = TachyonFS.getFile(mDataFilePath);
+      mIndexFile = TachyonFS.getFile(mIndexFilePath);
     }
 
     mDataFileLocation = 0;
@@ -107,9 +112,17 @@ public class ClientPartition {
       info.setStartKey(mStartKey.array());
       info.setEndKey(mEndKey.array());
       try {
-        TFS.r_addPartition(info);
+        TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
+        byte[] bytes = serializer.serialize(info);
+        List<ByteBuffer> res =
+            TachyonFS.masterProcess(ImmutableList.of(
+                MasterOperationType.ADD_PARTITION.toByteBuffer(), ByteBuffer.wrap(bytes)));
+
+        if (res.size() != 1 || res.get(0).array()[0] == 0) {
+          throw new IOException("Failed to add partition.");
+        }
       } catch (Exception e) {
-        LOG.error(e);
+        throw new IOException(e);
       }
       LOG.info("closing: " + info);
     }
