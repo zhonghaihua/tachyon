@@ -25,7 +25,7 @@ public abstract class ClientStoreBase extends StoreBase implements ShardBase {
       List<ByteBuffer> res =
           mTachyonFS.masterProcess(ImmutableList.of(
               MasterOperationType.CREATE_STORE.toByteBuffer(),
-              ByteBuffer.wrap(uri.getPath().getBytes()), ByteBuffer.wrap(storeType.getBytes())));
+              ByteBuffer.wrap(uri.getPath().getBytes())));
 
       ID = res.get(0).getInt();
     } else {

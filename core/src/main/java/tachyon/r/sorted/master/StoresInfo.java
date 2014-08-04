@@ -147,14 +147,15 @@ public class StoresInfo extends MasterComponent {
     try {
       switch (opType) {
       case CREATE_STORE: {
-        checkLength(data, 2);
+        checkLength(data, 2, opType);
         int storeId = createStore(new String(data.get(1).array()));
         ByteBuffer buf = ByteBuffer.allocate(4);
         buf.putInt(storeId);
+        buf.flip();
         return ImmutableList.of(buf);
       }
       case ADD_PARTITION: {
-        checkLength(data, 2);
+        checkLength(data, 2, opType);
 
         TDeserializer deserializer = new TDeserializer(new TBinaryProtocol.Factory());
         SortedStorePartitionInfo info = new SortedStorePartitionInfo();
@@ -163,10 +164,11 @@ public class StoresInfo extends MasterComponent {
         boolean res = addPartition(info);
         ByteBuffer buf = ByteBuffer.allocate(1);
         buf.put((byte) (res ? 1 : 0));
+        buf.flip();
         return ImmutableList.of(buf);
       }
       case GET_PARTITION: {
-        checkLength(data, 3);
+        checkLength(data, 3, opType);
 
         int storeId = data.get(1).getInt();
         SortedStorePartitionInfo info = getPartition(storeId, data.get(2));
@@ -193,10 +195,11 @@ public class StoresInfo extends MasterComponent {
     throw new ComponentException("Unprocessed MasterOperationType " + opType);
   }
 
-  private void checkLength(List<ByteBuffer> data, int length) throws ComponentException {
+  private void checkLength(List<ByteBuffer> data, int length, MasterOperationType opType)
+      throws ComponentException {
     if (data.size() != length) {
-      throw new ComponentException("Corrupted data, wrong data length " + data.size()
-          + " . Right length is " + length);
+      throw new ComponentException("Corrupted " + opType + " data, wrong data length "
+          + data.size() + " . Right length is " + length);
     }
   }
 

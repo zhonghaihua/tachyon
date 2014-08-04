@@ -1803,17 +1803,17 @@ public class TachyonFS {
   public List<ByteBuffer> workerProcess(InetSocketAddress workerAddress, List<ByteBuffer> data)
       throws IOException {
     connect();
-    WorkerClient tWorkerClient = mStoreWorkerClients.get(workerAddress);
-    if (tWorkerClient == null) {
+    WorkerClient workerClient = mStoreWorkerClients.get(workerAddress);
+    if (workerClient == null) {
       LOG.debug("Connecting to the worker: " + workerAddress);
-      tWorkerClient = new WorkerClient(workerAddress, 1000);
-      tWorkerClient.open();
-      mStoreWorkerClients.put(workerAddress, tWorkerClient);
+      workerClient = new WorkerClient(workerAddress, 1000);
+      workerClient.open();
+      mStoreWorkerClients.put(workerAddress, workerClient);
     } else {
       LOG.debug("Using cached worker: " + workerAddress);
     }
     try {
-      return tWorkerClient.x_process(data);
+      return workerClient.x_process(data);
     } catch (TachyonException e) {
       throw new IOException(e);
     } catch (TException e) {

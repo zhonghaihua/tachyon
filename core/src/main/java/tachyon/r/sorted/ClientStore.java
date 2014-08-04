@@ -84,9 +84,10 @@ public class ClientStore extends ClientStoreBase {
         new InetSocketAddress(info.location.mHost, info.location.mPort);
     byte[] result =
         mTachyonFS
-            .workerProcess(workerAddress,
-                ImmutableList.of(WorkerOperationType.GET.toByteBuffer(), ByteBuffer.wrap(bytes)))
-            .get(0).array();
+            .workerProcess(
+                workerAddress,
+                ImmutableList.of(WorkerOperationType.GET.toByteBuffer(), ByteBuffer.wrap(bytes),
+                    ByteBuffer.wrap(key))).get(0).array();
     return result.length == 0 ? null : result;
   }
 
