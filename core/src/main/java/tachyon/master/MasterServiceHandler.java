@@ -33,7 +33,7 @@ import tachyon.UnderFileSystem;
 import tachyon.conf.CommonConf;
 import tachyon.extension.ComponentException;
 import tachyon.extension.MasterComponent;
-import tachyon.r.sorted.master.StoresInfo;
+import tachyon.r.sorted.MasterStores;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.ClientBlockInfo;
 import tachyon.thrift.ClientDependencyInfo;
@@ -64,14 +64,14 @@ public class MasterServiceHandler implements MasterService.Iface {
 
   private final MasterInfo MASTER_INFO;
 
-  private final StoresInfo mStoresInfo;
+  private final MasterStores mStoresInfo;
 
   private final Map<String, MasterComponent> COMPONENTS = Collections
       .synchronizedMap(new HashMap<String, MasterComponent>());
 
   public MasterServiceHandler(MasterInfo masterInfo) {
     MASTER_INFO = masterInfo;
-    mStoresInfo = new StoresInfo(MASTER_INFO);
+    mStoresInfo = new MasterStores(MASTER_INFO);
   }
 
   @Override

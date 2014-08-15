@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableList;
 
 import tachyon.TachyonURI;
 import tachyon.client.TachyonFS;
-import tachyon.r.sorted.master.MasterOperationType;
+import tachyon.r.sorted.MasterOperationType;
 
 public abstract class ClientStoreBase extends StoreBase implements ShardBase {
   // TODO Use TachyonFS for now, create a new handler in the future.

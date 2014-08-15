@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableList;
 
 import tachyon.TachyonURI;
 import tachyon.r.ClientStoreBase;
-import tachyon.r.sorted.master.MasterOperationType;
 import tachyon.thrift.SortedStorePartitionInfo;
 
 public class ClientStore extends ClientStoreBase {

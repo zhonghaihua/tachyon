@@ -1,4 +1,4 @@
-package tachyon.r.sorted.master;
+package tachyon.r.sorted;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;

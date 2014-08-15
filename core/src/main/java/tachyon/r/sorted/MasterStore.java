@@ -1,4 +1,4 @@
-package tachyon.r.sorted.master;
+package tachyon.r.sorted;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,19 +8,18 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import tachyon.Constants;
-import tachyon.r.sorted.Utils;
 
 /**
  * Metadata of a key/value store in the master.
  */
-public class StoreInfo {
+public class MasterStore {
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
 
   public final int INODE_ID;
 
   private List<MasterPartition> mPartitions = new ArrayList<MasterPartition>();
 
-  public StoreInfo(int inodeId) {
+  public MasterStore(int inodeId) {
     INODE_ID = inodeId;
   }
 

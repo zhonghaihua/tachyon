@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tachyon.r.sorted.master;
+package tachyon.r.sorted;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

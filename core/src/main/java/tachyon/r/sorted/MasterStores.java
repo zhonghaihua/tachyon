@@ -1,4 +1,4 @@
-package tachyon.r.sorted.master;
+package tachyon.r.sorted;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,12 +29,12 @@ import tachyon.thrift.TachyonException;
 /**
  * All key/value stores information in the master component;
  */
-public class StoresInfo extends MasterComponent {
+public class MasterStores extends MasterComponent {
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
 
-  private Map<Integer, StoreInfo> mStores = new HashMap<Integer, StoreInfo>();
+  private Map<Integer, MasterStore> mStores = new HashMap<Integer, MasterStore>();
 
-  public StoresInfo(MasterInfo masterInfo) {
+  public MasterStores(MasterInfo masterInfo) {
     super(masterInfo);
   }
 
@@ -44,7 +44,7 @@ public class StoresInfo extends MasterComponent {
       return -1;
     }
     int storeId = MASTER_INFO.getFileId(path);
-    StoreInfo info = new StoreInfo(storeId);
+    MasterStore info = new MasterStore(storeId);
 
     if (mStores.containsKey(info.INODE_ID)) {
       throw new FileAlreadyExistException("The store already exists: " + info);

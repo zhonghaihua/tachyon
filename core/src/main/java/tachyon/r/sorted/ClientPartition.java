@@ -16,7 +16,6 @@ import tachyon.client.OutStream;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.client.WriteType;
-import tachyon.r.sorted.master.MasterOperationType;
 import tachyon.thrift.SortedStorePartitionInfo;
 import tachyon.util.CommonUtils;
 
