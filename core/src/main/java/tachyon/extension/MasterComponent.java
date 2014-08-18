@@ -9,7 +9,7 @@ import tachyon.thrift.NetAddress;
 /**
  * Extended components running in Tachyon Master
  */
-public abstract class MasterComponent {
+public abstract class MasterComponent extends ComponentUtils {
   protected final MasterInfo MASTER_INFO;
 
   public MasterComponent(MasterInfo masterInfo) {

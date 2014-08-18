@@ -19,10 +19,9 @@ import tachyon.extension.ComponentException;
 import tachyon.extension.WorkerComponent;
 import tachyon.thrift.SortedStorePartitionInfo;
 
-public class WorkerStore extends WorkerComponent {
-  private final TachyonURI URI;
-
+public class SortedKVWorkerStore extends WorkerComponent {
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private final TachyonURI URI;
 
   // TODO Using TachyonFS is a trick for now.
   private TachyonFS mTFS;
@@ -30,14 +29,14 @@ public class WorkerStore extends WorkerComponent {
   // Mapping: <storeId, <partitionIndex, Partition>>
   private HashMap<Integer, HashMap<Integer, WorkerPartition>> mData;
 
-  public WorkerStore(TachyonURI uri) throws IOException {
+  public SortedKVWorkerStore(TachyonURI uri) throws IOException {
     URI = uri;
     LOG.info(URI.toString());
     mTFS = TachyonFS.get(URI.toString());
     mData = new HashMap<Integer, HashMap<Integer, WorkerPartition>>();
   }
 
-  public byte[] get(SortedStorePartitionInfo info, byte[] key) throws IOException {
+  private byte[] get(SortedStorePartitionInfo info, byte[] key) throws IOException {
     if (!mData.containsKey(info.getStoreId())) {
       mData.put(info.getStoreId(), new HashMap<Integer, WorkerPartition>());
     }
@@ -52,9 +51,7 @@ public class WorkerStore extends WorkerComponent {
 
   @Override
   public List<ByteBuffer> process(List<ByteBuffer> data) throws ComponentException {
-    if (data.size() < 1) {
-      throw new ComponentException("Data List is empty");
-    }
+    minLengthCheck(data);
 
     WorkerOperationType opType = null;
     try {
@@ -66,7 +63,7 @@ public class WorkerStore extends WorkerComponent {
     try {
       switch (opType) {
       case GET: {
-        checkLength(data, 3);
+        lengthCheck(data, 3, opType.toString());
 
         TDeserializer deserializer = new TDeserializer(new TBinaryProtocol.Factory());
         SortedStorePartitionInfo info = new SortedStorePartitionInfo();
@@ -76,18 +73,13 @@ public class WorkerStore extends WorkerComponent {
       }
       }
     } catch (TException e) {
+      LOG.error(e.getMessage(), e);
       throw new ComponentException(e);
     } catch (IOException e) {
+      LOG.error(e.getMessage(), e);
       throw new ComponentException(e);
     }
 
-    throw new ComponentException("Unprocessed MasterOperationType " + opType);
-  }
-
-  private void checkLength(List<ByteBuffer> data, int length) throws ComponentException {
-    if (data.size() != length) {
-      throw new ComponentException("Corrupted data, wrong data length " + data.size()
-          + " . Right length is " + length);
-    }
+    throw new ComponentException("Unprocessed WorkerOperationType " + opType);
   }
 }

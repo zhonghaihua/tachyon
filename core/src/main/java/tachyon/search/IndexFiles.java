@@ -62,6 +62,10 @@ public class IndexFiles {
       System.exit(1);
     }
 
+    index(indexPath, docsPath, create);
+  }
+
+  private static void index(String indexPath, String docsPath, boolean create) {
     final File docDir = new File(docsPath);
     if (!docDir.exists() || !docDir.canRead()) {
       System.out.println("Document directory '" + docDir.getAbsolutePath()

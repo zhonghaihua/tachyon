@@ -132,6 +132,12 @@ struct SortedStorePartitionInfo {
   8: NetAddress location // Assume only one location for now. Add multiple locations in the future.
 }
 
+struct SearchStorePartitionInfo {
+  1: i32 storeId
+  2: i32 shareIndex
+  3: NetAddress location // Assume only one location for now. Add multiple locations in the future.
+}
+
 service MasterService {
   bool addCheckpoint(1: i64 workerId, 2: i32 fileId, 3: i64 length, 4: string checkpointPath)
     throws (1: FileDoesNotExistException eP, 2: SuspectedFileSizeException eS,

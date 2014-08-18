@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -22,62 +24,31 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-/** Simple command-line based search demo. */
-public class SearchFiles {
+import tachyon.Constants;
+import tachyon.client.TachyonFS;
+import tachyon.thrift.SearchStorePartitionInfo;
 
-  private SearchFiles() {
+public class WorkerShard {
+  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private TachyonFS mTFS;
+  private SearchStorePartitionInfo mInfo;
+  private long mLastAccessTimeMs = System.currentTimeMillis();
+
+  public WorkerShard(TachyonFS tfs, SearchStorePartitionInfo shardInfo) {
+    mTFS = tfs;
+    // mInfo = new SearchStorePartitionInfo(shardInfo);
   }
 
-  /** Simple command-line based search demo. */
-  public static void main(String[] args) throws Exception {
-    String usage =
-        "Usage:\tjava org.apache.lucene.demo.SearchFiles [-index dir] [-field f] [-repeat n] [-queries file] [-query string] [-raw] [-paging hitsPerPage]\n\nSee http://lucene.apache.org/core/4_1_0/demo/ for details.";
-    if (args.length > 0 && ("-h".equals(args[0]) || "-help".equals(args[0]))) {
-      System.out.println(usage);
-      System.exit(0);
-    }
-
-    String index = "index";
-    String field = "contents";
-    String queries = null;
-    int repeat = 0;
-    boolean raw = false;
-    String queryString = null;
-    int hitsPerPage = 10;
-
-    for (int i = 0; i < args.length; i ++) {
-      if ("-index".equals(args[i])) {
-        index = args[i + 1];
-        i ++;
-      } else if ("-field".equals(args[i])) {
-        field = args[i + 1];
-        i ++;
-      } else if ("-queries".equals(args[i])) {
-        queries = args[i + 1];
-        i ++;
-      } else if ("-query".equals(args[i])) {
-        queryString = args[i + 1];
-        i ++;
-      } else if ("-repeat".equals(args[i])) {
-        repeat = Integer.parseInt(args[i + 1]);
-        i ++;
-      } else if ("-raw".equals(args[i])) {
-        raw = true;
-      } else if ("-paging".equals(args[i])) {
-        hitsPerPage = Integer.parseInt(args[i + 1]);
-        if (hitsPerPage <= 0) {
-          System.err.println("There must be at least 1 hit per page.");
-          System.exit(1);
-        }
-        i ++;
-      }
-    }
-
-    search(index, field, queries, queryString, repeat, raw, hitsPerPage);
+  public synchronized byte[] query(byte[] key) throws UnsupportedEncodingException, IOException,
+      ParseException {
+    return search("/tmp/tmpIndex", "contents", null, new String(key, "UTF-8"), 0, false, 10)
+        .getBytes();
   }
 
-  private static void search(String index, String field, String queries, String queryString,
+  private String search(String index, String field, String queries, String queryString,
       int repeat, boolean raw, int hitsPerPage) throws IOException, ParseException {
+    StringBuilder sb = new StringBuilder();
+
     IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(index)));
     IndexSearcher searcher = new IndexSearcher(reader);
     // :Post-Release-Update-Version.LUCENE_XY:
@@ -95,7 +66,7 @@ public class SearchFiles {
     QueryParser parser = new QueryParser(Version.LUCENE_4_9, field, analyzer);
     while (true) {
       if (queries == null && queryString == null) {                        // prompt the user
-        System.out.println("Enter query: ");
+        sb.append("Enter query:\n");
       }
 
       String line = queryString != null ? queryString : in.readLine();
@@ -110,7 +81,7 @@ public class SearchFiles {
       }
 
       Query query = parser.parse(line);
-      System.out.println("Searching for: " + query.toString(field));
+      sb.append("Searching for: " + query.toString(field)).append("\n");
 
       if (repeat > 0) {                           // repeat & time as benchmark
         Date start = new Date();
@@ -118,10 +89,11 @@ public class SearchFiles {
           searcher.search(query, null, 100);
         }
         Date end = new Date();
-        System.out.println("Time: " + (end.getTime() - start.getTime()) + "ms");
+        sb.append("Time: " + (end.getTime() - start.getTime()) + "ms\n");
       }
 
-      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+      sb.append(doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null
+          && queryString == null));
 
       if (queryString != null) {
         break;
@@ -129,6 +101,7 @@ public class SearchFiles {
     }
     reader.close();
 
+    return sb.toString();
   }
 
   /**
@@ -140,28 +113,24 @@ public class SearchFiles {
    * to fill 5 result pages. If the user wants to page beyond this limit, then the query
    * is executed another time and all hits are collected.
    */
-  public static void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query,
+  private String doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query,
       int hitsPerPage, boolean raw, boolean interactive) throws IOException {
+    StringBuilder sb = new StringBuilder();
 
     // Collect enough docs to show 5 pages
     TopDocs results = searcher.search(query, 5 * hitsPerPage);
     ScoreDoc[] hits = results.scoreDocs;
 
     int numTotalHits = results.totalHits;
-    System.out.println(numTotalHits + " total matching documents");
+    sb.append(numTotalHits + " total matching documents\n");
 
     int start = 0;
     int end = Math.min(numTotalHits, hitsPerPage);
 
     while (true) {
       if (end > hits.length) {
-        System.out.println("Only results 1 - " + hits.length + " of " + numTotalHits
-            + " total matching documents collected.");
-        System.out.println("Collect more (y/n) ?");
-        String line = in.readLine();
-        if (line.length() == 0 || line.charAt(0) == 'n') {
-          break;
-        }
+        sb.append("Only results 1 - " + hits.length + " of " + numTotalHits
+            + " total matching documents collected.\n");
 
         hits = searcher.search(query, numTotalHits).scoreDocs;
       }
@@ -170,20 +139,20 @@ public class SearchFiles {
 
       for (int i = start; i < end; i ++) {
         if (raw) {                              // output raw format
-          System.out.println("doc=" + hits[i].doc + " score=" + hits[i].score);
+          sb.append("doc=" + hits[i].doc + " score=" + hits[i].score + "\n");
           continue;
         }
 
         Document doc = searcher.doc(hits[i].doc);
         String path = doc.get("path");
         if (path != null) {
-          System.out.println((i + 1) + ". " + path);
+          sb.append((i + 1) + ". " + path + "\n");
           String title = doc.get("title");
           if (title != null) {
-            System.out.println("   Title: " + doc.get("title"));
+            sb.append("   Title: " + doc.get("title") + "\n");
           }
         } else {
-          System.out.println((i + 1) + ". " + "No path for this document");
+          sb.append((i + 1) + ". " + "No path for this document\n");
         }
 
       }
@@ -195,14 +164,14 @@ public class SearchFiles {
       if (numTotalHits >= end) {
         boolean quit = false;
         while (true) {
-          System.out.print("Press ");
+          sb.append("Press ");
           if (start - hitsPerPage >= 0) {
-            System.out.print("(p)revious page, ");
+            sb.append("(p)revious page, ");
           }
           if (start + hitsPerPage < numTotalHits) {
-            System.out.print("(n)ext page, ");
+            sb.append("(n)ext page, ");
           }
-          System.out.println("(q)uit or enter number to jump to a page.");
+          sb.append("(q)uit or enter number to jump to a page.\n");
 
           String line = in.readLine();
           if (line.length() == 0 || line.charAt(0) == 'q') {
@@ -223,7 +192,7 @@ public class SearchFiles {
               start = (page - 1) * hitsPerPage;
               break;
             } else {
-              System.out.println("No such page");
+              sb.append("No such page\n");
             }
           }
         }
@@ -232,5 +201,6 @@ public class SearchFiles {
         end = Math.min(numTotalHits, start + hitsPerPage);
       }
     }
+    return sb.toString();
   }
 }

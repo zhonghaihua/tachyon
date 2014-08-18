@@ -24,7 +24,8 @@ import org.apache.thrift.TException;
 import tachyon.Constants;
 import tachyon.TachyonURI;
 import tachyon.extension.ComponentException;
-import tachyon.r.sorted.WorkerStore;
+import tachyon.r.sorted.SortedKVWorkerStore;
+import tachyon.search.SearchWorker;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.FailedToCheckpointException;
 import tachyon.thrift.FileDoesNotExistException;
@@ -40,13 +41,16 @@ public class WorkerServiceHandler implements WorkerService.Iface {
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
   private WorkerStorage mWorkerStorage;
 
-  private WorkerStore mWorkerStore;
+  private SortedKVWorkerStore mSortedKVWorkerStore;
+  private SearchWorker mSearchWorker;
 
   public WorkerServiceHandler(WorkerStorage workerStorage) {
     mWorkerStorage = workerStorage;
     try {
-      mWorkerStore =
-          new WorkerStore(new TachyonURI("tachyon://" + mWorkerStorage.getMasterAddress()));
+      mSortedKVWorkerStore =
+          new SortedKVWorkerStore(new TachyonURI("tachyon://" + mWorkerStorage.getMasterAddress()));
+      mSearchWorker =
+          new SearchWorker(new TachyonURI("tachyon://" + mWorkerStorage.getMasterAddress()));
     } catch (IOException e) {
       LOG.error(e.getMessage());
     }
@@ -123,7 +127,8 @@ public class WorkerServiceHandler implements WorkerService.Iface {
       TException {
     // TODO make it generic using clz;
     try {
-      return mWorkerStore.process(CommonUtils.cloneByteBufferList(data));
+      // return mSortedKVWorkerStore.process(CommonUtils.cloneByteBufferList(data));
+      return mSearchWorker.process(CommonUtils.cloneByteBufferList(data));
     } catch (ComponentException e) {
       throw new TachyonException(e.getMessage());
     }

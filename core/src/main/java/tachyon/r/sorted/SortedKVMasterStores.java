@@ -29,12 +29,12 @@ import tachyon.thrift.TachyonException;
 /**
  * All key/value stores information in the master component;
  */
-public class MasterStores extends MasterComponent {
+public class SortedKVMasterStores extends MasterComponent {
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
 
   private Map<Integer, MasterStore> mStores = new HashMap<Integer, MasterStore>();
 
-  public MasterStores(MasterInfo masterInfo) {
+  public SortedKVMasterStores(MasterInfo masterInfo) {
     super(masterInfo);
   }
 
@@ -133,9 +133,7 @@ public class MasterStores extends MasterComponent {
 
   @Override
   public List<ByteBuffer> process(List<ByteBuffer> data) throws ComponentException {
-    if (data.size() < 1) {
-      throw new ComponentException("Data List is empty");
-    }
+    minLengthCheck(data);
 
     MasterOperationType opType = null;
     try {
@@ -147,7 +145,7 @@ public class MasterStores extends MasterComponent {
     try {
       switch (opType) {
       case CREATE_STORE: {
-        checkLength(data, 2, opType);
+        lengthCheck(data, 2, opType.toString());
         int storeId = createStore(new String(data.get(1).array()));
         ByteBuffer buf = ByteBuffer.allocate(4);
         buf.putInt(storeId);
@@ -155,7 +153,7 @@ public class MasterStores extends MasterComponent {
         return ImmutableList.of(buf);
       }
       case ADD_PARTITION: {
-        checkLength(data, 2, opType);
+        lengthCheck(data, 2, opType.toString());
 
         TDeserializer deserializer = new TDeserializer(new TBinaryProtocol.Factory());
         SortedStorePartitionInfo info = new SortedStorePartitionInfo();
@@ -168,7 +166,7 @@ public class MasterStores extends MasterComponent {
         return ImmutableList.of(buf);
       }
       case GET_PARTITION: {
-        checkLength(data, 3, opType);
+        lengthCheck(data, 3, opType.toString());
 
         int storeId = data.get(1).getInt();
         SortedStorePartitionInfo info = getPartition(storeId, data.get(2));
@@ -193,14 +191,6 @@ public class MasterStores extends MasterComponent {
     }
 
     throw new ComponentException("Unprocessed MasterOperationType " + opType);
-  }
-
-  private void checkLength(List<ByteBuffer> data, int length, MasterOperationType opType)
-      throws ComponentException {
-    if (data.size() != length) {
-      throw new ComponentException("Corrupted " + opType + " data, wrong data length "
-          + data.size() + " . Right length is " + length);
-    }
   }
 
   @Override

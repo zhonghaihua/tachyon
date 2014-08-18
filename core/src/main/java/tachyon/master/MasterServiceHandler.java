@@ -33,7 +33,8 @@ import tachyon.UnderFileSystem;
 import tachyon.conf.CommonConf;
 import tachyon.extension.ComponentException;
 import tachyon.extension.MasterComponent;
-import tachyon.r.sorted.MasterStores;
+import tachyon.r.sorted.SortedKVMasterStores;
+import tachyon.search.SearchMasterStores;
 import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.ClientBlockInfo;
 import tachyon.thrift.ClientDependencyInfo;
@@ -64,14 +65,16 @@ public class MasterServiceHandler implements MasterService.Iface {
 
   private final MasterInfo MASTER_INFO;
 
-  private final MasterStores mStoresInfo;
+  private final SortedKVMasterStores SORTED_KV_STORES;
+  private final SearchMasterStores SEARCH_MASTER_STORES;
 
   private final Map<String, MasterComponent> COMPONENTS = Collections
       .synchronizedMap(new HashMap<String, MasterComponent>());
 
   public MasterServiceHandler(MasterInfo masterInfo) {
     MASTER_INFO = masterInfo;
-    mStoresInfo = new MasterStores(MASTER_INFO);
+    SORTED_KV_STORES = new SortedKVMasterStores(MASTER_INFO);
+    SEARCH_MASTER_STORES = new SearchMasterStores(MASTER_INFO);
   }
 
   @Override
@@ -376,7 +379,8 @@ public class MasterServiceHandler implements MasterService.Iface {
       // TODO use reflection to create the method
     }
 
-    return mStoresInfo;
+    // return SORTED_KV_STORES;
+    return SEARCH_MASTER_STORES;
   }
 
   @Override

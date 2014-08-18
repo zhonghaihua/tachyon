@@ -8,7 +8,7 @@ public class Example {
   public static void createAndFillTheStore(TachyonURI uri) throws IOException {
     SearchStore store = new SearchStore(uri, true);
 
-    store.addDocument(new TachyonURI("tachyon://localhost:19998/LICENSE"));
+    store.addDocument(new TachyonURI("/home/haoyuan/Tachyon/tachyon/core/src"));
   }
 
   public static void getResults(TachyonURI uri) throws IOException {
@@ -18,7 +18,7 @@ public class Example {
   }
 
   public static void main(String[] args) throws IOException {
-    TachyonURI uri = new TachyonURI("tachyon://localhost:19998/kv3");
+    TachyonURI uri = new TachyonURI("tachyon://localhost:19998/searchStore");
     createAndFillTheStore(uri);
     getResults(uri);
   }
