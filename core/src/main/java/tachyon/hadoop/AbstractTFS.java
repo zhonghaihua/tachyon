@@ -42,7 +42,7 @@ import tachyon.thrift.ClientDependencyInfo;
 import tachyon.thrift.ClientFileInfo;
 import tachyon.thrift.NetAddress;
 import tachyon.util.CommonUtils;
-import tachyon.util.UnderfsUtils;
+import tachyon.util.UfsUtils;
 
 /**
  * Base class for Apache Hadoop based Tachyon {@link FileSystem}. This class really just delegates
@@ -56,6 +56,8 @@ abstract class AbstractTFS extends FileSystem {
   public static final String RECOMPUTE_PATH = "tachyon_recompute/";
 
   public static String UNDERFS_ADDRESS;
+
+  public static boolean USE_HDFS = true;
 
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
 
@@ -164,6 +166,40 @@ abstract class AbstractTFS extends FileSystem {
     }
   }
 
+  /**
+   * TODO: We need to refactor this method after having a new internal API support (TACHYON-46).
+   * <p>
+   * Opens an FSDataOutputStream at the indicated Path with write-progress reporting. Same as
+   * create(), except fails if parent directory doesn't already exist.
+   * 
+   * @param cPath
+   *          the file name to open
+   * @param overwrite
+   *          if a file with this name already exists, then if true,
+   *          the file will be overwritten, and if false an error will be thrown.
+   * @param bufferSize
+   *          the size of the buffer to be used.
+   * @param replication
+   *          required block replication for the file.
+   * @param blockSize
+   * @param progress
+   * @throws IOException
+   * @see #setPermission(Path, FsPermission)
+   * @deprecated API only for 0.20-append
+   */
+  @Override
+  @Deprecated
+  public FSDataOutputStream createNonRecursive(Path cPath, FsPermission permission,
+      boolean overwrite, int bufferSize, short replication, long blockSize, Progressable progress)
+      throws IOException {
+    String tPath = Utils.getPathWithoutScheme(cPath.getParent());
+    fromHdfsToTachyon(tPath);
+    if (!mTFS.exist(tPath)) {
+      throw new FileNotFoundException("Parent directory does not exist!");
+    }
+    return this.create(cPath, permission, overwrite, bufferSize, replication, blockSize, progress);
+  }
+
   @Override
   @Deprecated
   public boolean delete(Path path) throws IOException {
@@ -185,7 +221,7 @@ abstract class AbstractTFS extends FileSystem {
       if (fs.exists(hdfsPath)) {
         String ufsAddrPath = CommonUtils.concat(UNDERFS_ADDRESS, path);
         // Set the path as the TFS root path.
-        UnderfsUtils.loadUnderFs(mTFS, path, ufsAddrPath, new PrefixList(null));
+        UfsUtils.loadUnderFs(mTFS, path, ufsAddrPath, new PrefixList(null));
       }
     }
   }
@@ -240,8 +276,9 @@ abstract class AbstractTFS extends FileSystem {
 
     LOG.info("getFileStatus(" + path + "): HDFS Path: " + hdfsPath + " TPath: " + mTachyonHeader
         + tPath);
-
-    fromHdfsToTachyon(tPath);
+    if (USE_HDFS) {
+      fromHdfsToTachyon(tPath);
+    }
     TachyonFile file = mTFS.getFile(tPath);
     if (file == null) {
       LOG.info("File does not exist: " + path);
@@ -275,6 +312,16 @@ abstract class AbstractTFS extends FileSystem {
     return mWorkingDir;
   }
 
+  @Override
+  public void setWorkingDirectory(Path path) {
+    LOG.info("setWorkingDirectory(" + path + ")");
+    if (path.isAbsolute()) {
+      mWorkingDir = path;
+    } else {
+      mWorkingDir = new Path(mWorkingDir, path);
+    }
+  }
+
   /**
    * Initialize the class, have a lazy connection with Tachyon through mTFS.
    */
@@ -287,7 +334,9 @@ abstract class AbstractTFS extends FileSystem {
     mTachyonHeader = getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
     mTFS = TachyonFS.get(uri.getHost(), uri.getPort(), isZookeeperMode());
     mUri = URI.create(mTachyonHeader);
-    UNDERFS_ADDRESS = mTFS.getUnderfsAddress();
+    if (UNDERFS_ADDRESS == null || URI.create(UNDERFS_ADDRESS).getScheme() == null) {
+      USE_HDFS = false;
+    }
     LOG.info(mTachyonHeader + " " + mUri + " " + UNDERFS_ADDRESS);
   }
 
@@ -340,16 +389,6 @@ abstract class AbstractTFS extends FileSystem {
     String hDst = Utils.getPathWithoutScheme(dst);
     fromHdfsToTachyon(hSrc);
     return mTFS.rename(hSrc, hDst);
-  }
-
-  @Override
-  public void setWorkingDirectory(Path path) {
-    LOG.info("setWorkingDirectory(" + path + ")");
-    if (path.isAbsolute()) {
-      mWorkingDir = path;
-    } else {
-      mWorkingDir = new Path(mWorkingDir, path);
-    }
   }
 
   /**

@@ -296,7 +296,7 @@ service MasterService {
   i32 user_getNumberOfFiles(1:string path)
     throws (1: FileDoesNotExistException eR, 2: InvalidPathException eI)
 
-  string user_getUnderfsAddress()
+  string user_getUfsAddress()
 
   // Services for X Framework
   list<binary> x_process(1: string clz, 2: list<binary> data)
@@ -324,7 +324,7 @@ service WorkerService {
 
   string getUserTempFolder(1: i64 userId)
 
-  string getUserUnderfsTempFolder(1: i64 userId)
+  string getUserUfsTempFolder(1: i64 userId)
 
   void lockBlock(1: i64 blockId, 2: i64 userId) // Lock the file in memory while the user is reading it.
 

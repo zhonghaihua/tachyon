@@ -64,7 +64,11 @@ public class WorkerServiceHandler implements WorkerService.Iface {
   @Override
   public void addCheckpoint(long userId, int fileId) throws FileDoesNotExistException,
       SuspectedFileSizeException, FailedToCheckpointException, BlockInfoException, TException {
-    mWorkerStorage.addCheckpoint(userId, fileId);
+    try {
+      mWorkerStorage.addCheckpoint(userId, fileId);
+    } catch (IOException e) {
+      throw new TException(e);
+    }
   }
 
   @Override
@@ -79,7 +83,11 @@ public class WorkerServiceHandler implements WorkerService.Iface {
   @Override
   public void cacheBlock(long userId, long blockId) throws FileDoesNotExistException,
       SuspectedFileSizeException, BlockInfoException, TException {
-    mWorkerStorage.cacheBlock(userId, blockId);
+    try {
+      mWorkerStorage.cacheBlock(userId, blockId);
+    } catch (IOException e) {
+      throw new TException(e);
+    }
   }
 
   @Override
@@ -89,12 +97,20 @@ public class WorkerServiceHandler implements WorkerService.Iface {
 
   @Override
   public String getUserTempFolder(long userId) throws TException {
-    return mWorkerStorage.getUserTempFolder(userId);
+    try {
+      return mWorkerStorage.getUserLocalTempFolder(userId);
+    } catch (IOException e) {
+      throw new TException(e);
+    }
   }
 
   @Override
-  public String getUserUnderfsTempFolder(long userId) throws TException {
-    return mWorkerStorage.getUserUnderfsTempFolder(userId);
+  public String getUserUfsTempFolder(long userId) throws TException {
+    try {
+      return mWorkerStorage.getUserUfsTempFolder(userId);
+    } catch (IOException e) {
+      throw new TException(e);
+    }
   }
 
   @Override

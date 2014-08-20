@@ -30,8 +30,8 @@ import tachyon.UnderFileSystem;
 import tachyon.conf.UserConf;
 import tachyon.thrift.ClientBlockInfo;
 import tachyon.thrift.NetAddress;
-import tachyon.worker.DataServerMessage;
 import tachyon.util.CommonUtils;
+import tachyon.worker.DataServerMessage;
 
 /**
  * Tachyon File.
@@ -89,16 +89,6 @@ public class TachyonFile implements Comparable<TachyonFile> {
    */
   public long getBlockSizeByte() {
     return TFS.getBlockSizeByte(FID);
-  }
-
-  /**
-   * Return the under filesystem path in the under file system of this file
-   * 
-   * @return the under filesystem path
-   * @throws IOException
-   */
-  String getUfsPath() throws IOException {
-    return TFS.getUfsPath(FID);
   }
 
   /**
@@ -200,6 +190,9 @@ public class TachyonFile implements Comparable<TachyonFile> {
    * @throws IOException
    */
   public OutStream getOutStream(WriteType writeType) throws IOException {
+    if (isComplete()) {
+      throw new IOException("Overriding after completion not supported.");
+    }
     if (writeType == null) {
       throw new IOException("WriteType can not be null.");
     }
@@ -223,6 +216,16 @@ public class TachyonFile implements Comparable<TachyonFile> {
    */
   public Object getUFSConf() {
     return mUFSConf;
+  }
+
+  /**
+   * Return the under filesystem path in the under file system of this file
+   * 
+   * @return the under filesystem path
+   * @throws IOException
+   */
+  String getUfsPath() throws IOException {
+    return TFS.getUfsPath(FID);
   }
 
   @Override
@@ -285,21 +288,8 @@ public class TachyonFile implements Comparable<TachyonFile> {
   }
 
   /**
-   * Return a TachyonByteBuffer of this file's block. It only works when this file has no more than
-   * one block.
+   * Advanced API.
    * 
-   * @return TachyonByteBuffer containing the file's block.
-   * @throws IOException
-   */
-  public TachyonByteBuffer readByteBuffer() throws IOException {
-    if (TFS.getNumberOfBlocks(FID) > 1) {
-      throw new IOException("The file has more than one block. This API does not support this.");
-    }
-
-    return readByteBuffer(0);
-  }
-
-  /**
    * Return a TachyonByteBuffer of the block specified by the blockIndex
    * 
    * @param blockIndex
@@ -307,7 +297,7 @@ public class TachyonFile implements Comparable<TachyonFile> {
    * @return TachyonByteBuffer containing the block.
    * @throws IOException
    */
-  TachyonByteBuffer readByteBuffer(int blockIndex) throws IOException {
+  public TachyonByteBuffer readByteBuffer(int blockIndex) throws IOException {
     if (!isComplete()) {
       return null;
     }
@@ -353,36 +343,34 @@ public class TachyonFile implements Comparable<TachyonFile> {
 
       for (int k = 0; k < blockLocations.size(); k ++) {
         String host = blockLocations.get(k).mHost;
-        int port = blockLocations.get(k).mPort;
+        int port = blockLocations.get(k).mSecondaryPort;
 
         // The data is not in remote machine's memory if port == -1.
         if (port == -1) {
           continue;
         }
-        if (host.equals(InetAddress.getLocalHost().getHostName())
-            || host.equals(InetAddress.getLocalHost().getHostAddress())) {
-          String localFileName = CommonUtils.concat(TFS.getRootFolder(), FID);
-          LOG.warn("Master thinks the local machine has data " + localFileName + "! But not!");
-        } else {
-          LOG.info(host + ":" + (port + 1) + " current host is "
-              + InetAddress.getLocalHost().getHostName() + " "
-              + InetAddress.getLocalHost().getHostAddress());
+        final String hostname = InetAddress.getLocalHost().getHostName();
+        final String hostaddress = InetAddress.getLocalHost().getHostAddress();
+        if (host.equals(hostname) || host.equals(hostaddress)) {
+          String localFileName = CommonUtils.concat(TFS.getRootFolder(), blockInfo.blockId);
+          LOG.warn("Reading remotely even though request is local; file is " + localFileName);
+        }
+        LOG.info(host + ":" + port + " current host is " + hostname + " " + hostaddress);
 
-          try {
-            buf =
-                retrieveByteBufferFromRemoteMachine(new InetSocketAddress(host, port + 1),
-                    blockInfo);
-            if (buf != null) {
-              break;
-            }
-          } catch (IOException e) {
-            LOG.error(e.getMessage());
-            buf = null;
+        try {
+          buf =
+              retrieveByteBufferFromRemoteMachine(new InetSocketAddress(host, port),
+                  blockInfo.blockId);
+          if (buf != null) {
+            break;
           }
+        } catch (IOException e) {
+          LOG.error(e);
+          buf = null;
         }
       }
     } catch (IOException e) {
-      LOG.error("Failed to get read data from remote " + e.getMessage());
+      LOG.error("Failed to get read data from remote ", e);
     }
 
     return buf == null ? null : new TachyonByteBuffer(TFS, buf, blockInfo.blockId, -1);
@@ -453,7 +441,7 @@ public class TachyonFile implements Comparable<TachyonFile> {
         }
       }
     } catch (IOException e) {
-      LOG.info(e);
+      LOG.warn(e);
       return false;
     }
 
@@ -472,13 +460,12 @@ public class TachyonFile implements Comparable<TachyonFile> {
     return TFS.rename(FID, path);
   }
 
-  private ByteBuffer retrieveByteBufferFromRemoteMachine(InetSocketAddress address,
-      ClientBlockInfo blockInfo) throws IOException {
+  private ByteBuffer retrieveByteBufferFromRemoteMachine(InetSocketAddress address, long blockId)
+      throws IOException {
     SocketChannel socketChannel = SocketChannel.open();
     socketChannel.connect(address);
 
     LOG.info("Connected to remote machine " + address + " sent");
-    long blockId = blockInfo.blockId;
     DataServerMessage sendMsg = DataServerMessage.createBlockRequestMessage(blockId);
     while (!sendMsg.finishSending()) {
       sendMsg.send(socketChannel);

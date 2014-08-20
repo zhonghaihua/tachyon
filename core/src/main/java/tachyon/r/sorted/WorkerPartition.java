@@ -71,11 +71,13 @@ public class WorkerPartition {
     mLastAccessTimeMs = System.currentTimeMillis();
     if (null == mData) {
       TachyonFile file = mTFS.getFile(mInfo.getDataFileId());
-      mData = file.readByteBuffer();
+      // TODO add check
+      mData = file.readByteBuffer(0);
     }
     if (null == mLoadedIndex) {
       TachyonFile file = mTFS.getFile(mInfo.getIndexFileId());
-      mIndex = file.readByteBuffer();
+      // TODO add check
+      mIndex = file.readByteBuffer(0);
 
       ByteBuffer data = mIndex.DATA;
       int size = data.remaining() / 4;
