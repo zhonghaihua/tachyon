@@ -1,17 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package tachyon.hadoop;
 
 import java.io.FileNotFoundException;
@@ -56,8 +42,6 @@ abstract class AbstractTFS extends FileSystem {
   public static final String RECOMPUTE_PATH = "tachyon_recompute/";
 
   public static String UNDERFS_ADDRESS;
-
-  public static boolean USE_HDFS = true;
 
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
 
@@ -276,7 +260,7 @@ abstract class AbstractTFS extends FileSystem {
 
     LOG.info("getFileStatus(" + path + "): HDFS Path: " + hdfsPath + " TPath: " + mTachyonHeader
         + tPath);
-    if (USE_HDFS) {
+    if (useHdfs()) {
       fromHdfsToTachyon(tPath);
     }
     TachyonFile file = mTFS.getFile(tPath);
@@ -290,6 +274,20 @@ abstract class AbstractTFS extends FileSystem {
             file.getBlockSizeByte(), file.getCreationTimeMs(), file.getCreationTimeMs(), null,
             null, null, new Path(mTachyonHeader + tPath));
     return ret;
+  }
+
+  /**
+   * When underfs has a schema, then we can use the hdfs underfs code base.
+   * <p />
+   * When this check is not done, {@link #fromHdfsToTachyon(String)} is called, which loads
+   * the default filesystem (hadoop's).  When there is no schema, then it may default to tachyon
+   * which causes a recursive loop.
+   *
+   * @see <a href="https://tachyon.atlassian.net/browse/TACHYON-54">TACHYON-54</a>
+   */
+  @Deprecated
+  private boolean useHdfs() {
+    return UNDERFS_ADDRESS != null && URI.create(UNDERFS_ADDRESS).getScheme() != null;
   }
 
   /**
@@ -334,9 +332,7 @@ abstract class AbstractTFS extends FileSystem {
     mTachyonHeader = getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
     mTFS = TachyonFS.get(uri.getHost(), uri.getPort(), isZookeeperMode());
     mUri = URI.create(mTachyonHeader);
-    if (UNDERFS_ADDRESS == null || URI.create(UNDERFS_ADDRESS).getScheme() == null) {
-      USE_HDFS = false;
-    }
+    UNDERFS_ADDRESS = mTFS.getUfsAddress();
     LOG.info(mTachyonHeader + " " + mUri + " " + UNDERFS_ADDRESS);
   }
 

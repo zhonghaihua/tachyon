@@ -1,17 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package tachyon.master;
 
 import java.io.DataOutputStream;
@@ -1033,6 +1019,11 @@ public class MasterInfo extends ImageWriter {
     }
   }
 
+  public int createFile(String path, long blockSizeByte, boolean recursive)
+      throws FileAlreadyExistException, InvalidPathException, BlockInfoException, TachyonException {
+    return createFile(recursive, path, false, blockSizeByte);
+  }
+
   public int createFile(String path, long blockSizeByte) throws FileAlreadyExistException,
       InvalidPathException, BlockInfoException, TachyonException {
     return createFile(true, path, false, blockSizeByte);
@@ -1095,7 +1086,7 @@ public class MasterInfo extends ImageWriter {
     }
 
     for (int k = 0; k < columns; k ++) {
-      mkdir(CommonUtils.concat(path, COL + k));
+      mkdirs(CommonUtils.concat(path, COL + k), true);
     }
 
     return id;
@@ -1991,10 +1982,10 @@ public class MasterInfo extends ImageWriter {
    * @throws InvalidPathException
    * @throws TachyonException
    */
-  public boolean mkdir(String path) throws FileAlreadyExistException, InvalidPathException,
-      TachyonException {
+  public boolean mkdirs(String path, boolean recursive) throws FileAlreadyExistException,
+      InvalidPathException, TachyonException {
     try {
-      return createFile(true, path, true, 0) > 0;
+      return createFile(recursive, path, true, 0) > 0;
     } catch (BlockInfoException e) {
       throw new FileAlreadyExistException(e.getMessage());
     }

@@ -1,17 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package tachyon.worker;
 
 import java.io.File;
@@ -189,7 +175,7 @@ public class WorkerStorage {
           }
 
           long startCopyTimeMs = System.currentTimeMillis();
-          ClientFileInfo fileInfo = mMasterClient.getClientFileInfoById(fileId);
+          ClientFileInfo fileInfo = mMasterClient.getFileStatus(fileId, "");
           if (!fileInfo.isComplete) {
             LOG.error("File " + fileInfo + " is not complete!");
             continue;
@@ -419,7 +405,7 @@ public class WorkerStorage {
    * @throws TException
    */
   public boolean asyncCheckpoint(int fileId) throws IOException, TException {
-    ClientFileInfo fileInfo = mMasterClient.getClientFileInfoById(fileId);
+    ClientFileInfo fileInfo = mMasterClient.getFileStatus(fileId, "");
 
     if (fileInfo.getDependencyId() != -1) {
       synchronized (DEPENDENCY_LOCK) {
@@ -466,14 +452,19 @@ public class WorkerStorage {
     if (!srcFile.exists()) {
       throw new FileDoesNotExistException("File " + srcFile + " does not exist.");
     }
-    if (!srcFile.renameTo(dstFile)) {
-      throw new FileDoesNotExistException("Failed to rename file from " + srcFile.getPath()
-          + " to " + dstFile.getPath());
+    synchronized (LATEST_BLOCK_ACCESS_TIME_MS) {
+      if (!srcFile.renameTo(dstFile)) {
+        throw new FileDoesNotExistException("Failed to rename file from " + srcFile.getPath()
+            + " to " + dstFile.getPath());
+      }
+      if (mBlockSizes.containsKey(blockId)) {
+        mWorkerSpaceCounter.returnUsedBytes(mBlockSizes.get(blockId));
+      }
+      addBlockId(blockId, fileSizeBytes);
+      mUsers.addOwnBytes(userId, -fileSizeBytes);
+      mMasterClient.worker_cacheBlock(mWorkerId, mWorkerSpaceCounter.getUsedBytes(), blockId,
+          fileSizeBytes);
     }
-    addBlockId(blockId, fileSizeBytes);
-    mUsers.addOwnBytes(userId, -fileSizeBytes);
-    mMasterClient.worker_cacheBlock(mWorkerId, mWorkerSpaceCounter.getUsedBytes(), blockId,
-        fileSizeBytes);
     LOG.info(userId + " " + dstFile);
   }
 
@@ -677,8 +668,7 @@ public class WorkerStorage {
           addFoundBlock(blockId, tFile.length());
         } catch (FileDoesNotExistException e) {
           LOG.error("BlockId: " + blockId + " becomes orphan for: \"" + e.message + "\"");
-          LOG.info("Swapout File " + cnt + ": blockId: " + blockId + " to "
-              + mUfsOrphansFolder);
+          LOG.info("Swapout File " + cnt + ": blockId: " + blockId + " to " + mUfsOrphansFolder);
           swapoutOrphanBlocks(blockId, tFile);
           freeBlock(blockId);
           continue;

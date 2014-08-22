@@ -1,17 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package tachyon.worker;
 
 import java.io.File;
@@ -28,6 +14,8 @@ import org.junit.rules.ExpectedException;
 import tachyon.Constants;
 import tachyon.TestUtils;
 import tachyon.UnderFileSystem;
+import tachyon.client.InStream;
+import tachyon.client.ReadType;
 import tachyon.client.TachyonFS;
 import tachyon.client.WriteType;
 import tachyon.master.LocalTachyonCluster;
@@ -81,6 +69,31 @@ public class WorkerStorageTest {
         mWorkerDataFolder + Constants.PATH_SEPARATOR + bid).exists());
     Assert.assertTrue("UFS hasn't the orphan block file ", ufs.exists(orpahnblock));
     Assert.assertTrue("Orpahblock file size is changed", ufs.getFileSize(orpahnblock) == filesize);
+  }
+
+  /**
+   * To test the cacheBlock method when multi clients cache the same block.
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void cacheBlockTest() throws Exception {
+    int fileLen = USER_QUOTA_UNIT_BYTES + 4;
+    int fid = TestUtils.createByteFile(mTfs, "/cacheBlockTest", WriteType.THROUGH, fileLen);
+    long usedBytes = mLocalTachyonCluster.getMasterInfo().getWorkersInfo().get(0).getUsedBytes();
+    Assert.assertEquals(0, usedBytes);
+    TachyonFS tfs1 = mLocalTachyonCluster.getClient();
+    TachyonFS tfs2 = mLocalTachyonCluster.getClient();
+    InStream fin1 = tfs1.getFile(fid).getInStream(ReadType.CACHE);
+    InStream fin2 = tfs2.getFile(fid).getInStream(ReadType.CACHE);
+    for (int i = 0; i < fileLen + 1; i ++) {
+      fin1.read();
+      fin2.read();
+    }
+    fin1.close();
+    fin2.close();
+    usedBytes = mLocalTachyonCluster.getMasterInfo().getWorkersInfo().get(0).getUsedBytes();
+    Assert.assertEquals(fileLen, usedBytes);
   }
 
   /**

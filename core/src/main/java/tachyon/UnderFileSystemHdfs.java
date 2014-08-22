@@ -1,17 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package tachyon;
 
 import java.io.FileNotFoundException;
@@ -116,8 +102,10 @@ public class UnderFileSystemHdfs extends UnderFileSystem {
     throw te;
   }
 
+  /**
+   * BlockSize should be a multiple of 512
+   */
   @Override
-  // BlockSize should be a multiple of 512
   public FSDataOutputStream create(String path, int blockSizeByte) throws IOException {
     // TODO Fix this
     // return create(path, (short) Math.min(3, mFs.getDefaultReplication()), blockSizeByte);
@@ -172,7 +160,7 @@ public class UnderFileSystemHdfs extends UnderFileSystem {
         return mFs.exists(new Path(path));
       } catch (IOException e) {
         cnt ++;
-        LOG.error(cnt + " try to check if " + path + " exists " +  " : " + e.getMessage(), e);
+        LOG.error(cnt + " try to check if " + path + " exists " + " : " + e.getMessage(), e);
         te = e;
       }
     }
@@ -225,7 +213,7 @@ public class UnderFileSystemHdfs extends UnderFileSystem {
         return fs.getLen();
       } catch (IOException e) {
         cnt ++;
-        LOG.error(cnt + " try to get file size for " + path +  " : " + e.getMessage(), e);
+        LOG.error(cnt + " try to get file size for " + path + " : " + e.getMessage(), e);
       }
     }
     return -1;
@@ -333,7 +321,7 @@ public class UnderFileSystemHdfs extends UnderFileSystem {
         return mFs.rename(new Path(src), new Path(dst));
       } catch (IOException e) {
         cnt ++;
-        LOG.error(cnt + " try to rename " + src + " to " + dst +  " : " + e.getMessage(), e);
+        LOG.error(cnt + " try to rename " + src + " to " + dst + " : " + e.getMessage(), e);
         te = e;
       }
     }
