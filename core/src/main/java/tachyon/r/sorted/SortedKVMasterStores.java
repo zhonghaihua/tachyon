@@ -38,23 +38,6 @@ public class SortedKVMasterStores extends MasterComponent {
     super(masterInfo);
   }
 
-  public synchronized int createStore(String path) throws InvalidPathException,
-      FileAlreadyExistException, TachyonException {
-    if (!MASTER_INFO.mkdir(path)) {
-      return -1;
-    }
-    int storeId = MASTER_INFO.getFileId(path);
-    MasterStore info = new MasterStore(storeId);
-
-    if (mStores.containsKey(info.INODE_ID)) {
-      throw new FileAlreadyExistException("The store already exists: " + info);
-    }
-
-    mStores.put(info.INODE_ID, info);
-
-    return storeId;
-  }
-
   public synchronized boolean addPartition(SortedStorePartitionInfo info) throws TachyonException {
     int storeId = info.storeId;
     if (!mStores.containsKey(storeId)) {
@@ -69,6 +52,23 @@ public class SortedKVMasterStores extends MasterComponent {
       throw new TachyonException(e.getMessage());
     }
     return true;
+  }
+
+  public synchronized int createStore(String path) throws InvalidPathException,
+  FileAlreadyExistException, TachyonException {
+    if (!MASTER_INFO.mkdirs(path, true)) {
+      return -1;
+    }
+    int storeId = MASTER_INFO.getFileId(path);
+    MasterStore info = new MasterStore(storeId);
+
+    if (mStores.containsKey(info.INODE_ID)) {
+      throw new FileAlreadyExistException("The store already exists: " + info);
+    }
+
+    mStores.put(info.INODE_ID, info);
+
+    return storeId;
   }
 
   public synchronized SortedStorePartitionInfo getPartition(int storeId, ByteBuffer key)
@@ -99,6 +99,12 @@ public class SortedKVMasterStores extends MasterComponent {
       LOG.info("MasterPartition with locations: " + res);
     }
     return res;
+  }
+
+  @Override
+  public List<NetAddress> lookup(List<ByteBuffer> data) throws ComponentException {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   public synchronized SortedStorePartitionInfo noPartition(NetAddress workerAddress, int storeId,
@@ -144,41 +150,41 @@ public class SortedKVMasterStores extends MasterComponent {
 
     try {
       switch (opType) {
-      case CREATE_STORE: {
-        lengthCheck(data, 2, opType.toString());
-        int storeId = createStore(new String(data.get(1).array()));
-        ByteBuffer buf = ByteBuffer.allocate(4);
-        buf.putInt(storeId);
-        buf.flip();
-        return ImmutableList.of(buf);
-      }
-      case ADD_PARTITION: {
-        lengthCheck(data, 2, opType.toString());
+        case CREATE_STORE: {
+          lengthCheck(data, 2, opType.toString());
+          int storeId = createStore(new String(data.get(1).array()));
+          ByteBuffer buf = ByteBuffer.allocate(4);
+          buf.putInt(storeId);
+          buf.flip();
+          return ImmutableList.of(buf);
+        }
+        case ADD_PARTITION: {
+          lengthCheck(data, 2, opType.toString());
 
-        TDeserializer deserializer = new TDeserializer(new TBinaryProtocol.Factory());
-        SortedStorePartitionInfo info = new SortedStorePartitionInfo();
-        deserializer.deserialize(info, data.get(1).array());
+          TDeserializer deserializer = new TDeserializer(new TBinaryProtocol.Factory());
+          SortedStorePartitionInfo info = new SortedStorePartitionInfo();
+          deserializer.deserialize(info, data.get(1).array());
 
-        boolean res = addPartition(info);
-        ByteBuffer buf = ByteBuffer.allocate(1);
-        buf.put((byte) (res ? 1 : 0));
-        buf.flip();
-        return ImmutableList.of(buf);
-      }
-      case GET_PARTITION: {
-        lengthCheck(data, 3, opType.toString());
+          boolean res = addPartition(info);
+          ByteBuffer buf = ByteBuffer.allocate(1);
+          buf.put((byte) (res ? 1 : 0));
+          buf.flip();
+          return ImmutableList.of(buf);
+        }
+        case GET_PARTITION: {
+          lengthCheck(data, 3, opType.toString());
 
-        int storeId = data.get(1).getInt();
-        SortedStorePartitionInfo info = getPartition(storeId, data.get(2));
+          int storeId = data.get(1).getInt();
+          SortedStorePartitionInfo info = getPartition(storeId, data.get(2));
 
-        TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
-        byte[] bytes = serializer.serialize(info);
+          TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
+          byte[] bytes = serializer.serialize(info);
 
-        return ImmutableList.of(ByteBuffer.wrap(bytes));
-      }
-      case NO_PARTITION: {
-        throw new ComponentException("NoPartition not supported yet.");
-      }
+          return ImmutableList.of(ByteBuffer.wrap(bytes));
+        }
+        case NO_PARTITION: {
+          throw new ComponentException("NoPartition not supported yet.");
+        }
       }
     } catch (InvalidPathException e) {
       throw new ComponentException(e);
@@ -191,11 +197,5 @@ public class SortedKVMasterStores extends MasterComponent {
     }
 
     throw new ComponentException("Unprocessed MasterOperationType " + opType);
-  }
-
-  @Override
-  public List<NetAddress> lookup(List<ByteBuffer> data) throws ComponentException {
-    // TODO Auto-generated method stub
-    return null;
   }
 }

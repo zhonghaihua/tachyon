@@ -34,8 +34,8 @@ public class SearchMasterStores extends MasterComponent {
   }
 
   public synchronized int createStore(String path) throws InvalidPathException,
-      FileAlreadyExistException, TachyonException {
-    if (!MASTER_INFO.mkdir(path)) {
+  FileAlreadyExistException, TachyonException {
+    if (!MASTER_INFO.mkdirs(path, true)) {
       return -1;
     }
     int storeId = MASTER_INFO.getFileId(path);
@@ -51,6 +51,12 @@ public class SearchMasterStores extends MasterComponent {
   }
 
   @Override
+  public List<NetAddress> lookup(List<ByteBuffer> data) throws ComponentException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public List<ByteBuffer> process(List<ByteBuffer> data) throws ComponentException {
     minLengthCheck(data);
 
@@ -63,27 +69,27 @@ public class SearchMasterStores extends MasterComponent {
 
     try {
       switch (opType) {
-      case CREATE_STORE: {
-        lengthCheck(data, 2, opType.toString());
-        int storeId = createStore(new String(data.get(1).array()));
-        ByteBuffer buf = ByteBuffer.allocate(4);
-        buf.putInt(storeId);
-        buf.flip();
-        return ImmutableList.of(buf);
-      }
-      case ADD_SHARD: {
-        throw new ComponentException("Not supported yet");
-      }
-      case GET_WORKERS: {
-        List<ClientWorkerInfo> workersInfo = MASTER_INFO.getWorkersInfo();
-        List<ByteBuffer> result = new ArrayList<ByteBuffer>();
-        TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
-        for (ClientWorkerInfo workerInfo : workersInfo) {
-          byte[] bytes = serializer.serialize(workerInfo.getAddress());
-          result.add(ByteBuffer.wrap(bytes));
+        case CREATE_STORE: {
+          lengthCheck(data, 2, opType.toString());
+          int storeId = createStore(new String(data.get(1).array()));
+          ByteBuffer buf = ByteBuffer.allocate(4);
+          buf.putInt(storeId);
+          buf.flip();
+          return ImmutableList.of(buf);
         }
-        return result;
-      }
+        case ADD_SHARD: {
+          throw new ComponentException("Not supported yet");
+        }
+        case GET_WORKERS: {
+          List<ClientWorkerInfo> workersInfo = MASTER_INFO.getWorkersInfo();
+          List<ByteBuffer> result = new ArrayList<ByteBuffer>();
+          TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
+          for (ClientWorkerInfo workerInfo : workersInfo) {
+            byte[] bytes = serializer.serialize(workerInfo.getAddress());
+            result.add(ByteBuffer.wrap(bytes));
+          }
+          return result;
+        }
       }
     } catch (InvalidPathException e) {
       throw new ComponentException(e);
@@ -96,12 +102,6 @@ public class SearchMasterStores extends MasterComponent {
     }
 
     throw new ComponentException("Unprocessed MasterOperationType " + opType);
-  }
-
-  @Override
-  public List<NetAddress> lookup(List<ByteBuffer> data) throws ComponentException {
-    // TODO Auto-generated method stub
-    return null;
   }
 
 }

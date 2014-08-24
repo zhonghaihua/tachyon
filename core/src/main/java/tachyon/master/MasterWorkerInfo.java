@@ -15,13 +15,12 @@ import tachyon.util.CommonUtils;
  * The structure to store a worker's information in master node.
  */
 public class MasterWorkerInfo {
-
   /** Worker's address **/
-  public final NetAddress ADDRESS;
+  public final NetAddress mWorkerAddress;
   /** Capacity of worker in bytes **/
-  private final long CAPACITY_BYTES;
+  private final long mCapacityBytes;
   /** Start time of the worker in ms **/
-  private final long START_TIME_MS;
+  private final long mStartTimeMs;
   /** The id of the worker **/
   private long mId;
   /** Worker's used bytes **/
@@ -35,9 +34,9 @@ public class MasterWorkerInfo {
 
   public MasterWorkerInfo(long id, NetAddress address, long capacityBytes) {
     mId = id;
-    ADDRESS = address;
-    CAPACITY_BYTES = capacityBytes;
-    START_TIME_MS = System.currentTimeMillis();
+    mWorkerAddress = address;
+    mCapacityBytes = capacityBytes;
+    mStartTimeMs = System.currentTimeMillis();
 
     mUsedBytes = 0;
     mBlocks = new HashSet<Long>();
@@ -51,13 +50,13 @@ public class MasterWorkerInfo {
   public synchronized ClientWorkerInfo generateClientWorkerInfo() {
     ClientWorkerInfo ret = new ClientWorkerInfo();
     ret.id = mId;
-    ret.address = ADDRESS;
+    ret.address = mWorkerAddress;
     ret.lastContactSec =
         (int) ((CommonUtils.getCurrentMs() - mLastUpdatedTimeMs) / Constants.SECOND_MS);
     ret.state = "In Service";
-    ret.capacityBytes = CAPACITY_BYTES;
+    ret.capacityBytes = mCapacityBytes;
     ret.usedBytes = mUsedBytes;
-    ret.starttimeMs = START_TIME_MS;
+    ret.starttimeMs = mStartTimeMs;
     return ret;
   }
 
@@ -65,14 +64,14 @@ public class MasterWorkerInfo {
    * @return the worker's address.
    */
   public NetAddress getAddress() {
-    return ADDRESS;
+    return mWorkerAddress;
   }
 
   /**
    * @return the available space of the worker in bytes
    */
   public synchronized long getAvailableBytes() {
-    return CAPACITY_BYTES - mUsedBytes;
+    return mCapacityBytes - mUsedBytes;
   }
 
   /**
@@ -86,7 +85,7 @@ public class MasterWorkerInfo {
    * @return the capacity of the worker in bytes
    */
   public long getCapacityBytes() {
-    return CAPACITY_BYTES;
+    return mCapacityBytes;
   }
 
   /**
@@ -121,10 +120,10 @@ public class MasterWorkerInfo {
   public synchronized String toString() {
     StringBuilder sb = new StringBuilder("MasterWorkerInfo(");
     sb.append(" ID: ").append(mId);
-    sb.append(", ADDRESS: ").append(ADDRESS);
-    sb.append(", TOTAL_BYTES: ").append(CAPACITY_BYTES);
+    sb.append(", mWorkerAddress: ").append(mWorkerAddress);
+    sb.append(", TOTAL_BYTES: ").append(mCapacityBytes);
     sb.append(", mUsedBytes: ").append(mUsedBytes);
-    sb.append(", mAvailableBytes: ").append(CAPACITY_BYTES - mUsedBytes);
+    sb.append(", mAvailableBytes: ").append(mCapacityBytes - mUsedBytes);
     sb.append(", mLastUpdatedTimeMs: ").append(mLastUpdatedTimeMs);
     sb.append(", mBlocks: [ ");
     for (long blockId : mBlocks) {
@@ -136,7 +135,7 @@ public class MasterWorkerInfo {
 
   /**
    * Adds or removes a block from the worker
-   * 
+   *
    * @param add
    *          true if to add, to remove otherwise.
    * @param blockId
@@ -152,7 +151,7 @@ public class MasterWorkerInfo {
 
   /**
    * Adds or removes blocks from the worker
-   * 
+   *
    * @param add
    *          true if to add, to remove otherwise.
    * @param blockIds
@@ -175,7 +174,7 @@ public class MasterWorkerInfo {
 
   /**
    * Adds or removes a block from the to-be-removed blocks set of the worker.
-   * 
+   *
    * @param add
    *          true if to add, to remove otherwise.
    * @param blockId
@@ -193,7 +192,7 @@ public class MasterWorkerInfo {
 
   /**
    * Adds or removes blocks from the to-be-removed blocks set of the worker.
-   * 
+   *
    * @param add
    *          true if to add, to remove otherwise.
    * @param blockIds
@@ -207,7 +206,7 @@ public class MasterWorkerInfo {
 
   /**
    * Set the used space of the worker in bytes.
-   * 
+   *
    * @param usedBytes
    *          the used space in bytes
    */

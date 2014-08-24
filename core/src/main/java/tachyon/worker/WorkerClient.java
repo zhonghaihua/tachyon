@@ -33,13 +33,13 @@ import tachyon.util.NetworkUtils;
 
 /**
  * The client talks to a worker server. It keeps sending keep alive message to the worker server.
- * 
+ *
  * Since WorkerService.Client is not thread safe, this class has to guarantee thread safe.
  */
 public class WorkerClient implements Closeable {
-  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
-  private final MasterClient MASTER_CLIENT;
-  private final int CONNECTION_RETRY_TIMES = 5;
+  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private final MasterClient mMasterClient;
+  private static final int CONNECTION_RETRY_TIMES = 5;
 
   private WorkerService.Client mClient;
   private TProtocol mProtocol;
@@ -52,22 +52,22 @@ public class WorkerClient implements Closeable {
 
   /**
    * Create a WorkerClient, with a given MasterClient.
-   * 
+   *
    * @param masterClient
    * @throws IOException
    */
   public WorkerClient(MasterClient masterClient) throws IOException {
-    MASTER_CLIENT = masterClient;
+    mMasterClient = masterClient;
   }
 
   public WorkerClient(MasterClient masterClient, InetSocketAddress workerAddress) {
-    MASTER_CLIENT = masterClient;
+    mMasterClient = masterClient;
     mWorkerAddress = workerAddress;
   }
 
   /**
    * Update the latest block access time on the worker.
-   * 
+   *
    * @param blockId
    *          The id of the block
    * @throws IOException
@@ -86,7 +86,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Notify the worker that the checkpoint file of the file has been added.
-   * 
+   *
    * @param userId
    *          The user id of the client who send the notification
    * @param fileId
@@ -114,7 +114,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Notify the worker to checkpoint the file asynchronously.
-   * 
+   *
    * @param fid
    *          The id of the file
    * @return true if succeed, false otherwise
@@ -135,18 +135,16 @@ public class WorkerClient implements Closeable {
 
   /**
    * Notify the worker the block is cached.
-   * 
-   * @param userId
-   *          The user id of the client who send the notification
+   *
    * @param blockId
    *          The id of the block
    * @throws IOException
    */
-  public synchronized void cacheBlock(long userId, long blockId) throws IOException {
+  public synchronized void cacheBlock(long blockId) throws IOException {
     mustConnect();
 
     try {
-      mClient.cacheBlock(userId, blockId);
+      mClient.cacheBlock(mMasterClient.getUserId(), blockId);
     } catch (FileDoesNotExistException e) {
       throw new IOException(e);
     } catch (BlockInfoException e) {
@@ -173,7 +171,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Open the connection to the worker. And start the heartbeat thread.
-   * 
+   *
    * @return true if succeed, false otherwise
    * @throws IOException
    */
@@ -190,7 +188,7 @@ public class WorkerClient implements Closeable {
             localHostName = InetAddress.getLocalHost().getCanonicalHostName();
           }
           LOG.info("Trying to get local worker host : " + localHostName);
-          workerNetAddress = MASTER_CLIENT.user_getWorker(false, localHostName);
+          workerNetAddress = mMasterClient.user_getWorker(false, localHostName);
           mIsLocal = true;
         } catch (NoWorkerException e) {
           LOG.info(e.getMessage());
@@ -202,7 +200,19 @@ public class WorkerClient implements Closeable {
 
         if (workerNetAddress == null) {
           try {
-            workerNetAddress = MASTER_CLIENT.user_getWorker(true, "");
+            workerNetAddress = mMasterClient.user_getWorker(true, "");
+          } catch (NoWorkerException e) {
+            LOG.info(e.getMessage());
+            workerNetAddress = null;
+          } catch (UnknownHostException e) {
+            LOG.error(e.getMessage(), e);
+            workerNetAddress = null;
+          }
+        }
+
+        if (workerNetAddress == null) {
+          try {
+            workerNetAddress = mMasterClient.user_getWorker(true, "");
           } catch (NoWorkerException e) {
             LOG.info(e.getMessage());
             workerNetAddress = null;
@@ -226,7 +236,7 @@ public class WorkerClient implements Closeable {
 
       mHeartbeatThread =
           new HeartbeatThread("WorkerClientToWorkerHeartbeat", new WorkerClientHeartbeatExecutor(
-              this, MASTER_CLIENT.getUserId()), UserConf.get().HEARTBEAT_INTERVAL_MS);
+              this, mMasterClient.getUserId()), UserConf.get().HEARTBEAT_INTERVAL_MS);
 
       try {
         mProtocol.getTransport().open();
@@ -269,7 +279,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Get the local user temporary folder of the specified user.
-   * 
+   *
    * @return The local user temporary folder of the specified user
    * @throws IOException
    */
@@ -277,7 +287,7 @@ public class WorkerClient implements Closeable {
     mustConnect();
 
     try {
-      return mClient.getUserTempFolder(MASTER_CLIENT.getUserId());
+      return mClient.getUserTempFolder(mMasterClient.getUserId());
     } catch (TException e) {
       throw new IOException(e);
     }
@@ -285,7 +295,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Get the user temporary folder in the under file system of the specified user.
-   * 
+   *
    * @return The user temporary folder in the under file system
    * @throws IOException
    */
@@ -293,7 +303,7 @@ public class WorkerClient implements Closeable {
     mustConnect();
 
     try {
-      return mClient.getUserUfsTempFolder(MASTER_CLIENT.getUserId());
+      return mClient.getUserUfsTempFolder(mMasterClient.getUserId());
     } catch (TException e) {
       mConnected = false;
       throw new IOException(e);
@@ -325,7 +335,7 @@ public class WorkerClient implements Closeable {
   /**
    * Lock the block, therefore, the worker will lock evict the block from the memory untill it is
    * unlocked.
-   * 
+   *
    * @param blockId
    *          The id of the block
    * @param userId
@@ -345,7 +355,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Connect to the worker.
-   * 
+   *
    * @throws IOException
    */
   public synchronized void mustConnect() throws IOException {
@@ -360,7 +370,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Request space from the worker's memory
-   * 
+   *
    * @param userId
    *          The id of the user who send the request
    * @param requestBytes
@@ -381,7 +391,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Return the space which has been requested
-   * 
+   *
    * @param userId
    *          The id of the user who wants to return the space
    * @param returnSpaceBytes
@@ -401,7 +411,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Unlock the block
-   * 
+   *
    * @param blockId
    *          The id of the block
    * @param userId
@@ -421,7 +431,7 @@ public class WorkerClient implements Closeable {
 
   /**
    * Users' heartbeat to the Worker.
-   * 
+   *
    * @param userId
    *          The id of the user
    * @throws IOException

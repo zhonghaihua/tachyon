@@ -16,6 +16,10 @@ import tachyon.util.CommonUtils;
  */
 public class LeaderInquireClient {
   private static final int MAX_TRY = 10;
+  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+
+  private static HashMap<String, LeaderInquireClient> createdClients =
+      new HashMap<String, LeaderInquireClient>();
 
   public static synchronized LeaderInquireClient getClient(String zookeeperAddress,
       String leaderPath) {
@@ -26,31 +30,26 @@ public class LeaderInquireClient {
     return createdClients.get(key);
   }
 
-  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
-  private final String ZOOKEEPER_ADDRESS;
-  private final String LEADER_PATH;
-
-  private final CuratorFramework CLIENT;
-
-  private static HashMap<String, LeaderInquireClient> createdClients =
-      new HashMap<String, LeaderInquireClient>();
+  private final String mZookeeperAddress;
+  private final String mLeaderPath;
+  private final CuratorFramework mCLient;
 
   private LeaderInquireClient(String zookeeperAddress, String leaderPath) {
-    ZOOKEEPER_ADDRESS = zookeeperAddress;
-    LEADER_PATH = leaderPath;
+    mZookeeperAddress = zookeeperAddress;
+    mLeaderPath = leaderPath;
 
-    CLIENT =
-        CuratorFrameworkFactory.newClient(ZOOKEEPER_ADDRESS, new ExponentialBackoffRetry(
+    mCLient =
+        CuratorFrameworkFactory.newClient(mZookeeperAddress, new ExponentialBackoffRetry(
             Constants.SECOND_MS, 3));
-    CLIENT.start();
+    mCLient.start();
   }
 
   public synchronized String getMasterAddress() {
     int tried = 0;
     try {
       while (tried < MAX_TRY) {
-        if (CLIENT.checkExists().forPath(LEADER_PATH) != null) {
-          List<String> masters = CLIENT.getChildren().forPath(LEADER_PATH);
+        if (mCLient.checkExists().forPath(mLeaderPath) != null) {
+          List<String> masters = mCLient.getChildren().forPath(mLeaderPath);
           LOG.info(masters);
           if (masters.size() >= 1) {
             if (masters.size() == 1) {
@@ -60,7 +59,7 @@ public class LeaderInquireClient {
             long maxTime = 0;
             String leader = "";
             for (String master : masters) {
-              Stat stat = CLIENT.checkExists().forPath(CommonUtils.concat(LEADER_PATH, master));
+              Stat stat = mCLient.checkExists().forPath(CommonUtils.concat(mLeaderPath, master));
               if (stat != null && stat.getCtime() > maxTime) {
                 maxTime = stat.getCtime();
                 leader = master;
@@ -69,7 +68,7 @@ public class LeaderInquireClient {
             return leader;
           }
         } else {
-          LOG.info(LEADER_PATH + " does not exist (" + (++ tried) + ")");
+          LOG.info(mLeaderPath + " does not exist (" + (++ tried) + ")");
         }
         CommonUtils.sleepMs(LOG, Constants.SECOND_MS);
       }
