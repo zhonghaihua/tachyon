@@ -1,12 +1,9 @@
 package tachyon.client;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,13 +21,11 @@ import tachyon.client.table.RawTable;
 import tachyon.conf.CommonConf;
 import tachyon.conf.UserConf;
 import tachyon.master.MasterClient;
-import tachyon.thrift.BlockInfoException;
 import tachyon.thrift.ClientBlockInfo;
 import tachyon.thrift.ClientDependencyInfo;
 import tachyon.thrift.ClientFileInfo;
 import tachyon.thrift.ClientRawTableInfo;
 import tachyon.thrift.ClientWorkerInfo;
-import tachyon.thrift.FileDoesNotExistException;
 import tachyon.thrift.InvalidPathException;
 import tachyon.util.CommonUtils;
 import tachyon.worker.WorkerClient;
@@ -136,7 +131,7 @@ public class TachyonFS extends AbstractTachyonFS {
    *          the local block's id
    * @throws IOException
    */
-  private synchronized void accessLocalBlock(long blockId) throws IOException {
+  synchronized void accessLocalBlock(long blockId) throws IOException {
     if (mWorkerClient.isLocal()) {
       mWorkerClient.accessBlock(blockId);
     }
@@ -368,14 +363,10 @@ public class TachyonFS extends AbstractTachyonFS {
    *           if the file does not exist, or connection issue.
    */
   public synchronized long getBlockId(int fid, int blockIndex) throws IOException {
-    ClientFileInfo info = mIdToClientFileInfo.get(fid);
+    ClientFileInfo info = getFileStatus(fid, "", true);
+
     if (info == null) {
-      info = getFileStatus(fid, "");
-      if (info != null) {
-        mIdToClientFileInfo.put(fid, info);
-      } else {
-        throw new IOException("File " + fid + " does not exist.");
-      }
+      throw new IOException("File " + fid + " does not exist.");
     }
 
     if (info.blockIds.size() > blockIndex) {
@@ -386,82 +377,22 @@ public class TachyonFS extends AbstractTachyonFS {
   }
 
   /**
-   * Get the block id by the file id and offset. it will check whether the file and the block exist.
-   * 
-   * @param fid
-   *          the file id
-   * @param offset
-   *          The offset of the file.
-   * @return the block id if exists
-   * @throws IOException
-   */
-  synchronized long getBlockIdBasedOnOffset(int fid, long offset) throws IOException {
-    ClientFileInfo info;
-    if (!mIdToClientFileInfo.containsKey(fid)) {
-      info = getFileStatus(fid, "");
-      mIdToClientFileInfo.put(fid, info);
-    }
-    info = mIdToClientFileInfo.get(fid);
-
-    int index = (int) (offset / info.getBlockSizeByte());
-
-    return getBlockId(fid, index);
-  }
-
-  /**
    * @return a new block lock id
    */
-  public int getBlockLockId() {
+  synchronized int getBlockLockId() {
     return mBlockLockId.getAndIncrement();
   }
 
   /**
-   * Get a ClientBlockInfo by the file id and block index
+   * Get a ClientBlockInfo by blockId
    * 
-   * @param fid
-   *          the file id
-   * @param blockIndex
-   *          The index of the block in the file.
+   * @param blockId
+   *          the id of the block
    * @return the ClientBlockInfo of the specified block
    * @throws IOException
    */
-  public synchronized ClientBlockInfo getClientBlockInfo(int fid, int blockIndex)
-      throws IOException {
-    boolean fetch = false;
-    if (!mIdToClientFileInfo.containsKey(fid)) {
-      fetch = true;
-    }
-    ClientFileInfo info = null;
-    if (!fetch) {
-      info = mIdToClientFileInfo.get(fid);
-      if (info.isFolder || info.blockIds.size() <= blockIndex) {
-        fetch = true;
-      }
-    }
-
-    if (fetch) {
-      info = getFileStatus(fid, "");
-    }
-
-    if (info == null) {
-      throw new IOException("File " + fid + " does not exist.");
-    } else if (fetch) {
-      mIdToClientFileInfo.put(fid, info);
-    }
-    if (info.isFolder) {
-      throw new IOException(new FileDoesNotExistException("File " + fid + " is a folder."));
-    }
-    if (info.blockIds.size() <= blockIndex) {
-      throw new IOException("BlockIndex " + blockIndex + " is out of the bound in file " + info);
-    }
-
-    try {
-      return mMasterClient.user_getClientBlockInfo(info.blockIds.get(blockIndex));
-    } catch (FileDoesNotExistException e) {
-      throw new IOException(e);
-    } catch (BlockInfoException e) {
-      throw new IOException(e);
-    }
+  synchronized ClientBlockInfo getClientBlockInfo(long blockId) throws IOException {
+    return mMasterClient.user_getClientBlockInfo(blockId);
   }
 
   /**
@@ -531,7 +462,6 @@ public class TachyonFS extends AbstractTachyonFS {
     if (clientFileInfo == null) {
       return null;
     }
-    mIdToClientFileInfo.put(clientFileInfo.getId(), clientFileInfo);
     return new TachyonFile(this, clientFileInfo.getId());
   }
 
@@ -558,7 +488,7 @@ public class TachyonFS extends AbstractTachyonFS {
    */
   public synchronized int getFileId(String path) throws IOException {
     try {
-      return mMasterClient.getFileStatus(-1, cleanPathIOException(path)).getId();
+      return getFileStatus(-1, cleanPathIOException(path), false).getId();
     } catch (IOException e) {
       return -1;
     }
@@ -573,10 +503,12 @@ public class TachyonFS extends AbstractTachyonFS {
   /**
    * Advanced API.
    * 
-   * Get a ClientFileInfo of the file.
+   * Gets the ClientFileInfo object that represents the fileId, or the path if fileId is -1.
    * 
+   * @param fileId
+   *          the file id of the file or folder.
    * @param path
-   *          the file path in Tachyon file system
+   *          the path of the file or folder. valid iff fileId is -1.
    * @param useCachedMetadata
    *          if true use the local cached meta data
    * @return the ClientFileInfo of the file. null if the file does not exist.
@@ -625,28 +557,6 @@ public class TachyonFS extends AbstractTachyonFS {
   }
 
   /**
-   * Returns the local filename for the block if that file exists on the local file system. This is
-   * an alpha power-api feature for applications that want short-circuit-read files directly. There
-   * is no guarantee that the file still exists after this call returns, as Tachyon may evict blocks
-   * from memory at any time.
-   * 
-   * @param blockId
-   *          The id of the block.
-   * @return filename on local file system or null if file not present on local file system.
-   */
-  String getLocalFilename(long blockId) throws IOException {
-    String rootFolder = getRootFolder();
-    if (rootFolder != null) {
-      String localFileName = CommonUtils.concat(rootFolder, blockId);
-      File file = new File(localFileName);
-      if (file.exists()) {
-        return localFileName;
-      }
-    }
-    return null;
-  }
-
-  /**
    * Get the RawTable by id
    * 
    * @param id
@@ -678,7 +588,7 @@ public class TachyonFS extends AbstractTachyonFS {
    * @return the local root data folder
    * @throws IOException
    */
-  synchronized String getRootFolder() throws IOException {
+  synchronized String getLocalDataFolder() throws IOException {
     return mWorkerClient.getDataFolder();
   }
 
@@ -722,27 +632,6 @@ public class TachyonFS extends AbstractTachyonFS {
     return mIdToClientFileInfo.get(fid).isFolder;
   }
 
-  /**
-   * @param fid
-   *          the file id
-   * @return true if the file is need pin, false otherwise
-   */
-  synchronized boolean isNeedPin(int fid) {
-    return mIdToClientFileInfo.get(fid).isPinned;
-  }
-
-  /** Returns true if the given file or folder has its "pinned" flag set. */
-  public synchronized boolean isPinned(int fid, boolean useCachedMetadata) throws IOException {
-    ClientFileInfo info;
-    if (!useCachedMetadata || !mIdToClientFileInfo.containsKey(fid)) {
-      info = getFileStatus(fid, "");
-      mIdToClientFileInfo.put(fid, info);
-    }
-    info = mIdToClientFileInfo.get(fid);
-
-    return info.isPinned;
-  }
-
   @Override
   public synchronized List<ClientFileInfo> listStatus(String path) throws IOException {
     return mMasterClient.listStatus(path);
@@ -757,7 +646,7 @@ public class TachyonFS extends AbstractTachyonFS {
    *          The block lock id of the block of lock. <code>blockLockId</code> must be non-negative.
    * @return true if successfully lock the block, false otherwise (or invalid parameter).
    */
-  private synchronized boolean lockBlock(long blockId, int blockLockId) throws IOException {
+  synchronized boolean lockBlock(long blockId, int blockLockId) throws IOException {
     if (blockId <= 0 || blockLockId < 0) {
       return false;
     }
@@ -786,71 +675,6 @@ public class TachyonFS extends AbstractTachyonFS {
   /** Alias for setPinned(fid, true). */
   public synchronized void pinFile(int fid) throws IOException {
     setPinned(fid, true);
-  }
-
-  /**
-   * Read local block return a TachyonByteBuffer
-   * 
-   * @param blockId
-   *          The id of the block.
-   * @param offset
-   *          The start position to read.
-   * @param len
-   *          The length to read. -1 represents read the whole block.
-   * @return <code>TachyonByteBuffer</code> containing the block.
-   * @throws IOException
-   */
-  TachyonByteBuffer readLocalByteBuffer(long blockId, long offset, long len) throws IOException {
-    if (offset < 0) {
-      throw new IOException("Offset can not be negative: " + offset);
-    }
-    if (len < 0 && len != -1) {
-      throw new IOException("Length can not be negative except -1: " + len);
-    }
-
-    int blockLockId = getBlockLockId();
-    if (!lockBlock(blockId, blockLockId)) {
-      return null;
-    }
-    String localFileName = getLocalFilename(blockId);
-    if (localFileName != null) {
-      try {
-        RandomAccessFile localFile = new RandomAccessFile(localFileName, "r");
-
-        long fileLength = localFile.length();
-        String error = null;
-        if (offset > fileLength) {
-          error = String.format("Offset(%d) is larger than file length(%d)", offset, fileLength);
-        }
-        if (error == null && len != -1 && offset + len > fileLength) {
-          error =
-              String.format("Offset(%d) plus length(%d) is larger than file length(%d)", offset,
-                  len, fileLength);
-        }
-        if (error != null) {
-          localFile.close();
-          throw new IOException(error);
-        }
-
-        if (len == -1) {
-          len = fileLength - offset;
-        }
-
-        FileChannel localFileChannel = localFile.getChannel();
-        ByteBuffer buf = localFileChannel.map(FileChannel.MapMode.READ_ONLY, offset, len);
-        localFileChannel.close();
-        localFile.close();
-        accessLocalBlock(blockId);
-        return new TachyonByteBuffer(this, buf, blockId, blockLockId);
-      } catch (FileNotFoundException e) {
-        LOG.info(localFileName + " is not on local disk.");
-      } catch (IOException e) {
-        LOG.warn("Failed to read local file " + localFileName + " because:", e);
-      }
-    }
-
-    unlockBlock(blockId, blockLockId);
-    return null;
   }
 
   public synchronized void releaseSpace(long releaseSpaceBytes) {
