@@ -45,7 +45,7 @@ public class SearchStore {
 
   public SearchStore(TachyonURI uri, boolean create) throws IOException {
     URI = uri;
-    mTachyonFS = TachyonFS.get(uri.toString());
+    mTachyonFS = TachyonFS.get(uri);
 
     if (create) {
       List<ByteBuffer> res =
@@ -56,7 +56,7 @@ public class SearchStore {
       ID = res.get(0).getInt();
     } else {
       // TODO use get StoreID;
-      ID = mTachyonFS.getFileId(uri.getPath());
+      ID = mTachyonFS.getFileId(uri);
     }
   }
 
