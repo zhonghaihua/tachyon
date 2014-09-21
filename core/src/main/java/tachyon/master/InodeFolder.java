@@ -7,9 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.collect.ImmutableSet;
 
@@ -20,15 +22,13 @@ import tachyon.thrift.ClientFileInfo;
  * Tachyon file system's folder representation in master.
  */
 public class InodeFolder extends Inode {
-  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private static final Logger LOG = LoggerFactory.getLogger(Constants.LOGGER_TYPE);
 
   /**
    * Create a new InodeFile from a JsonParser and an image Json element.
    * 
-   * @param parser
-   *          the JsonParser to get the next element
-   * @param ele
-   *          the current InodeFolder's Json image element.
+   * @param parser the JsonParser to get the next element
+   * @param ele the current InodeFolder's Json image element.
    * @return the constructed InodeFolder.
    * @throws IOException
    */
@@ -38,7 +38,7 @@ public class InodeFolder extends Inode {
     String fileName = ele.getString("name");
     int parentId = ele.getInt("parentId");
     boolean isPinned = ele.getBoolean("pinned");
-    List<Integer> childrenIds = ele.<List<Integer>> get("childrenIds");
+    List<Integer> childrenIds = ele.get("childrenIds", new TypeReference<List<Integer>>() {});
     long lastModificationTimeMs = ele.getLong("lastModificationTimeMs");
 
     int numberOfChildren = childrenIds.size();
@@ -46,22 +46,22 @@ public class InodeFolder extends Inode {
     for (int k = 0; k < numberOfChildren; k ++) {
       try {
         ele = parser.readValueAs(ImageElement.class);
-        LOG.debug("Read Element: " + ele);
+        LOG.debug("Read Element: {}", ele);
       } catch (IOException e) {
         throw e;
       }
 
       switch (ele.type) {
-      case InodeFile: {
-        children[k] = InodeFile.loadImage(ele);
-        break;
-      }
-      case InodeFolder: {
-        children[k] = InodeFolder.loadImage(parser, ele);
-        break;
-      }
-      default:
-        throw new IOException("Invalid element type " + ele);
+        case InodeFile: {
+          children[k] = InodeFile.loadImage(ele);
+          break;
+        }
+        case InodeFolder: {
+          children[k] = InodeFolder.loadImage(parser, ele);
+          break;
+        }
+        default:
+          throw new IOException("Invalid element type " + ele);
       }
     }
 
@@ -77,14 +77,10 @@ public class InodeFolder extends Inode {
   /**
    * Create a new InodeFolder.
    * 
-   * @param name
-   *          The name of the folder
-   * @param id
-   *          The id of the folder
-   * @param parentId
-   *          The id of the parent of the folder
-   * @param creationTimeMs
-   *          The creation time of the folder, in milliseconds
+   * @param name The name of the folder
+   * @param id The id of the folder
+   * @param parentId The id of the parent of the folder
+   * @param creationTimeMs The creation time of the folder, in milliseconds
    */
   public InodeFolder(String name, int id, int parentId, long creationTimeMs) {
     super(name, id, parentId, true, creationTimeMs);
@@ -93,8 +89,7 @@ public class InodeFolder extends Inode {
   /**
    * Adds the given inode to the set of children.
    * 
-   * @param child
-   *          The inode to add
+   * @param child The inode to add
    */
   public synchronized void addChild(Inode child) {
     mChildren.add(child);
@@ -103,8 +98,7 @@ public class InodeFolder extends Inode {
   /**
    * Adds the given inodes to the set of children.
    * 
-   * @param children
-   *          The inodes to add
+   * @param children The inodes to add
    */
   public synchronized void addChildren(Inode[] children) {
     for (Inode child : children) {
@@ -115,8 +109,7 @@ public class InodeFolder extends Inode {
   /**
    * Generates client file info for the folder.
    * 
-   * @param path
-   *          The path of the folder in the filesystem
+   * @param path The path of the folder in the filesystem
    * @return the generated ClientFileInfo
    */
   @Override
@@ -144,8 +137,7 @@ public class InodeFolder extends Inode {
   /**
    * Returns the child with the given id.
    * 
-   * @param fid
-   *          The id of the child
+   * @param fid The id of the child
    * @return the inode with the given id, or null if there is no child with that id
    */
   public synchronized Inode getChild(int fid) {
@@ -160,8 +152,7 @@ public class InodeFolder extends Inode {
   /**
    * Returns the child with the given name.
    * 
-   * @param name
-   *          The name of the child
+   * @param name The name of the child
    * @return the inode with the given name, or null if there is no child with that name
    */
   public synchronized Inode getChild(String name) {
@@ -207,8 +198,7 @@ public class InodeFolder extends Inode {
   /**
    * Removes the given inode from the folder.
    * 
-   * @param child
-   *          The Inode to remove
+   * @param child The Inode to remove
    * @return true if the inode was removed, false otherwise.
    */
   public synchronized boolean removeChild(Inode child) {
@@ -218,8 +208,7 @@ public class InodeFolder extends Inode {
   /**
    * Removes the given child from the folder.
    * 
-   * @param name
-   *          The name of the Inode to remove.
+   * @param name The name of the Inode to remove.
    * @return true if the inode was removed, false otherwise.
    */
   public synchronized boolean removeChild(String name) {
@@ -242,8 +231,7 @@ public class InodeFolder extends Inode {
   /**
    * Write an image of the folder.
    * 
-   * @param os
-   *          The output stream to write the folder to
+   * @param os The output stream to write the folder to
    */
   @Override
   public void writeImage(ObjectWriter objWriter, DataOutputStream dos) throws IOException {

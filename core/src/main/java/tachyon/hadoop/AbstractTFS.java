@@ -15,10 +15,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import tachyon.Constants;
 import tachyon.PrefixList;
+import tachyon.TachyonURI;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.client.WriteType;
@@ -33,20 +35,20 @@ import tachyon.util.UfsUtils;
 /**
  * Base class for Apache Hadoop based Tachyon {@link FileSystem}. This class really just delegates
  * to {@link tachyon.client.TachyonFS} for most operations.
- *
- * All implementing classes must define {@link #isZookeeperMode()} which states if fault tolerant
- * is used and {@link #getScheme()} for Hadoop's {@link java.util.ServiceLoader} support.
+ * 
+ * All implementing classes must define {@link #isZookeeperMode()} which states if fault tolerant is
+ * used and {@link #getScheme()} for Hadoop's {@link java.util.ServiceLoader} support.
  */
 abstract class AbstractTFS extends FileSystem {
   public static final String FIRST_COM_PATH = "tachyon_dep/";
   public static final String RECOMPUTE_PATH = "tachyon_recompute/";
 
-  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private static final Logger LOG = LoggerFactory.getLogger(Constants.LOGGER_TYPE);
 
   public static String mUnderFSAddress;
 
   private URI mUri = null;
-  private Path mWorkingDir = new Path(Constants.PATH_SEPARATOR);
+  private Path mWorkingDir = new Path(TachyonURI.SEPARATOR);
   private TachyonFS mTFS = null;
   private String mTachyonHeader = null;
 
@@ -57,7 +59,7 @@ abstract class AbstractTFS extends FileSystem {
 
     String path = Utils.getPathWithoutScheme(cPath);
     fromHdfsToTachyon(path);
-    int fileId = mTFS.getFileId(path);
+    int fileId = mTFS.getFileId(new TachyonURI(path));
     TachyonFile file = mTFS.getFile(fileId);
 
     if (file.length() > 0) {
@@ -76,11 +78,11 @@ abstract class AbstractTFS extends FileSystem {
     if (!CommonConf.get().ASYNC_ENABLED) {
       String path = Utils.getPathWithoutScheme(cPath);
       if (mTFS.exist(path)) {
-        if (!mTFS.delete(path, false)) {
+        if (!mTFS.delete(new TachyonURI(path), false)) {
           throw new IOException("Failed to delete existing data " + cPath);
         }
       }
-      int fileId = mTFS.createFile(path, blockSize);
+      int fileId = mTFS.createFile(new TachyonURI(path), blockSize);
       TachyonFile file = mTFS.getFile(fileId);
       file.setUFSConf(getConf());
       return new FSDataOutputStream(file.getOutStream(WriteType.CACHE_THROUGH), null);
@@ -88,7 +90,7 @@ abstract class AbstractTFS extends FileSystem {
 
     if (cPath.toString().contains(FIRST_COM_PATH) && !cPath.toString().contains("SUCCESS")) {
       String path = Utils.getPathWithoutScheme(cPath);
-      mTFS.createFile(path, blockSize);
+      mTFS.createFile(new TachyonURI(path), blockSize);
       path = path.substring(path.indexOf(FIRST_COM_PATH) + FIRST_COM_PATH.length());
       path = path.substring(0, path.indexOf(Constants.PATH_SEPARATOR));
       int depId = Integer.parseInt(path);
@@ -110,7 +112,7 @@ abstract class AbstractTFS extends FileSystem {
     }
     if (cPath.toString().contains(RECOMPUTE_PATH) && !cPath.toString().contains("SUCCESS")) {
       String path = Utils.getPathWithoutScheme(cPath);
-      mTFS.createFile(path, blockSize);
+      mTFS.createFile(new TachyonURI(path), blockSize);
       path = path.substring(path.indexOf(RECOMPUTE_PATH) + RECOMPUTE_PATH.length());
       path = path.substring(0, path.indexOf(Constants.PATH_SEPARATOR));
       int depId = Integer.parseInt(path);
@@ -130,7 +132,7 @@ abstract class AbstractTFS extends FileSystem {
       // }
       return new FSDataOutputStream(file.getOutStream(WriteType.ASYNC_THROUGH), null);
     } else {
-      String path = Utils.getPathWithoutScheme(cPath);
+      TachyonURI path = new TachyonURI(Utils.getPathWithoutScheme(cPath));
       int fileId;
       WriteType type = WriteType.CACHE_THROUGH;
       if (mTFS.exist(path)) {
@@ -155,16 +157,12 @@ abstract class AbstractTFS extends FileSystem {
    * <p>
    * Opens an FSDataOutputStream at the indicated Path with write-progress reporting. Same as
    * create(), except fails if parent directory doesn't already exist.
-   *
-   * @param cPath
-   *          the file name to open
-   * @param overwrite
-   *          if a file with this name already exists, then if true,
-   *          the file will be overwritten, and if false an error will be thrown.
-   * @param bufferSize
-   *          the size of the buffer to be used.
-   * @param replication
-   *          required block replication for the file.
+   * 
+   * @param cPath the file name to open
+   * @param overwrite if a file with this name already exists, then if true, the file will be
+   *        overwritten, and if false an error will be thrown.
+   * @param bufferSize the size of the buffer to be used.
+   * @param replication required block replication for the file.
    * @param blockSize
    * @param progress
    * @throws IOException
@@ -195,7 +193,7 @@ abstract class AbstractTFS extends FileSystem {
     LOG.info("delete(" + path + ", " + recursive + ")");
     String tPath = Utils.getPathWithoutScheme(path);
     fromHdfsToTachyon(tPath);
-    return mTFS.delete(tPath, recursive);
+    return mTFS.delete(new TachyonURI(tPath), recursive);
   }
 
   private void fromHdfsToTachyon(String path) throws IOException {
@@ -219,7 +217,7 @@ abstract class AbstractTFS extends FileSystem {
 
     String path = Utils.getPathWithoutScheme(file.getPath());
     fromHdfsToTachyon(path);
-    int fileId = mTFS.getFileId(path);
+    int fileId = mTFS.getFileId(new TachyonURI(path));
 
     if (fileId == -1) {
       throw new FileNotFoundException("File does not exist: " + file.getPath());
@@ -277,13 +275,13 @@ abstract class AbstractTFS extends FileSystem {
   }
 
   /**
-   * Get the URI schema that maps to the FileSystem. This was introduced in Hadoop 2.x as a means
-   * to make loading new FileSystems simpler. This doesn't exist in Hadoop 1.x, so can not put
-   *
+   * Get the URI schema that maps to the FileSystem. This was introduced in Hadoop 2.x as a means to
+   * make loading new FileSystems simpler. This doesn't exist in Hadoop 1.x, so can not put
+   * 
    * @Override on this method.
-   *
+   * 
    * @return schema hadoop should map to.
-   *
+   * 
    * @see org.apache.hadoop.fs.FileSystem#createFileSystem(java.net.URI,
    *      org.apache.hadoop.conf.Configuration)
    */
@@ -291,7 +289,7 @@ abstract class AbstractTFS extends FileSystem {
 
   /**
    * Returns an object implementing the Tachyon-specific client API.
-   *
+   * 
    * @return null if initialize() hasn't been called.
    */
   public TachyonFS getTachyonFS() {
@@ -328,7 +326,7 @@ abstract class AbstractTFS extends FileSystem {
   /**
    * Determines if zookeeper should be used for the FileSystem. This method should only be used for
    * {@link #initialize(java.net.URI, org.apache.hadoop.conf.Configuration)}.
-   *
+   * 
    * @return true if zookeeper should be used
    */
   protected abstract boolean isZookeeperMode();
@@ -369,7 +367,7 @@ abstract class AbstractTFS extends FileSystem {
 
     String path = Utils.getPathWithoutScheme(cPath);
     fromHdfsToTachyon(path);
-    int fileId = mTFS.getFileId(path);
+    int fileId = mTFS.getFileId(new TachyonURI(path));
 
     return new FSDataInputStream(new HdfsFileInputStream(mTFS, fileId, Utils.getHDFSPath(path),
         getConf(), bufferSize));
@@ -397,10 +395,10 @@ abstract class AbstractTFS extends FileSystem {
   /**
    * When underfs has a schema, then we can use the hdfs underfs code base.
    * <p />
-   * When this check is not done, {@link #fromHdfsToTachyon(String)} is called, which loads
-   * the default filesystem (hadoop's).  When there is no schema, then it may default to tachyon
-   * which causes a recursive loop.
-   *
+   * When this check is not done, {@link #fromHdfsToTachyon(String)} is called, which loads the
+   * default filesystem (hadoop's). When there is no schema, then it may default to tachyon which
+   * causes a recursive loop.
+   * 
    * @see <a href="https://tachyon.atlassian.net/browse/TACHYON-54">TACHYON-54</a>
    */
   @Deprecated

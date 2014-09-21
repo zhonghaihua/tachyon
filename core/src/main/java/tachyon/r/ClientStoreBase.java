@@ -19,7 +19,7 @@ public abstract class ClientStoreBase extends StoreBase implements ShardBase {
   protected ClientStoreBase(TachyonURI uri, String storeType, boolean create) throws IOException {
     super(uri);
 
-    mTachyonFS = TachyonFS.get(uri.toString());
+    mTachyonFS = TachyonFS.get(uri);
 
     if (create) {
       List<ByteBuffer> res =
@@ -30,7 +30,7 @@ public abstract class ClientStoreBase extends StoreBase implements ShardBase {
       ID = res.get(0).getInt();
     } else {
       // TODO use get StoreID;
-      ID = mTachyonFS.getFileId(uri.getPath());
+      ID = mTachyonFS.getFileId(uri);
     }
   }
 }

@@ -12,6 +12,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 import tachyon.Constants;
+import tachyon.TachyonURI;
 import tachyon.client.OutStream;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
@@ -74,11 +75,11 @@ public class ClientPartition {
     LOG.info("Creating KV partition: " + toString());
 
     if (create) {
-      mDataFileId = TachyonFS.createFile(mDataFilePath, Constants.GB);
+      mDataFileId = TachyonFS.createFile(new TachyonURI(mDataFilePath), Constants.GB);
       mDataFile = TachyonFS.getFile(mDataFileId);
       mDataFileOutStream = mDataFile.getOutStream(WriteType.CACHE_THROUGH);
 
-      mIndexFileId = TachyonFS.createFile(mIndexFilePath, Constants.GB);
+      mIndexFileId = TachyonFS.createFile(new TachyonURI(mIndexFilePath), Constants.GB);
       mIndexFile = TachyonFS.getFile(mIndexFileId);
       mIndexFileOutStream = mIndexFile.getOutStream(WriteType.CACHE_THROUGH);
 

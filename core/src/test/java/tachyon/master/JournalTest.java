@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import tachyon.Constants;
+import tachyon.TachyonURI;
 import tachyon.TestUtils;
 import tachyon.UnderFileSystem;
 import tachyon.client.TachyonFS;
@@ -22,8 +23,8 @@ import tachyon.thrift.FileDoesNotExistException;
 import tachyon.thrift.InvalidPathException;
 
 /**
- * Test master journal, including image and edit log.
- * Most tests will test edit log first, followed by the image.
+ * Test master journal, including image and edit log. Most tests will test edit log first, followed
+ * by the image.
  */
 public class JournalTest {
   private LocalTachyonCluster mLocalTachyonCluster = null;
@@ -36,7 +37,7 @@ public class JournalTest {
    */
   @Test
   public void AddBlockTest() throws Exception {
-    mTfs.createFile("/xyz", 64);
+    mTfs.createFile(new TachyonURI("/xyz"), 64);
     TachyonFile file = mTfs.getFile("/xyz");
     OutputStream os = file.getOutStream(WriteType.MUST_CACHE);
     for (int k = 0; k < 1000; k ++) {
@@ -75,8 +76,7 @@ public class JournalTest {
   public void AddCheckpointTest() throws Exception {
     TestUtils.createByteFile(mTfs, "/xyz", WriteType.THROUGH, 10);
     ClientFileInfo fInfo = mLocalTachyonCluster.getMasterInfo().getClientFileInfo("/xyz");
-    String ckPath = fInfo.getUfsPath();
-    mTfs.createFile("/xyz_ck", ckPath);
+    mTfs.createFile(new TachyonURI("/xyz_ck"), new TachyonURI(fInfo.getUfsPath()));
     ClientFileInfo ckFileInfo = mLocalTachyonCluster.getMasterInfo().getClientFileInfo("/xyz_ck");
     mLocalTachyonCluster.stopTFS();
     AddCheckpointTestUtil(fInfo, ckFileInfo);
@@ -130,7 +130,7 @@ public class JournalTest {
     Journal journal = mLocalTachyonCluster.getMasterInfo().getJournal();
     journal.setMaxLogSize(Constants.KB);
     for (int i = 0; i < 124; i ++) {
-      mTfs.createFile("/a" + i, (i + 10) / 10 * 64);
+      mTfs.createFile(new TachyonURI("/a" + i), (i + 10) / 10 * 64);
     }
     mLocalTachyonCluster.stopTFS();
     String editLogPath = mLocalTachyonCluster.getEditLogPath();
@@ -152,13 +152,13 @@ public class JournalTest {
     for (int i = 0; i < 10; i ++) {
       mTfs.mkdir("/i" + i);
       for (int j = 0; j < 10; j ++) {
-        mTfs.createFile("/i" + i + "/j" + j, (i + j + 1) * 64);
+        mTfs.createFile(new TachyonURI("/i" + i + "/j" + j), (i + j + 1) * 64);
         if (j >= 5) {
-          mTfs.delete("/i" + i + "/j" + j, false);
+          mTfs.delete(new TachyonURI("/i" + i + "/j" + j), false);
         }
       }
       if (i >= 5) {
-        mTfs.delete("/i" + i, true);
+        mTfs.delete(new TachyonURI("/i" + i), true);
       }
     }
     mLocalTachyonCluster.stopTFS();
@@ -168,8 +168,7 @@ public class JournalTest {
     DeleteTestUtil();
   }
 
-  private void DeleteTestUtil() throws IOException, InvalidPathException,
-      FileDoesNotExistException {
+  private void DeleteTestUtil() throws IOException, InvalidPathException, FileDoesNotExistException {
     Journal journal = new Journal(MasterConf.get().JOURNAL_FOLDER, "image.data", "log.data");
     MasterInfo info = new MasterInfo(new InetSocketAddress(9999), journal);
     info.init();
@@ -204,7 +203,7 @@ public class JournalTest {
     for (int i = 0; i < 10; i ++) {
       mTfs.mkdir("/i" + i);
       for (int j = 0; j < 10; j ++) {
-        mTfs.createFile("/i" + i + "/j" + j, (i + j + 1) * 64);
+        mTfs.createFile(new TachyonURI("/i" + i + "/j" + j), (i + j + 1) * 64);
       }
     }
     mLocalTachyonCluster.stopTFS();
@@ -214,8 +213,7 @@ public class JournalTest {
     FileFolderUtil();
   }
 
-  private void FileFolderUtil() throws IOException, InvalidPathException,
-      FileDoesNotExistException {
+  private void FileFolderUtil() throws IOException, InvalidPathException, FileDoesNotExistException {
     Journal journal = new Journal(MasterConf.get().JOURNAL_FOLDER, "image.data", "log.data");
     MasterInfo info = new MasterInfo(new InetSocketAddress(9999), journal);
     info.init();
@@ -236,7 +234,7 @@ public class JournalTest {
    */
   @Test
   public void FileTest() throws Exception {
-    mTfs.createFile("/xyz", 64);
+    mTfs.createFile(new TachyonURI("/xyz"), 64);
     ClientFileInfo fInfo = mLocalTachyonCluster.getMasterInfo().getClientFileInfo("/xyz");
     mLocalTachyonCluster.stopTFS();
     FileTestUtil(fInfo);
@@ -263,11 +261,11 @@ public class JournalTest {
   @Test
   public void PinTest() throws Exception {
     mTfs.mkdir("/myFolder");
-    int folderId = mTfs.getFileId("/myFolder");
+    int folderId = mTfs.getFileId(new TachyonURI("/myFolder"));
     mTfs.setPinned(folderId, true);
-    int file0Id = mTfs.createFile("/myFolder/file0", 64);
+    int file0Id = mTfs.createFile(new TachyonURI("/myFolder/file0"), 64);
     mTfs.setPinned(file0Id, false);
-    int file1Id = mTfs.createFile("/myFolder/file1", 64);
+    int file1Id = mTfs.createFile(new TachyonURI("/myFolder/file1"), 64);
     ClientFileInfo folderInfo = mLocalTachyonCluster.getMasterInfo().getClientFileInfo(folderId);
     ClientFileInfo file0Info = mLocalTachyonCluster.getMasterInfo().getClientFileInfo(file0Id);
     ClientFileInfo file1Info = mLocalTachyonCluster.getMasterInfo().getClientFileInfo(file1Id);
@@ -328,7 +326,7 @@ public class JournalTest {
   @Test
   public void ManyFileTest() throws Exception {
     for (int i = 0; i < 10; i ++) {
-      mTfs.createFile("/a" + i, (i + 1) * 64);
+      mTfs.createFile(new TachyonURI("/a" + i), (i + 1) * 64);
     }
     mLocalTachyonCluster.stopTFS();
     ManyFileTestUtil();
@@ -360,7 +358,7 @@ public class JournalTest {
     Journal journal = mLocalTachyonCluster.getMasterInfo().getJournal();
     journal.setMaxLogSize(Constants.KB);
     for (int i = 0; i < 124; i ++) {
-      mTfs.createFile("/a" + i, (i + 10) / 10 * 64);
+      mTfs.createFile(new TachyonURI("/a" + i), (i + 10) / 10 * 64);
     }
     mLocalTachyonCluster.stopTFS();
     MultiEditLogTestUtil();
@@ -392,7 +390,7 @@ public class JournalTest {
     for (int i = 0; i < 10; i ++) {
       mTfs.mkdir("/i" + i);
       for (int j = 0; j < 10; j ++) {
-        mTfs.createFile("/i" + i + "/j" + j, (i + j + 1) * 64);
+        mTfs.createFile(new TachyonURI("/i" + i + "/j" + j), (i + j + 1) * 64);
         mTfs.rename("/i" + i + "/j" + j, "/i" + i + "/jj" + j);
       }
       mTfs.rename("/i" + i, "/ii" + i);
@@ -404,8 +402,7 @@ public class JournalTest {
     RenameTestUtil();
   }
 
-  private void RenameTestUtil() throws IOException, InvalidPathException,
-      FileDoesNotExistException {
+  private void RenameTestUtil() throws IOException, InvalidPathException, FileDoesNotExistException {
     Journal journal = new Journal(MasterConf.get().JOURNAL_FOLDER, "image.data", "log.data");
     MasterInfo info = new MasterInfo(new InetSocketAddress(9999), journal);
     info.init();

@@ -84,8 +84,8 @@ public final class TachyonFileUpdateTest {
   }
 
   /**
-   * Runs the tests against the writer. The test verifies that a IOException is returned
-   * when {@link Write#apply(TachyonFile, WriteType, int)} is called more than once.
+   * Runs the tests against the writer. The test verifies that a IOException is returned when
+   * {@link Write#apply(TachyonFile, WriteType, int)} is called more than once.
    */
   private void run(Write writer) throws IOException {
     // runs against all write types
@@ -123,7 +123,7 @@ public final class TachyonFileUpdateTest {
   }
 
   private TachyonFile createFile(final String path) throws IOException {
-    int fileId = mTfs.createFile(path);
+    int fileId = mTfs.createFile(new TachyonURI(path));
     TachyonFile file = mTfs.getFile(fileId);
     return file;
   }

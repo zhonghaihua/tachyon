@@ -2,13 +2,13 @@ package tachyon.master;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.curator.test.TestingServer;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
@@ -21,13 +21,14 @@ import tachyon.conf.MasterConf;
 import tachyon.conf.UserConf;
 import tachyon.conf.WorkerConf;
 import tachyon.util.CommonUtils;
+import tachyon.util.NetworkUtils;
 import tachyon.worker.TachyonWorker;
 
 /**
  * A local Tachyon cluster with Multiple masters
  */
 public class LocalTachyonClusterMultiMaster {
-  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private static final Logger LOG = LoggerFactory.getLogger(Constants.LOGGER_TYPE);
 
   public static void main(String[] args) throws Exception {
     LocalTachyonCluster cluster = new LocalTachyonCluster(100);
@@ -130,7 +131,7 @@ public class LocalTachyonClusterMultiMaster {
     mkdir(masterDataFolder);
     mkdir(masterLogFolder);
 
-    mLocalhostName = InetAddress.getLocalHost().getCanonicalHostName();
+    mLocalhostName = NetworkUtils.getLocalHostName();
 
     System.setProperty("tachyon.test.mode", "true");
     System.setProperty("tachyon.home", mTachyonHome);
