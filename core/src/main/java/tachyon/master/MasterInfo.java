@@ -1355,7 +1355,7 @@ public class MasterInfo extends ImageWriter {
    */
   public List<ClientBlockInfo> getFileBlocks(String path) throws FileDoesNotExistException,
       InvalidPathException, IOException {
-    LOG.info("getFileLocations: " + path);
+    LOG.info("getFileBlocks: " + path);
     synchronized (ROOT_LOCK) {
       Inode inode = getInode(path);
       if (inode == null) {

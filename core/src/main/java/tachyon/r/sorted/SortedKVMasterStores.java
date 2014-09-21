@@ -88,7 +88,7 @@ public class SortedKVMasterStores extends MasterComponent {
       int indexFileId = partition.INDEX_FILE_ID;
       List<ClientBlockInfo> blockInfo;
       try {
-        blockInfo = MASTER_INFO.getFileLocations(indexFileId);
+        blockInfo = MASTER_INFO.getFileBlocks(indexFileId);
       } catch (IOException e) {
         throw new TachyonException(e.getMessage());
       }
@@ -123,7 +123,7 @@ public class SortedKVMasterStores extends MasterComponent {
       int indexFileId = partition.INDEX_FILE_ID;
       List<ClientBlockInfo> blockInfo;
       try {
-        blockInfo = MASTER_INFO.getFileLocations(indexFileId);
+        blockInfo = MASTER_INFO.getFileBlocks(indexFileId);
       } catch (FileDoesNotExistException e) {
         throw new TachyonException(e.getMessage());
       } catch (IOException e) {
