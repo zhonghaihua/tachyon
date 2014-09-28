@@ -32,7 +32,7 @@ public class SearchWorker extends WorkerComponent {
   public SearchWorker(TachyonURI uri) throws IOException {
     URI = uri;
     LOG.info(URI.toString());
-    mTFS = TachyonFS.get(URI.toString());
+    mTFS = TachyonFS.get(URI);
     mData = new HashMap<Integer, HashMap<Integer, WorkerShard>>();
   }
 

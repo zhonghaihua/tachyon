@@ -32,7 +32,7 @@ public class SortedKVWorkerStore extends WorkerComponent {
   public SortedKVWorkerStore(TachyonURI uri) throws IOException {
     URI = uri;
     LOG.info(URI.toString());
-    mTFS = TachyonFS.get(URI.toString());
+    mTFS = TachyonFS.get(URI);
     mData = new HashMap<Integer, HashMap<Integer, WorkerPartition>>();
   }
 
