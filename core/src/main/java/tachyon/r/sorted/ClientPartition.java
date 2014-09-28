@@ -87,8 +87,8 @@ public class ClientPartition {
         throw new IOException("Failed to create data file or index file, or both.");
       }
     } else {
-      mDataFile = TachyonFS.getFile(mDataFilePath);
-      mIndexFile = TachyonFS.getFile(mIndexFilePath);
+      mDataFile = TachyonFS.getFile(new TachyonURI(mDataFilePath));
+      mIndexFile = TachyonFS.getFile(new TachyonURI(mIndexFilePath));
     }
 
     mDataFileLocation = 0;
