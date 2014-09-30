@@ -15,6 +15,7 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import com.google.common.collect.ImmutableList;
 
 import tachyon.Constants;
+import tachyon.TachyonURI;
 import tachyon.extension.ComponentException;
 import tachyon.extension.MasterComponent;
 import tachyon.master.MasterInfo;
@@ -45,8 +46,8 @@ public class SortedKVMasterStores extends MasterComponent {
     }
     try {
       mStores.get(storeId).addPartition(
-          new MasterPartition(info.storeId, info.partitionIndex, info.dataFileId,
-              info.indexFileId, info.startKey, info.endKey));
+          new MasterPartition(info.storeId, info.partitionIndex, info.dataFileId, info.indexFileId,
+              info.startKey, info.endKey));
     } catch (IOException e) {
       LOG.error(e.getMessage());
       throw new TachyonException(e.getMessage());
@@ -54,8 +55,8 @@ public class SortedKVMasterStores extends MasterComponent {
     return true;
   }
 
-  public synchronized int createStore(String path) throws InvalidPathException,
-  FileAlreadyExistException, TachyonException {
+  public synchronized int createStore(TachyonURI path) throws InvalidPathException,
+      FileAlreadyExistException, TachyonException {
     if (!MASTER_INFO.mkdirs(path, true)) {
       return -1;
     }
@@ -152,7 +153,7 @@ public class SortedKVMasterStores extends MasterComponent {
       switch (opType) {
         case CREATE_STORE: {
           lengthCheck(data, 2, opType.toString());
-          int storeId = createStore(new String(data.get(1).array()));
+          int storeId = createStore(new TachyonURI(new String(data.get(1).array())));
           ByteBuffer buf = ByteBuffer.allocate(4);
           buf.putInt(storeId);
           buf.flip();
