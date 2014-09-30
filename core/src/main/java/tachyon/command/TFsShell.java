@@ -21,6 +21,7 @@ import tachyon.client.ReadType;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 import tachyon.client.WriteType;
+import tachyon.conf.UserConf;
 import tachyon.r.sorted.ClientStore;
 import tachyon.thrift.ClientBlockInfo;
 import tachyon.thrift.ClientFileInfo;
@@ -130,7 +131,7 @@ public class TFsShell implements Closeable {
       TachyonFile tFile = tachyonClient.getFile(fileId);
       Closer closer = Closer.create();
       try {
-        OutStream os = closer.register(tFile.getOutStream(WriteType.CACHE_THROUGH));
+        OutStream os = closer.register(tFile.getOutStream(UserConf.get().DEFAULT_WRITE_TYPE));
         FileInputStream in = closer.register(new FileInputStream(src));
         FileChannel channel = closer.register(in.getChannel());
         ByteBuffer buf = ByteBuffer.allocate(Constants.KB);
