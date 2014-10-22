@@ -132,6 +132,14 @@ struct SortedStorePartitionInfo {
   8: NetAddress location // Assume only one location for now. Add multiple locations in the future.
 }
 
+struct HashPartition {
+  1: i32 pId
+  2: i32 version
+  3: i32 left
+  4: i32 right
+  5: NetAddress location
+}
+
 struct SearchStorePartitionInfo {
   1: i32 storeId
   2: i32 shareIndex
@@ -241,7 +249,7 @@ service MasterService {
    */
   i32 user_getRawTableId(1: string path)
     throws (1: InvalidPathException e)
-     
+
   /**
    * Get RawTable's info; Return a ClientRawTable instance with id 0 if the system does not contain
    * the table. path if valid iff id is -1.
@@ -257,7 +265,7 @@ service MasterService {
   // Services for X Framework
   list<binary> x_process(1: string clz, 2: list<binary> data)
     throws (1: TachyonException e)
-  
+
   list<NetAddress> x_lookup(1: string clz, 2: list<binary> data)
     throws (1: TachyonException e)
 }

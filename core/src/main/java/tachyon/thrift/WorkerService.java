@@ -11329,13 +11329,13 @@ public class WorkerService {
             case 2: // DATA
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list184 = iprot.readListBegin();
-                  struct.data = new ArrayList<ByteBuffer>(_list184.size);
-                  for (int _i185 = 0; _i185 < _list184.size; ++_i185)
+                  org.apache.thrift.protocol.TList _list160 = iprot.readListBegin();
+                  struct.data = new ArrayList<ByteBuffer>(_list160.size);
+                  for (int _i161 = 0; _i161 < _list160.size; ++_i161)
                   {
-                    ByteBuffer _elem186;
-                    _elem186 = iprot.readBinary();
-                    struct.data.add(_elem186);
+                    ByteBuffer _elem162;
+                    _elem162 = iprot.readBinary();
+                    struct.data.add(_elem162);
                   }
                   iprot.readListEnd();
                 }
@@ -11368,9 +11368,9 @@ public class WorkerService {
           oprot.writeFieldBegin(DATA_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.data.size()));
-            for (ByteBuffer _iter187 : struct.data)
+            for (ByteBuffer _iter163 : struct.data)
             {
-              oprot.writeBinary(_iter187);
+              oprot.writeBinary(_iter163);
             }
             oprot.writeListEnd();
           }
@@ -11407,9 +11407,9 @@ public class WorkerService {
         if (struct.isSetData()) {
           {
             oprot.writeI32(struct.data.size());
-            for (ByteBuffer _iter188 : struct.data)
+            for (ByteBuffer _iter164 : struct.data)
             {
-              oprot.writeBinary(_iter188);
+              oprot.writeBinary(_iter164);
             }
           }
         }
@@ -11425,13 +11425,13 @@ public class WorkerService {
         }
         if (incoming.get(1)) {
           {
-            org.apache.thrift.protocol.TList _list189 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-            struct.data = new ArrayList<ByteBuffer>(_list189.size);
-            for (int _i190 = 0; _i190 < _list189.size; ++_i190)
+            org.apache.thrift.protocol.TList _list165 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.data = new ArrayList<ByteBuffer>(_list165.size);
+            for (int _i166 = 0; _i166 < _list165.size; ++_i166)
             {
-              ByteBuffer _elem191;
-              _elem191 = iprot.readBinary();
-              struct.data.add(_elem191);
+              ByteBuffer _elem167;
+              _elem167 = iprot.readBinary();
+              struct.data.add(_elem167);
             }
           }
           struct.setDataIsSet(true);
@@ -11824,13 +11824,13 @@ public class WorkerService {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list192 = iprot.readListBegin();
-                  struct.success = new ArrayList<ByteBuffer>(_list192.size);
-                  for (int _i193 = 0; _i193 < _list192.size; ++_i193)
+                  org.apache.thrift.protocol.TList _list168 = iprot.readListBegin();
+                  struct.success = new ArrayList<ByteBuffer>(_list168.size);
+                  for (int _i169 = 0; _i169 < _list168.size; ++_i169)
                   {
-                    ByteBuffer _elem194;
-                    _elem194 = iprot.readBinary();
-                    struct.success.add(_elem194);
+                    ByteBuffer _elem170;
+                    _elem170 = iprot.readBinary();
+                    struct.success.add(_elem170);
                   }
                   iprot.readListEnd();
                 }
@@ -11867,9 +11867,9 @@ public class WorkerService {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.success.size()));
-            for (ByteBuffer _iter195 : struct.success)
+            for (ByteBuffer _iter171 : struct.success)
             {
-              oprot.writeBinary(_iter195);
+              oprot.writeBinary(_iter171);
             }
             oprot.writeListEnd();
           }
@@ -11908,9 +11908,9 @@ public class WorkerService {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (ByteBuffer _iter196 : struct.success)
+            for (ByteBuffer _iter172 : struct.success)
             {
-              oprot.writeBinary(_iter196);
+              oprot.writeBinary(_iter172);
             }
           }
         }
@@ -11925,13 +11925,13 @@ public class WorkerService {
         BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list197 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-            struct.success = new ArrayList<ByteBuffer>(_list197.size);
-            for (int _i198 = 0; _i198 < _list197.size; ++_i198)
+            org.apache.thrift.protocol.TList _list173 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.success = new ArrayList<ByteBuffer>(_list173.size);
+            for (int _i174 = 0; _i174 < _list173.size; ++_i174)
             {
-              ByteBuffer _elem199;
-              _elem199 = iprot.readBinary();
-              struct.success.add(_elem199);
+              ByteBuffer _elem175;
+              _elem175 = iprot.readBinary();
+              struct.success.add(_elem175);
             }
           }
           struct.setSuccessIsSet(true);
