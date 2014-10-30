@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 import tachyon.Constants;
 import tachyon.PrefixList;
 import tachyon.TachyonURI;
-import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
+import tachyon.client.TachyonFS;
 import tachyon.client.WriteType;
 import tachyon.conf.CommonConf;
 import tachyon.conf.UserConf;
@@ -46,7 +46,7 @@ abstract class AbstractTFS extends FileSystem {
 
   private static final Logger LOG = LoggerFactory.getLogger(Constants.LOGGER_TYPE);
 
-  public static String mUnderFSAddress;
+  private String mUnderFSAddress;
 
   private URI mUri = null;
   private Path mWorkingDir = new Path(TachyonURI.SEPARATOR);
@@ -201,11 +201,12 @@ abstract class AbstractTFS extends FileSystem {
 
   private void fromHdfsToTachyon(TachyonURI path) throws IOException {
     if (!mTFS.exist(path)) {
-      Path hdfsPath = Utils.getHDFSPath(path);
+      Path hdfsPath = Utils.getHDFSPath(path, mUnderFSAddress);
       FileSystem fs = hdfsPath.getFileSystem(getConf());
       if (fs.exists(hdfsPath)) {
         TachyonURI ufsUri = new TachyonURI(mUnderFSAddress);
-        TachyonURI ufsAddrPath = new TachyonURI(ufsUri.getScheme(), ufsUri.getAuthority(), path.getPath());
+        TachyonURI ufsAddrPath = new TachyonURI(ufsUri.getScheme(), ufsUri.getAuthority(),
+            path.getPath());
         // Set the path as the TFS root path.
         UfsUtils.loadUnderFs(mTFS, path, ufsAddrPath, new PrefixList(null));
       }
@@ -258,7 +259,7 @@ abstract class AbstractTFS extends FileSystem {
   @Override
   public FileStatus getFileStatus(Path path) throws IOException {
     TachyonURI tPath = new TachyonURI(Utils.getPathWithoutScheme(path));
-    Path hdfsPath = Utils.getHDFSPath(tPath);
+    Path hdfsPath = Utils.getHDFSPath(tPath, mUnderFSAddress);
 
     LOG.info("getFileStatus(" + path + "): HDFS Path: " + hdfsPath + " TPath: " + mTachyonHeader
         + tPath);
@@ -338,7 +339,7 @@ abstract class AbstractTFS extends FileSystem {
   @Override
   public FileStatus[] listStatus(Path path) throws IOException {
     TachyonURI tPath = new TachyonURI(Utils.getPathWithoutScheme(path));
-    Path hdfsPath = Utils.getHDFSPath(tPath);
+    Path hdfsPath = Utils.getHDFSPath(tPath, mUnderFSAddress);
     LOG.info("listStatus(" + path + "): HDFS Path: " + hdfsPath);
 
     fromHdfsToTachyon(tPath);
@@ -374,8 +375,8 @@ abstract class AbstractTFS extends FileSystem {
     fromHdfsToTachyon(path);
     int fileId = mTFS.getFileId(path);
 
-    return new FSDataInputStream(new HdfsFileInputStream(mTFS, fileId, Utils.getHDFSPath(path),
-        getConf(), bufferSize));
+    return new FSDataInputStream(new HdfsFileInputStream(mTFS, fileId,
+        Utils.getHDFSPath(path, mUnderFSAddress), getConf(), bufferSize));
   }
 
   @Override

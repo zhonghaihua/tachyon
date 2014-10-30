@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,12 @@ public class UnderFileSystemSingleLocal extends UnderFileSystem {
   @Override
   public OutputStream create(String path) throws IOException {
     FileOutputStream stream = new FileOutputStream(path);
-    setPermission(path, "777");
+    try {
+      setPermission(path, "777");
+    } catch (IOException e) {
+      stream.close();
+      throw e;
+    }
     CommonUtils.setLocalFileStickyBit(path);
     return stream;
   }
@@ -117,8 +122,9 @@ public class UnderFileSystemSingleLocal extends UnderFileSystem {
         return file.getFreeSpace();
       case SPACE_USED:
         return file.getTotalSpace() - file.getFreeSpace();
+      default:
+        throw new IOException("Unknown getSpace parameter: " + type);
     }
-    throw new IOException("Unknown getSpace parameter: " + type);
   }
 
   @Override

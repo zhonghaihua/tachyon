@@ -158,8 +158,11 @@ public class WorkerClient implements Closeable {
   @Override
   public synchronized void close() {
     if (mConnected) {
-      mProtocol.getTransport().close();
-      mHeartbeatThread.shutdown();
+      try {
+        mProtocol.getTransport().close();
+      } finally {
+        mHeartbeatThread.shutdown();
+      }
       mConnected = false;
     }
   }

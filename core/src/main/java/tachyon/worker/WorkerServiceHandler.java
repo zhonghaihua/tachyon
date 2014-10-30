@@ -25,7 +25,7 @@ import tachyon.util.CommonUtils;
  */
 public class WorkerServiceHandler implements WorkerService.Iface {
   private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
-  private WorkerStorage mWorkerStorage;
+  private final WorkerStorage mWorkerStorage;
 
   private SortedKVWorkerStore mSortedKVWorkerStore;
   private SearchWorker mSearchWorker;
@@ -83,20 +83,12 @@ public class WorkerServiceHandler implements WorkerService.Iface {
 
   @Override
   public String getUserTempFolder(long userId) throws TException {
-    try {
-      return mWorkerStorage.getUserLocalTempFolder(userId);
-    } catch (IOException e) {
-      throw new TException(e);
-    }
+    return mWorkerStorage.getUserLocalTempFolder(userId);
   }
 
   @Override
   public String getUserUfsTempFolder(long userId) throws TException {
-    try {
-      return mWorkerStorage.getUserUfsTempFolder(userId);
-    } catch (IOException e) {
-      throw new TException(e);
-    }
+    return mWorkerStorage.getUserUfsTempFolder(userId);
   }
 
   @Override

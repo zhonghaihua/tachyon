@@ -17,8 +17,8 @@ import tachyon.Constants;
 import tachyon.TachyonURI;
 import tachyon.client.InStream;
 import tachyon.client.ReadType;
-import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
+import tachyon.client.TachyonFS;
 import tachyon.master.MasterInfo;
 import tachyon.thrift.ClientFileInfo;
 import tachyon.thrift.FileDoesNotExistException;
@@ -32,7 +32,7 @@ public class WebInterfaceDownloadServlet extends HttpServlet {
 
   private static final Logger LOG = LoggerFactory.getLogger(Constants.LOGGER_TYPE);
 
-  private MasterInfo mMasterInfo;
+  private final transient MasterInfo mMasterInfo;
 
   public WebInterfaceDownloadServlet(MasterInfo masterInfo) {
     mMasterInfo = masterInfo;
@@ -76,8 +76,8 @@ public class WebInterfaceDownloadServlet extends HttpServlet {
    * @throws FileDoesNotExistException
    * @throws IOException
    */
-  private void downloadFile(TachyonURI path, HttpServletRequest request, HttpServletResponse response)
-      throws FileDoesNotExistException, IOException {
+  private void downloadFile(TachyonURI path, HttpServletRequest request,
+      HttpServletResponse response) throws FileDoesNotExistException, IOException {
     String masterAddress =
         Constants.HEADER + mMasterInfo.getMasterAddress().getHostName() + ":"
             + mMasterInfo.getMasterAddress().getPort();
@@ -103,9 +103,13 @@ public class WebInterfaceDownloadServlet extends HttpServlet {
       out = response.getOutputStream();
       ByteStreams.copy(is, out);
     } finally {
-      out.flush();
-      out.close();
-      is.close();
+      if (out != null) {
+        out.flush();
+        out.close();
+      }
+      if (is != null) {
+        is.close();
+      }
     }
     try {
       tachyonClient.close();

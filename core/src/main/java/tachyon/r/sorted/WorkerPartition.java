@@ -79,7 +79,7 @@ public class WorkerPartition {
       // TODO add check
       mIndex = file.readByteBuffer(0);
 
-      ByteBuffer data = mIndex.DATA;
+      ByteBuffer data = mIndex.mData;
       int size = data.remaining() / 4;
       mLoadedIndex = new int[size];
       for (int k = 0; k < size; k ++) {
@@ -89,7 +89,7 @@ public class WorkerPartition {
       mIndex = null;
     }
 
-    return getFromSortedData(key, mLoadedIndex, mData.DATA);
+    return getFromSortedData(key, mLoadedIndex, mData.mData);
   }
 
   public synchronized long getLastAccessTimeMs() {
@@ -102,7 +102,7 @@ public class WorkerPartition {
   public synchronized long getSize() {
     long res = 0;
     if (null != mData) {
-      res += mData.DATA.capacity();
+      res += mData.mData.capacity();
     }
     if (null != mLoadedIndex) {
       res += mLoadedIndex.length * 4;
@@ -121,11 +121,11 @@ public class WorkerPartition {
     long res = 0;
 
     if (null != mData) {
-      res += mData.DATA.capacity();
+      res += mData.mData.capacity();
       mData.close();
     }
     if (null != mIndex) {
-      res += mIndex.DATA.capacity();
+      res += mIndex.mData.capacity();
       mIndex.close();
     }
     if (null != mLoadedIndex) {
