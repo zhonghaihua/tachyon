@@ -24,7 +24,7 @@ import tachyon.util.CommonUtils;
  * <code>WorkerServiceHandler</code> handles all the RPC calls to the worker.
  */
 public class WorkerServiceHandler implements WorkerService.Iface {
-  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
   private final WorkerStorage mWorkerStorage;
 
   private SortedKVWorkerStore mSortedKVWorkerStore;

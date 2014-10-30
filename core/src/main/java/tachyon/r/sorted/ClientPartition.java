@@ -32,16 +32,16 @@ public class ClientPartition {
     return new ClientPartition(tfs, storeId, storePath, index, true);
   }
 
-  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
-  private final TachyonFS TachyonFS;
-  private final int STORE_ID;
-  private final String STORE_PATH;
-  private final int INDEX;
+  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private final TachyonFS mTachyonFS;
+  private final int mStoreID;
+  private final String mStorePath;
+  private final int mIndex;
 
   // private final Serializer KEY_SER;
   // private final Serializer VALUE_SER;
 
-  private final boolean CREATE;
+  private final boolean mCreate;
 
   private String mPartitionPath;
   private String mDataFilePath;
@@ -61,34 +61,34 @@ public class ClientPartition {
 
   ClientPartition(TachyonFS tfs, int storeId, String storePath, int index, boolean create)
       throws IOException {
-    TachyonFS = tfs;
-    STORE_ID = storeId;
-    STORE_PATH = storePath;
-    INDEX = index;
-    CREATE = create;
+    mTachyonFS = tfs;
+    mStoreID = storeId;
+    mStorePath = storePath;
+    mIndex = index;
+    mCreate = create;
 
     mPartitionPath =
-        CommonUtils.concat(STORE_PATH,
+        CommonUtils.concat(mStorePath,
             "partition-" + Strings.padStart(Integer.toString(index), 5, '0'));
     mDataFilePath = mPartitionPath + "-data";
     mIndexFilePath = mPartitionPath + "-index";
     LOG.info("Creating KV partition: " + toString());
 
     if (create) {
-      mDataFileId = TachyonFS.createFile(new TachyonURI(mDataFilePath), Constants.GB);
-      mDataFile = TachyonFS.getFile(mDataFileId);
+      mDataFileId = mTachyonFS.createFile(new TachyonURI(mDataFilePath), Constants.GB);
+      mDataFile = mTachyonFS.getFile(mDataFileId);
       mDataFileOutStream = mDataFile.getOutStream(WriteType.CACHE_THROUGH);
 
-      mIndexFileId = TachyonFS.createFile(new TachyonURI(mIndexFilePath), Constants.GB);
-      mIndexFile = TachyonFS.getFile(mIndexFileId);
+      mIndexFileId = mTachyonFS.createFile(new TachyonURI(mIndexFilePath), Constants.GB);
+      mIndexFile = mTachyonFS.getFile(mIndexFileId);
       mIndexFileOutStream = mIndexFile.getOutStream(WriteType.CACHE_THROUGH);
 
       if (mDataFileId == -1 || mIndexFileId == -1) {
         throw new IOException("Failed to create data file or index file, or both.");
       }
     } else {
-      mDataFile = TachyonFS.getFile(new TachyonURI(mDataFilePath));
-      mIndexFile = TachyonFS.getFile(new TachyonURI(mIndexFilePath));
+      mDataFile = mTachyonFS.getFile(new TachyonURI(mDataFilePath));
+      mIndexFile = mTachyonFS.getFile(new TachyonURI(mIndexFilePath));
     }
 
     mDataFileLocation = 0;
@@ -97,12 +97,12 @@ public class ClientPartition {
   }
 
   public void close() throws IOException {
-    if (CREATE) {
+    if (mCreate) {
       mDataFileOutStream.close();
       mIndexFileOutStream.close();
       SortedStorePartitionInfo info = new SortedStorePartitionInfo();
-      info.setStoreId(STORE_ID);
-      info.setPartitionIndex(INDEX);
+      info.setStoreId(mStoreID);
+      info.setPartitionIndex(mIndex);
       info.setDataFileId(mDataFileId);
       info.setIndexFileId(mIndexFileId);
       if (mStartKey == null) {
@@ -115,7 +115,7 @@ public class ClientPartition {
         TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
         byte[] bytes = serializer.serialize(info);
         List<ByteBuffer> res =
-            TachyonFS.masterProcess(ImmutableList.of(
+            mTachyonFS.masterProcess(ImmutableList.of(
                 MasterOperationType.ADD_PARTITION.toByteBuffer(), ByteBuffer.wrap(bytes)));
 
         if (res.size() != 1 || res.get(0).array()[0] == 0) {
@@ -129,7 +129,7 @@ public class ClientPartition {
   }
 
   public void put(byte[] key, byte[] value) throws IOException {
-    if (!CREATE) {
+    if (!mCreate) {
       throw new IOException("Can not put key value pair in non-create mode");
     }
 
@@ -156,8 +156,8 @@ public class ClientPartition {
 
   @Override
   public String toString() {
-    return new StringBuilder("PartitionSortedStorePartition(").append("CREATE ").append(CREATE)
-        .append(" , STORE_PATH ").append(STORE_PATH).append(" , mPartitionPath ")
+    return new StringBuilder("PartitionSortedStorePartition(").append("CREATE ").append(mCreate)
+        .append(" , STORE_PATH ").append(mStorePath).append(" , mPartitionPath ")
         .append(mPartitionPath).append(" , mDataFilePath ").append(mDataFilePath)
         .append(" , mIndexFilePath ").append(mIndexFilePath).append(")").toString();
   }

@@ -128,7 +128,8 @@ public class IndexFiles {
    * in the benchmark module, which can create "line doc" files, one document per line,
    * using the
    * <a href=
-   * "../../../../../contrib-benchmark/org/apache/lucene/benchmark/byTask/tasks/WriteLineDocTask.html"
+   * "../../../../../contrib-benchmark/org/apache/lucene/benchmark/byTask/tasks/
+   * WriteLineDocTask.html"
    * >WriteLineDocTask</a>.
    * 
    * @param writer

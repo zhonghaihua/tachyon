@@ -26,7 +26,7 @@ import tachyon.thrift.NetAddress;
 import tachyon.thrift.TachyonException;
 
 public class SearchMasterStores extends MasterComponent {
-  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
 
   private Map<Integer, SearchMasterStore> mStores = new HashMap<Integer, SearchMasterStore>();
 
@@ -36,17 +36,17 @@ public class SearchMasterStores extends MasterComponent {
 
   public synchronized int createStore(TachyonURI path) throws InvalidPathException,
       FileAlreadyExistException, TachyonException {
-    if (!MASTER_INFO.mkdirs(path, true)) {
+    if (!mMasterInfo.mkdirs(path, true)) {
       return -1;
     }
-    int storeId = MASTER_INFO.getFileId(path);
+    int storeId = mMasterInfo.getFileId(path);
     SearchMasterStore info = new SearchMasterStore(storeId);
 
-    if (mStores.containsKey(info.INODE_ID)) {
+    if (mStores.containsKey(info.mInodeID)) {
       throw new FileAlreadyExistException("The store already exists: " + info);
     }
 
-    mStores.put(info.INODE_ID, info);
+    mStores.put(info.mInodeID, info);
 
     return storeId;
   }
@@ -82,7 +82,7 @@ public class SearchMasterStores extends MasterComponent {
           throw new ComponentException("Not supported yet");
         }
         case GET_WORKERS: {
-          List<ClientWorkerInfo> workersInfo = MASTER_INFO.getWorkersInfo();
+          List<ClientWorkerInfo> workersInfo = mMasterInfo.getWorkersInfo();
           List<ByteBuffer> result = new ArrayList<ByteBuffer>();
           TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
           for (ClientWorkerInfo workerInfo : workersInfo) {
@@ -91,6 +91,8 @@ public class SearchMasterStores extends MasterComponent {
           }
           return result;
         }
+        default:
+          throw new ComponentException("Unprocessed MasterOperationType " + opType);
       }
     } catch (InvalidPathException e) {
       throw new ComponentException(e);
@@ -101,8 +103,6 @@ public class SearchMasterStores extends MasterComponent {
     } catch (TException e) {
       throw new ComponentException(e);
     }
-
-    throw new ComponentException("Unprocessed MasterOperationType " + opType);
   }
 
 }

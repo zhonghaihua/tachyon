@@ -227,8 +227,9 @@ public class SearchFiles {
             }
           }
         }
-        if (quit)
+        if (quit) {
           break;
+        }
         end = Math.min(numTotalHits, start + hitsPerPage);
       }
     }

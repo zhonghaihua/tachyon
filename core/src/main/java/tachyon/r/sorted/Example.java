@@ -5,13 +5,13 @@ import java.io.IOException;
 import tachyon.TachyonURI;
 
 public class Example {
-  private static int KEYS = 5;
+  private static int sKEYS = 5;
 
   public static void createAndFillTheStore(TachyonURI uri) throws IOException {
     ClientStore store = ClientStore.createStore(uri);
 
     store.createPartition(0);
-    for (int k = 0; k < KEYS; k ++) {
+    for (int k = 0; k < sKEYS; k ++) {
       System.out.println("Puting " + k + " "
           + Utils.byteArrayToString(String.valueOf(k).getBytes()) + " "
           + Utils.byteArrayToString(String.valueOf(k * k).getBytes()));
@@ -23,7 +23,7 @@ public class Example {
   public static void getResults(TachyonURI uri) throws IOException {
     ClientStore store = ClientStore.getStore(uri);
 
-    for (int k = 0; k < KEYS * 2; k += 2) {
+    for (int k = 0; k < sKEYS * 2; k += 2) {
       byte[] result = store.get(String.valueOf(k).getBytes());
       if (null == result) {
         System.out.println("Key " + k + " does not exist in the store " + uri);

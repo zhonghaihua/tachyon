@@ -11,9 +11,9 @@ import tachyon.Version;
 import tachyon.thrift.TachyonException;
 
 public class Performance {
-  private static TachyonURI STORE_ADDRESS = null;
-  private static ClientStore STORE = null;
-  private static List<String> KEYS = new ArrayList<String>();
+  private static TachyonURI sStoreAddress = null;
+  private static ClientStore sStore = null;
+  private static List<String> sKeys = new ArrayList<String>();
 
   public static void main(String[] args) throws IOException, TachyonException, TException {
     if (args.length < 1) {
@@ -22,9 +22,9 @@ public class Performance {
       System.exit(-1);
     }
 
-    STORE_ADDRESS = new TachyonURI(args[0]);
+    sStoreAddress = new TachyonURI(args[0]);
     // STORE_ADDRESS = new TachyonURI("tachyon://localhost:19998/store_11");
-    STORE = ClientStore.getStore(STORE_ADDRESS);
+    sStore = ClientStore.getStore(sStoreAddress);
 
     // STORE.createPartition(0);
     // STORE.put(0, "spark".getBytes(), "5".getBytes());
@@ -33,7 +33,7 @@ public class Performance {
 
     System.out.println("There are " + (args.length - 1) + " keys.");
     for (int k = 1; k < args.length; k ++) {
-      KEYS.add(args[k]);
+      sKeys.add(args[k]);
       System.out.println("Key " + k + ": " + args[k]);
     }
     // KEYS.add("200400");
@@ -45,9 +45,9 @@ public class Performance {
     int tests = 10000;
     int have = 0;
 
-    for (int k = 0; k < KEYS.size(); k ++) {
-      String key = KEYS.get(k % KEYS.size());
-      byte[] result = STORE.get(key.getBytes());
+    for (int k = 0; k < sKeys.size(); k ++) {
+      String key = sKeys.get(k % sKeys.size());
+      byte[] result = sStore.get(key.getBytes());
       if (result == null) {
         System.out.println("Key " + key + " does not exist in the store.");
       } else {
@@ -58,8 +58,8 @@ public class Performance {
 
     long startTimeMs = System.currentTimeMillis();
     for (int k = 0; k < tests; k ++) {
-      String key = KEYS.get(k % KEYS.size());
-      byte[] result = STORE.get(key.getBytes());
+      String key = sKeys.get(k % sKeys.size());
+      byte[] result = sStore.get(key.getBytes());
       if (result == null) {
         // System.out.println("Key " + key + " does not exist in the store.");
       } else {

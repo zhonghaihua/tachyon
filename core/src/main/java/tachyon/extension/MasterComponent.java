@@ -10,10 +10,10 @@ import tachyon.thrift.NetAddress;
  * Extended components running in Tachyon Master
  */
 public abstract class MasterComponent extends ComponentUtils {
-  protected final MasterInfo MASTER_INFO;
+  protected final MasterInfo mMasterInfo;
 
   public MasterComponent(MasterInfo masterInfo) {
-    MASTER_INFO = masterInfo;
+    mMasterInfo = masterInfo;
   }
 
   public abstract List<ByteBuffer> process(List<ByteBuffer> data) throws ComponentException;

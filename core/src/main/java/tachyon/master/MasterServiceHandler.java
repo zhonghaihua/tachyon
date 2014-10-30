@@ -49,16 +49,16 @@ import tachyon.util.CommonUtils;
 public class MasterServiceHandler implements MasterService.Iface {
   private final MasterInfo mMasterInfo;
 
-  private final SortedKVMasterStores SORTED_KV_STORES;
-  private final SearchMasterStores SEARCH_MASTER_STORES;
+  private final SortedKVMasterStores mSortedKvStores;
+  private final SearchMasterStores mSearchMasterStores;
 
-  private final Map<String, MasterComponent> COMPONENTS = Collections
+  private final Map<String, MasterComponent> mComponents = Collections
       .synchronizedMap(new HashMap<String, MasterComponent>());
 
   public MasterServiceHandler(MasterInfo masterInfo) {
     mMasterInfo = masterInfo;
-    SORTED_KV_STORES = new SortedKVMasterStores(mMasterInfo);
-    SEARCH_MASTER_STORES = new SearchMasterStores(mMasterInfo);
+    mSortedKvStores = new SortedKVMasterStores(mMasterInfo);
+    mSearchMasterStores = new SearchMasterStores(mMasterInfo);
   }
 
   @Override
@@ -322,13 +322,13 @@ public class MasterServiceHandler implements MasterService.Iface {
   }
 
   private MasterComponent x_checkAndGet(String clz) throws TachyonException {
-    MasterComponent res = COMPONENTS.get(clz);
+    MasterComponent res = mComponents.get(clz);
     if (res == null) {
       // TODO use reflection to create the method
     }
 
     // return SORTED_KV_STORES;
-    return SEARCH_MASTER_STORES;
+    return mSearchMasterStores;
   }
 
   @Override

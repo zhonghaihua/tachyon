@@ -5,11 +5,11 @@ import org.apache.log4j.Logger;
 import tachyon.Constants;
 
 public class SearchMasterStore {
-  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
 
-  public final int INODE_ID;
+  public final int mInodeID;
 
   public SearchMasterStore(int inodeId) {
-    INODE_ID = inodeId;
+    mInodeID = inodeId;
   }
 }

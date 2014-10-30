@@ -56,7 +56,7 @@ public class ClientStore extends ClientStoreBase {
     }
 
     mWritePartitions.put(partitionId, ClientPartition.createPartitionSortedStorePartition(
-        mTachyonFS, ID, URI.getPath(), partitionId));
+        mTachyonFS, mID, mURI.getPath(), partitionId));
   }
 
   @Override
@@ -102,7 +102,7 @@ public class ClientStore extends ClientStoreBase {
     }
     if (res.size() == 0) {
       ByteBuffer storeId = ByteBuffer.allocate(4);
-      storeId.putInt(ID);
+      storeId.putInt(mID);
       storeId.flip();
 
       List<ByteBuffer> tmp =

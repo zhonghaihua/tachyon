@@ -25,9 +25,9 @@ public enum WorkerOperationType {
     switch (op.getInt()) {
     case 1:
       return QUERY;
+    default:
+      throw new IOException("Corrupted WorkerOperationType.");
     }
-
-    throw new IOException("Corrupted WorkerOperationType.");
   }
 
   /**
@@ -35,15 +35,15 @@ public enum WorkerOperationType {
    */
   public ByteBuffer toByteBuffer() {
     ByteBuffer res = ByteBuffer.allocate(4);
-    res.putInt(VALUE);
+    res.putInt(mValue);
     res.flip();
     return res;
   }
 
-  private final int VALUE;
+  private final int mValue;
 
   private WorkerOperationType(int value) {
-    VALUE = value;
+    mValue = value;
   }
 
   /**
@@ -52,6 +52,6 @@ public enum WorkerOperationType {
    * @return the value of the write type
    */
   public int getValue() {
-    return VALUE;
+    return mValue;
   }
 }

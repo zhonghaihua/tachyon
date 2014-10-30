@@ -19,8 +19,8 @@ import tachyon.extension.WorkerComponent;
 import tachyon.thrift.SearchStorePartitionInfo;
 
 public class SearchWorker extends WorkerComponent {
-  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
-  private final TachyonURI URI;
+  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private final TachyonURI mURI;
 
   // TODO Using TachyonFS is a trick for now.
   private TachyonFS mTFS;
@@ -30,9 +30,9 @@ public class SearchWorker extends WorkerComponent {
   private WorkerShard mShard = null;
 
   public SearchWorker(TachyonURI uri) throws IOException {
-    URI = uri;
-    LOG.info(URI.toString());
-    mTFS = TachyonFS.get(URI);
+    mURI = uri;
+    LOG.info(mURI.toString());
+    mTFS = TachyonFS.get(mURI);
     mData = new HashMap<Integer, HashMap<Integer, WorkerShard>>();
   }
 
@@ -77,6 +77,8 @@ public class SearchWorker extends WorkerComponent {
 
         return ImmutableList.of(ByteBuffer.wrap(query(null, data.get(1).array())));
       }
+      default:
+        throw new ComponentException("Unprocessed WorkerOperationType " + opType);
       }
     } catch (UnsupportedEncodingException e) {
       LOG.error(e.getMessage(), e);
@@ -88,8 +90,6 @@ public class SearchWorker extends WorkerComponent {
       LOG.error(e.getMessage(), e);
       throw new ComponentException(e);
     }
-
-    throw new ComponentException("Unprocessed WorkerOperationType " + opType);
   }
 
 }

@@ -1,10 +1,10 @@
 package tachyon.r;
 
 public abstract class MasterStoreBase {
-  protected final String URI;
+  protected final String mURI;
 
   public MasterStoreBase(String uri) {
-    URI = uri;
+    mURI = uri;
   }
   
   public abstract MasterStoreBase createStore();

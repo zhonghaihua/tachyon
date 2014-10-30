@@ -12,25 +12,25 @@ import tachyon.util.CommonUtils;
  * This is one type of partition.
  */
 public class MasterPartition {
-  public final int STORE_ID;
-  public final int PARTITION_INDEX;
-  public final int DATA_FILE_ID;
-  public final int INDEX_FILE_ID;
+  public final int mStoreID;
+  public final int mPartitionIndex;
+  public final int mDataFileID;
+  public final int mIndexFileID;
 
-  public final ByteBuffer START_KEY;
-  public final ByteBuffer END_KEY;
+  public final ByteBuffer mStartKey;
+  public final ByteBuffer mEndKey;
 
   private Set<NetAddress> mLocations = new HashSet<NetAddress>();
 
   MasterPartition(int storeId, int partitionIndex, int dataFileId, int indexFileId,
       ByteBuffer start, ByteBuffer end) {
-    STORE_ID = storeId;
-    PARTITION_INDEX = partitionIndex;
-    DATA_FILE_ID = dataFileId;
-    INDEX_FILE_ID = indexFileId;
+    mStoreID = storeId;
+    mPartitionIndex = partitionIndex;
+    mDataFileID = dataFileId;
+    mIndexFileID = indexFileId;
 
-    START_KEY = CommonUtils.cloneByteBuffer(start);
-    END_KEY = CommonUtils.cloneByteBuffer(end);
+    mStartKey = CommonUtils.cloneByteBuffer(start);
+    mEndKey = CommonUtils.cloneByteBuffer(end);
   }
 
   public synchronized void addLocation(NetAddress address) {
@@ -43,12 +43,12 @@ public class MasterPartition {
 
   public synchronized SortedStorePartitionInfo generateSortedStorePartitionInfo() {
     SortedStorePartitionInfo res = new SortedStorePartitionInfo();
-    res.setStoreId(STORE_ID);
-    res.setPartitionIndex(PARTITION_INDEX);
-    res.setDataFileId(DATA_FILE_ID);
-    res.setIndexFileId(INDEX_FILE_ID);
-    res.setStartKey(START_KEY.array());
-    res.setEndKey(END_KEY.array());
+    res.setStoreId(mStoreID);
+    res.setPartitionIndex(mPartitionIndex);
+    res.setDataFileId(mDataFileID);
+    res.setIndexFileId(mIndexFileID);
+    res.setStartKey(mStartKey.array());
+    res.setEndKey(mEndKey.array());
     if (mLocations.size() > 0) {
       res.setLocation(mLocations.iterator().next());
     }
@@ -65,10 +65,10 @@ public class MasterPartition {
 
   @Override
   public String toString() {
-    return new StringBuilder("MasterPartition(").append("STORE_ID ").append(STORE_ID)
-        .append(", PARTITION_INDEX ").append(PARTITION_INDEX).append(", DATA_FILE_ID ")
-        .append(DATA_FILE_ID).append(", INDEX_FILE_ID ").append(INDEX_FILE_ID)
-        .append(", START_KEY ").append(START_KEY).append(", END_KEY ").append(END_KEY).append(")")
+    return new StringBuilder("MasterPartition(").append("STORE_ID ").append(mStoreID)
+        .append(", PARTITION_INDEX ").append(mPartitionIndex).append(", DATA_FILE_ID ")
+        .append(mDataFileID).append(", INDEX_FILE_ID ").append(mIndexFileID)
+        .append(", START_KEY ").append(mStartKey).append(", END_KEY ").append(mEndKey).append(")")
         .toString();
   }
 }

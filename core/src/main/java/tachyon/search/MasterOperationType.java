@@ -29,9 +29,9 @@ public enum MasterOperationType {
       return ADD_SHARD;
     case 3:
       return GET_WORKERS;
+    default:
+      throw new IOException("Corrupted MasterOperationType.");
     }
-
-    throw new IOException("Corrupted MasterOperationType.");
   }
 
   /**
@@ -39,15 +39,15 @@ public enum MasterOperationType {
    */
   public ByteBuffer toByteBuffer() {
     ByteBuffer res = ByteBuffer.allocate(4);
-    res.putInt(VALUE);
+    res.putInt(mValue);
     res.flip();
     return res;
   }
 
-  private final int VALUE;
+  private final int mValue;
 
   private MasterOperationType(int value) {
-    VALUE = value;
+    mValue = value;
   }
 
   /**
@@ -56,6 +56,6 @@ public enum MasterOperationType {
    * @return the value of the write type
    */
   public int getValue() {
-    return VALUE;
+    return mValue;
   }
 }

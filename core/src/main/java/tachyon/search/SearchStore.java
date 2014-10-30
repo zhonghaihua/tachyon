@@ -38,13 +38,13 @@ import tachyon.client.TachyonFS;
 import tachyon.thrift.NetAddress;
 
 public class SearchStore {
-  private final TachyonURI URI;
+  private final TachyonURI mURI;
   // TODO Use TachyonFS for now, create a new handler in the future.
   private TachyonFS mTachyonFS;
-  private final int ID;
+  private final int mID;
 
   public SearchStore(TachyonURI uri, boolean create) throws IOException {
-    URI = uri;
+    mURI = uri;
     mTachyonFS = TachyonFS.get(uri);
 
     if (create) {
@@ -53,10 +53,10 @@ public class SearchStore {
               MasterOperationType.CREATE_STORE.toByteBuffer(),
               ByteBuffer.wrap(uri.getPath().getBytes())));
 
-      ID = res.get(0).getInt();
+      mID = res.get(0).getInt();
     } else {
       // TODO use get StoreID;
-      ID = mTachyonFS.getFileId(uri);
+      mID = mTachyonFS.getFileId(uri);
     }
   }
 
@@ -133,7 +133,8 @@ public class SearchStore {
    * in the benchmark module, which can create "line doc" files, one document per line,
    * using the
    * <a href=
-   * "../../../../../contrib-benchmark/org/apache/lucene/benchmark/byTask/tasks/WriteLineDocTask.html"
+   * "../../../../../contrib-benchmark/org/apache/lucene/benchmark/byTask/tasks/
+   * WriteLineDocTask.html"
    * >WriteLineDocTask</a>.
    * 
    * @param writer
@@ -218,7 +219,7 @@ public class SearchStore {
 
     if (res.size() == 0) {
       ByteBuffer storeId = ByteBuffer.allocate(4);
-      storeId.putInt(ID);
+      storeId.putInt(mID);
       storeId.flip();
 
       List<ByteBuffer> tmp =

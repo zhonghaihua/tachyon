@@ -14,7 +14,7 @@ public abstract class ClientStoreBase extends StoreBase implements ShardBase {
   // TODO Use TachyonFS for now, create a new handler in the future.
   protected TachyonFS mTachyonFS;
 
-  protected final int ID;
+  protected final int mID;
 
   protected ClientStoreBase(TachyonURI uri, String storeType, boolean create) throws IOException {
     super(uri);
@@ -27,10 +27,10 @@ public abstract class ClientStoreBase extends StoreBase implements ShardBase {
               MasterOperationType.CREATE_STORE.toByteBuffer(),
               ByteBuffer.wrap(uri.getPath().getBytes())));
 
-      ID = res.get(0).getInt();
+      mID = res.get(0).getInt();
     } else {
       // TODO use get StoreID;
-      ID = mTachyonFS.getFileId(uri);
+      mID = mTachyonFS.getFileId(uri);
     }
   }
 }

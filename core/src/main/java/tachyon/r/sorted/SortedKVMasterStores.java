@@ -31,7 +31,7 @@ import tachyon.thrift.TachyonException;
  * All key/value stores information in the master component;
  */
 public class SortedKVMasterStores extends MasterComponent {
-  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
 
   private Map<Integer, MasterStore> mStores = new HashMap<Integer, MasterStore>();
 
@@ -57,17 +57,17 @@ public class SortedKVMasterStores extends MasterComponent {
 
   public synchronized int createStore(TachyonURI path) throws InvalidPathException,
       FileAlreadyExistException, TachyonException {
-    if (!MASTER_INFO.mkdirs(path, true)) {
+    if (!mMasterInfo.mkdirs(path, true)) {
       return -1;
     }
-    int storeId = MASTER_INFO.getFileId(path);
+    int storeId = mMasterInfo.getFileId(path);
     MasterStore info = new MasterStore(storeId);
 
-    if (mStores.containsKey(info.INODE_ID)) {
+    if (mStores.containsKey(info.mInodeID)) {
       throw new FileAlreadyExistException("The store already exists: " + info);
     }
 
-    mStores.put(info.INODE_ID, info);
+    mStores.put(info.mInodeID, info);
 
     return storeId;
   }
@@ -86,10 +86,10 @@ public class SortedKVMasterStores extends MasterComponent {
     }
     SortedStorePartitionInfo res = partition.generateSortedStorePartitionInfo();
     if (!partition.hasLocation()) {
-      int indexFileId = partition.INDEX_FILE_ID;
+      int indexFileId = partition.mIndexFileID;
       List<ClientBlockInfo> blockInfo;
       try {
-        blockInfo = MASTER_INFO.getFileBlocks(indexFileId);
+        blockInfo = mMasterInfo.getFileBlocks(indexFileId);
       } catch (IOException e) {
         throw new TachyonException(e.getMessage());
       }
@@ -121,10 +121,10 @@ public class SortedKVMasterStores extends MasterComponent {
 
     SortedStorePartitionInfo res = partition.generateSortedStorePartitionInfo();
     if (!partition.hasLocation()) {
-      int indexFileId = partition.INDEX_FILE_ID;
+      int indexFileId = partition.mIndexFileID;
       List<ClientBlockInfo> blockInfo;
       try {
-        blockInfo = MASTER_INFO.getFileBlocks(indexFileId);
+        blockInfo = mMasterInfo.getFileBlocks(indexFileId);
       } catch (FileDoesNotExistException e) {
         throw new TachyonException(e.getMessage());
       } catch (IOException e) {
@@ -186,6 +186,8 @@ public class SortedKVMasterStores extends MasterComponent {
         case NO_PARTITION: {
           throw new ComponentException("NoPartition not supported yet.");
         }
+        default :
+          throw new ComponentException("Unprocessed MasterOperationType " + opType);
       }
     } catch (InvalidPathException e) {
       throw new ComponentException(e);
@@ -196,7 +198,5 @@ public class SortedKVMasterStores extends MasterComponent {
     } catch (TException e) {
       throw new ComponentException(e);
     }
-
-    throw new ComponentException("Unprocessed MasterOperationType " + opType);
   }
 }

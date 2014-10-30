@@ -29,7 +29,7 @@ import tachyon.client.TachyonFS;
 import tachyon.thrift.SearchStorePartitionInfo;
 
 public class WorkerShard {
-  private final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
+  private static final Logger LOG = Logger.getLogger(Constants.LOGGER_TYPE);
   private TachyonFS mTFS;
   private SearchStorePartitionInfo mInfo;
   private long mLastAccessTimeMs = System.currentTimeMillis();
@@ -196,8 +196,9 @@ public class WorkerShard {
             }
           }
         }
-        if (quit)
+        if (quit) {
           break;
+        }
         end = Math.min(numTotalHits, start + hitsPerPage);
       }
     }
