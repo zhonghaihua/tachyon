@@ -386,6 +386,12 @@ public final class FileSystemMaster extends AbstractMaster {
       throws FileDoesNotExistException, InvalidPathException {
     MasterContext.getMasterSource().incGetFileInfoOps(1);
     synchronized (mInodeTree) {
+      //fix bug , if file does not exist in alluxio, should load from ufs
+      try {
+          getFileId(path);
+      } catch (AccessControlException e) {
+          e.printStackTrace();
+      }
       Inode inode = mInodeTree.getInodeByPath(path);
       return getFileInfoInternal(inode);
     }
