@@ -16,10 +16,12 @@
 package tachyon.yarn;
 
 import java.io.IOException;
+import java.lang.RuntimeException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.records.Container;
@@ -27,10 +29,12 @@ import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.NodeReport;
+import org.apache.hadoop.yarn.api.records.NodeState;
 import org.apache.hadoop.yarn.api.records.Priority;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.apache.hadoop.yarn.client.api.NMClient;
+import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.client.api.async.AMRMClientAsync;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
@@ -38,7 +42,10 @@ import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ConcurrentHashMultiset;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
 
 import tachyon.Constants;
 import tachyon.conf.TachyonConf;
@@ -53,6 +60,18 @@ import tachyon.util.io.PathUtils;
 public final class ApplicationMaster implements AMRMClientAsync.CallbackHandler {
   private static final Logger LOG = LoggerFactory.getLogger(Constants.LOGGER_TYPE);
 
+  private static final NodeState[] USABLE_NODE_STATES;
+
+  static {
+    List<NodeState> usableStates = Lists.newArrayList();
+    for (NodeState nodeState : NodeState.values()) {
+      if (!nodeState.isUnusable()) {
+        usableStates.add(nodeState);
+      }
+    }
+    USABLE_NODE_STATES = usableStates.toArray(new NodeState[usableStates.size()]);
+  }
+
   // Parameters sent from Client
   private final int mMasterCpu;
   private final int mWorkerCpu;
@@ -63,18 +82,30 @@ public final class ApplicationMaster implements AMRMClientAsync.CallbackHandler 
   private final String mTachyonHome;
   private final String mMasterAddress;
 
+  /** Set of hostnames for launched workers. The implementation must be thread safe. */
+  private final Multiset<String> mWorkerHosts;
   private final YarnConfiguration mYarnConf = new YarnConfiguration();
   private final TachyonConf mTachyonConf = new TachyonConf();
   /** Client to talk to Resource Manager */
   private AMRMClientAsync<ContainerRequest> mRMClient;
   /** Client to talk to Node Manager */
   private NMClient mNMClient;
+  /** Client Resource Manager Service. */
+  private YarnClient mYarnClient;
   /** Whether a container for Tachyon master is allocated */
   private volatile boolean mMasterContainerAllocated;
   /** Num of allocated worker containers */
   private volatile int mNumAllocatedWorkerContainers;
+  private static final int MAX_WORKER_CONTAINER_REQUEST_ROUNDS = 20;
   /** Network address of the container allocated for Tachyon master */
   private String mMasterContainerNetAddress;
+
+  /**
+   * The number of worker container requests we are waiting to hear back from. Initialized during
+   * {@link #requestWorkerContainers()} and decremented during
+   * {@link #launchAlluxioWorkerContainers(List)}.
+   */
+  private CountDownLatch mOutstandingWorkerContainerRequestsLatch = null;
 
   private volatile boolean mApplicationDone;
 
@@ -92,6 +123,7 @@ public final class ApplicationMaster implements AMRMClientAsync.CallbackHandler 
     mNumWorkers = numWorkers;
     mTachyonHome = tachyonHome;
     mMasterAddress = masterAddress;
+    mWorkerHosts = ConcurrentHashMultiset.create();
     mMasterContainerAllocated = false;
     mNumAllocatedWorkerContainers = 0;
     mApplicationDone = false;
@@ -160,6 +192,11 @@ public final class ApplicationMaster implements AMRMClientAsync.CallbackHandler 
     mRMClient.init(mYarnConf);
     mRMClient.start();
 
+    // Create a client to talk to Yarn e.g. to find out what nodes exist in the cluster
+    mYarnClient = YarnClient.createYarnClient();
+    mYarnClient.init(mYarnConf);
+    mYarnClient.start();
+
     // Register with ResourceManager
     mRMClient.registerApplicationMaster("" /* hostname */, 0 /* port */, "" /* tracking url */);
     LOG.info("ApplicationMaster registered");
@@ -189,16 +226,54 @@ public final class ApplicationMaster implements AMRMClientAsync.CallbackHandler 
       Thread.sleep(1000);
     }
 
+    int round = 0;
+    while (mWorkerHosts.size() < mNumWorkers && round < MAX_WORKER_CONTAINER_REQUEST_ROUNDS) {
+      requestWorkerContainer();
+      LOG.info("Waiting for {} worker containers to be allocated",
+          mOutstandingWorkerContainerRequestsLatch.getCount());
+      // TODO(andrew): Handle the case where something goes wrong and some worker containers never
+      // get allocated. See ALLUXIO-1410
+      mOutstandingWorkerContainerRequestsLatch.await();
+      round++;
+    }
+
+    if (mWorkerHosts.size() < mNumWorkers) {
+      LOG.error(
+          "Could not request {} workers from yarn resource manager after {} tries. "
+              + "Proceeding with {} workers",
+              mNumWorkers, MAX_WORKER_CONTAINER_REQUEST_ROUNDS, mWorkerHosts.size());
+    }
+
+    LOG.info("Master and workers are launched");
+    // Wait for 5 more seconds to avoid application unregistered before some container fully
+    // launched.
+    while (!mApplicationDone) {
+      Thread.sleep(5000);
+    }
+  }
+
+  public void requestWorkerContainer() throws Exception {
+    Priority priority = Records.newRecord(Priority.class);
+    priority.setPriority(0);
     // Resource requirements for master containers
     Resource workerResource = Records.newRecord(Resource.class);
     workerResource.setMemory(mWorkerMemInMB + mRamdiskMemInMB);
     workerResource.setVirtualCores(mWorkerCpu);
 
+    String[] hosts;
+    hosts = getUnfilledWorkerHosts();
+    int currentNumWorkers = mWorkerHosts.size();
+    int neededWorkers = mNumWorkers - currentNumWorkers;
+    mOutstandingWorkerContainerRequestsLatch = new CountDownLatch(neededWorkers);
+    if (hosts.length < neededWorkers) {
+      throw new RuntimeException("not enough worker to launch, need: " + neededWorkers + "current free: " + hosts.length);
+    }
+
     // Make container requests for workers to ResourceManager
     for (int i = 0; i < mNumWorkers; i ++) {
       ContainerRequest containerAsk =
-          new ContainerRequest(workerResource, null /* any hosts */, null /* any racks */,
-              priority);
+          new ContainerRequest(workerResource, hosts, null /* any racks */,
+          priority);
       LOG.info("Making resource request for Tachyon worker {}: cpu {} memory {} MB on any nodes",
           i, workerResource.getVirtualCores(), workerResource.getMemory());
       mRMClient.addContainerRequest(containerAsk);
@@ -208,13 +283,24 @@ public final class ApplicationMaster implements AMRMClientAsync.CallbackHandler 
     while (mNumAllocatedWorkerContainers < mNumWorkers) {
       Thread.sleep(1000);
     }
+  }
 
-    LOG.info("Master and workers are launched");
-    // Wait for 5 more seconds to avoid application unregistered before some container fully
-    // launched.
-    while (!mApplicationDone) {
-      Thread.sleep(5000);
+  /**
+   * @return the hostnames in the cluster which are not being used by the maximum number of Alluxio
+   *         workers. If all workers are full, returns an empty array
+   */
+  private String[] getUnfilledWorkerHosts() throws Exception {
+    List<String> unusedHosts = Lists.newArrayList();
+    ImmutableSet.Builder<String> nodeHosts = ImmutableSet.builder();
+    for (NodeReport runningNode : mYarnClient.getNodeReports(USABLE_NODE_STATES)) {
+      nodeHosts.add(runningNode.getNodeId().getHost());
     }
+    for (String host : nodeHosts.build()) {
+      if (mWorkerHosts.count(host) < 1) {
+        unusedHosts.add(host);
+      }
+    }
+    return unusedHosts.toArray(new String[] {});
   }
 
   public void stop() {
@@ -270,21 +356,31 @@ public final class ApplicationMaster implements AMRMClientAsync.CallbackHandler 
         FormatUtils.getSizeFromBytes((long) mRamdiskMemInMB * Constants.MB));
 
     for (Container container : containers) {
-      if (mNumAllocatedWorkerContainers >= mNumWorkers) {
-        break;
-      }
-      try {
-        // Launch container by create ContainerLaunchContext
-        ContainerLaunchContext ctx = Records.newRecord(ContainerLaunchContext.class);
-        ctx.setCommands(commands);
-        ctx.setEnvironment(environmentMap);
-        LOG.info("Launching container {} for Tachyon worker {} on {} with worker command: {}",
-            container.getId(), mNumAllocatedWorkerContainers, container.getNodeHttpAddress(),
-            command);
-        mNMClient.startContainer(container, ctx);
-        mNumAllocatedWorkerContainers ++;
-      } catch (Exception ex) {
-        LOG.error("Error launching container " + container.getId() + " " + ex);
+      synchronized (mWorkerHosts) {
+        if (mWorkerHosts.size() >= mNumWorkers
+            || mWorkerHosts.count(container.getNodeId().getHost()) >= 1) {
+          // 1. Yarn will sometimes offer more containers than were requested, so we ignore offers
+          // when mWorkerHosts.size() >= mNumWorkers
+          // 2. Avoid re-using nodes if they already have the maximum number of workers
+          LOG.info("Releasing assigned container on {}", container.getNodeId().getHost());
+          mRMClient.releaseAssignedContainer(container.getId());
+        } else {
+          try {
+            // Launch container by create ContainerLaunchContext
+            ContainerLaunchContext ctx = Records.newRecord(ContainerLaunchContext.class);
+            ctx.setCommands(commands);
+            ctx.setEnvironment(environmentMap);
+            LOG.info("Launching container {} for Tachyon worker {} on {} with worker command: {}",
+                container.getId(), mNumAllocatedWorkerContainers, container.getNodeHttpAddress(),
+                command);
+            mNMClient.startContainer(container, ctx);
+            mWorkerHosts.add(container.getNodeId().getHost());
+            mNumAllocatedWorkerContainers ++;
+          } catch (Exception ex) {
+            LOG.error("Error launching container " + container.getId() + " " + ex);
+          }
+        }
+        mOutstandingWorkerContainerRequestsLatch.countDown();
       }
     }
   }
