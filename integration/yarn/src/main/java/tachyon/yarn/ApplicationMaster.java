@@ -264,7 +264,7 @@ public final class ApplicationMaster implements AMRMClientAsync.CallbackHandler 
 
   public void requestWorkerContainer() throws Exception {
     Priority priority = Records.newRecord(Priority.class);
-    priority.setPriority(0);
+    priority.setPriority(1);
     // Resource requirements for master containers
     Resource workerResource = Records.newRecord(Resource.class);
     workerResource.setMemory(mWorkerMemInMB + mRamdiskMemInMB);
